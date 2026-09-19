@@ -744,76 +744,92 @@
 
   <style id="logo-and-catalog-integration">
     .app-public-brand{
+      flex:0 0 auto !important;
+      width:auto !important;
+      height:auto !important;
       overflow:visible !important;
+      border:0 !important;
       border-radius:0 !important;
       background:transparent !important;
       padding:0 !important;
+      margin:0 6px 0 0 !important;
     }
     .app-public-brand img{
       display:block !important;
-      width:100% !important;
-      max-width:230px !important;
-      max-height:58px !important;
-      height:auto !important;
+      width:auto !important;
+      height:76px !important;
+      max-width:none !important;
+      max-height:none !important;
       object-fit:contain !important;
       transform:none !important;
       clip-path:none !important;
-      filter:drop-shadow(0 8px 18px rgba(0,0,0,.34));
+      filter:none !important;
     }
     .app-public-brand-footer img{
-      max-width:180px !important;
-      max-height:48px !important;
+      width:auto !important;
+      height:62px !important;
+      max-width:none !important;
+      max-height:none !important;
       transform:none !important;
       clip-path:none !important;
     }
     .catalog-card[id],
-    .catalog-anchor{
-      scroll-margin-top:96px;
-    }
+    .catalog-anchor{scroll-margin-top:104px}
     .catalog-card:target{
       border-color:rgba(245,197,24,.78) !important;
       box-shadow:0 0 0 3px rgba(245,197,24,.10),0 20px 46px rgba(0,0,0,.34) !important;
     }
+    @media(max-width:900px){
+      .app-public-brand img{height:62px !important}
+    }
     @media(max-width:620px){
-      .app-public-brand img{
-        max-width:122px !important;
-        max-height:44px !important;
-      }
+      .app-public-brand img{height:52px !important}
+      .app-public-brand-footer img{height:50px !important}
     }
   </style>
 
   <style id="slogan-formatting">
-    .slogan-block{margin:18px 0 30px}
+    .slogan-block{margin:24px 0 34px}
     .slogan-main{
-      max-width:760px;
-      margin:0 0 14px;
+      max-width:820px;
+      margin:0 0 20px;
       color:#fff;
-      font-size:clamp(42px,6vw,72px);
-      line-height:.98;
-      font-weight:700;
-      letter-spacing:-.052em;
+      font-size:clamp(58px,7.6vw,96px);
+      line-height:.91;
+      font-weight:800;
+      letter-spacing:-.06em;
     }
-    .slogan-main .accent{color:var(--ref-yellow-brand,#f5c518)}
+    .slogan-main .accent{
+      color:var(--ref-yellow-brand,#f5c518);
+      text-shadow:0 0 28px rgba(245,197,24,.10);
+    }
     .slogan-sub{
-      margin:0 0 6px;
-      color:#d3d7dc;
-      font-size:17px;
-      line-height:1.45;
-      font-weight:750;
-      letter-spacing:-.01em;
+      margin:0 0 8px;
+      color:#eef0f3;
+      font-size:22px;
+      line-height:1.32;
+      font-weight:800;
+      letter-spacing:-.02em;
     }
     .slogan-location{
       margin:0;
-      color:#9da3ab;
-      font-size:14px;
+      color:#a8aeb6;
+      font-size:17px;
       font-weight:800;
-      letter-spacing:.02em;
+    }
+    @media(max-width:900px){
+      .slogan-main{font-size:clamp(54px,9vw,78px)}
+      .slogan-sub{font-size:20px}
     }
     @media(max-width:620px){
-      .slogan-block{margin:14px 0 24px}
-      .slogan-main{font-size:44px}
-      .slogan-sub{font-size:15px}
-      .slogan-location{font-size:13px}
+      .slogan-block{margin:18px 0 28px}
+      .slogan-main{
+        font-size:clamp(48px,13vw,64px);
+        line-height:.92;
+        letter-spacing:-.055em;
+      }
+      .slogan-sub{font-size:18px;line-height:1.35}
+      .slogan-location{font-size:15px}
     }
   </style>
 
@@ -843,7 +859,7 @@
       <div>
         <div class="eyebrow"><span class="dot"></span> Córdoba Capital y alrededores</div>
         <div class="slogan-block">
-          <h1 class="slogan-main">Va a funcionar, pero aparte va a quedar <span class="accent">fachero.</span></h1>
+          <h1 class="slogan-main">Va a funcionar,<br>pero aparte va a quedar <span class="accent">fachero.</span></h1>
           <p class="slogan-sub">Lasolucioncba y punto - ¿Matrículas? algunas.</p>
           <p class="slogan-location">📍 Córdoba</p>
         </div>
