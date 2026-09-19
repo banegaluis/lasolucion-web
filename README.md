@@ -1,25 +1,34 @@
-# La Solución — Mini web
+# La Solución — Sitio público + acceso al CRM
 
-Landing page oficial de **La Solución**, enfocada en convertir visitas desde Instagram, Facebook, TikTok y WhatsApp Business en consultas y pedidos de presupuesto.
+Este repositorio es la base online de **La Solución**.
 
-## Estructura
-- Servicios por rubro
-- Gas y calefacción destacados
-- Proceso de trabajo
-- Espacio para trabajos reales
-- Formulario que arma el mensaje para WhatsApp
-- Diseño responsive para celular
+## Arquitectura actual
 
-## Configuración pendiente
-En `index.html`, completar la constante:
+- `index.html`: vidriera pública para clientes.
+- Catálogo de servicios con consultas específicas por WhatsApp.
+- Portfolio preparado para trabajos reales.
+- Presupuesto guiado por WhatsApp Business.
+- `acceso-interno.html`: ruta interna no enlazada y bloqueada para buscadores.
+- El acceso interno redirige actualmente al CRM online existente mientras se termina de consolidar todo el código en este repositorio.
 
-```js
-const WHATSAPP_NUMBER = "549351XXXXXXXX";
-```
+## WhatsApp Business
 
-Usar sólo números, con código de país.
+Número configurado:
+
+`+54 9 351 543-9183`
 
 ## Publicación
-El sitio está preparado para GitHub Pages desde la rama `main` y la carpeta raíz.
+
+GitHub Pages publica desde `main`.
+
+Sitio público:
+
+`https://banegaluis.github.io/lasolucion-web/`
+
+La página pública no muestra ni enlaza el acceso interno al CRM.
+
+## Próxima consolidación
+
+El objetivo es que el CRM completo (dashboard, agenda, órdenes, clientes, técnicos y Supabase) viva también en este proyecto online, sin depender de archivos locales de Windows/WSL.
 
 Instagram: **@lasolucioncba**
