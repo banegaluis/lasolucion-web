@@ -7,7 +7,7 @@
   <meta name="description" content="Gas, calefacción, plomería, refrigeración, electricidad y terminaciones en Córdoba. Pedí tu presupuesto por WhatsApp.">
   <meta name="theme-color" content="#0a0a0a">
   <meta property="og:title" content="La Solución | Servicios técnicos">
-  <meta property="og:description" content="Va a funcionar, pero aparte va a quedar fachero. Servicios técnicos en Córdoba.">
+  <meta property="og:description" content="Va a funcionar, pero aparte va a quedar fachero. Lasolucioncba y punto - ¿Matrículas? algunas. Córdoba.">
   <meta property="og:type" content="website">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%230a0a0a'/%3E%3Cpath d='M22 27h18v35h28v15H22z' fill='%23ffd400'/%3E%3Cpath d='M59 23h19v17H59z' fill='%23fff'/%3E%3C/svg%3E">
   <style>
@@ -346,8 +346,9 @@
     .slogan{
       margin:0 0 26px;
       color:#fff;
-      font-size:17px;
-      font-weight:800;
+      font-size:16px;
+      line-height:1.55;
+      font-weight:750;
     }
     .hero-actions{display:flex;flex-wrap:wrap;gap:10px}
     .trust{
@@ -743,21 +744,27 @@
 
   <style id="logo-and-catalog-integration">
     .app-public-brand{
-      overflow:hidden !important;
-      border-radius:10px;
-      background:#050607;
+      overflow:visible !important;
+      border-radius:0 !important;
+      background:transparent !important;
+      padding:0 !important;
     }
     .app-public-brand img{
-      width:112% !important;
-      max-width:none !important;
-      max-height:none !important;
-      transform:scale(1.10);
-      transform-origin:center;
-      clip-path:inset(11% 4% 10% 4% round 10px);
+      display:block !important;
+      width:100% !important;
+      max-width:230px !important;
+      max-height:58px !important;
+      height:auto !important;
+      object-fit:contain !important;
+      transform:none !important;
+      clip-path:none !important;
+      filter:drop-shadow(0 8px 18px rgba(0,0,0,.34));
     }
     .app-public-brand-footer img{
-      transform:scale(1.10);
-      clip-path:inset(11% 4% 10% 4% round 10px);
+      max-width:180px !important;
+      max-height:48px !important;
+      transform:none !important;
+      clip-path:none !important;
     }
     .catalog-card[id],
     .catalog-anchor{
@@ -766,6 +773,12 @@
     .catalog-card:target{
       border-color:rgba(245,197,24,.78) !important;
       box-shadow:0 0 0 3px rgba(245,197,24,.10),0 20px 46px rgba(0,0,0,.34) !important;
+    }
+    @media(max-width:620px){
+      .app-public-brand img{
+        max-width:122px !important;
+        max-height:44px !important;
+      }
     }
   </style>
 
@@ -796,7 +809,7 @@
         <div class="eyebrow"><span class="dot"></span> Córdoba Capital y alrededores</div>
         <h1>El trabajo tiene que <span class="accent">quedar bien.</span></h1>
         <p class="lead">Gas, calefacción, agua, refrigeración, electricidad y terminaciones. Un solo contacto para resolver trabajos técnicos de punta a punta.</p>
-        <p class="slogan">De resolverlo nos ocupamos nosotros.</p>
+        <p class="slogan">Va a funcionar, pero aparte va a quedar fachero.<br>Lasolucioncba y punto - ¿Matrículas? algunas.<br>📍 Córdoba</p>
         <div class="hero-actions">
           <a class="btn btn-primary wa-action" href="#" data-message="Hola, vi la web de La Solución y necesito presupuesto para un trabajo.">Pedir presupuesto por WhatsApp →</a>
           <a class="btn btn-secondary" href="#servicios">Ver servicios</a>
