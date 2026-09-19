@@ -33,7 +33,40 @@ if '<meta name="robots" content="noindex,nofollow">' not in txt:
 p.write_text(txt, encoding="utf-8")
 PY
 
-mkdir -p css js
+mkdir -p css js assets/public/trabajos
+
+if [[ ! -f assets/public/trabajos/manifest.json ]]; then
+cat > assets/public/trabajos/manifest.json <<'JSON'
+[]
+JSON
+fi
+
+if [[ ! -f assets/public/trabajos/README.txt ]]; then
+cat > assets/public/trabajos/README.txt <<'TXT'
+Colocá acá fotos o videos de trabajos reales.
+
+Luego agregalos a manifest.json con este formato:
+
+[
+  {
+    "archivo": "calefon-orbis.jpg",
+    "tipo": "imagen",
+    "titulo": "Recambio de calefón",
+    "rubro": "Gas y calefacción",
+    "descripcion": "Trabajo realizado en Córdoba."
+  },
+  {
+    "archivo": "bano-terminado.mp4",
+    "tipo": "video",
+    "titulo": "Terminación de baño",
+    "rubro": "Obra y terminaciones",
+    "descripcion": "Cerámicos y terminaciones."
+  }
+]
+
+Tipos admitidos: "imagen" y "video".
+TXT
+fi
 
 cat > css/public.css <<'CSS'
 :root{
@@ -96,6 +129,26 @@ label{display:block;font-size:13px;font-weight:800;color:#ccc;margin-bottom:6px}
 input,select,textarea{width:100%;background:#0c0c0c;border:1px solid #303030;color:#fff;border-radius:13px;padding:13px 14px;outline:none}
 textarea{min-height:115px;resize:vertical}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.section-intro{display:flex;justify-content:space-between;gap:28px;align-items:end;margin-bottom:24px}
+.section-intro p{max-width:560px;margin:0;color:var(--muted)}
+.catalog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.catalog-card{background:linear-gradient(180deg,#161616,#101010);border:1px solid var(--line);border-radius:var(--radius);padding:22px;display:flex;flex-direction:column;min-height:280px}
+.catalog-card .meta{font-size:12px;color:#8f8f8f;text-transform:uppercase;letter-spacing:.09em;font-weight:800}
+.catalog-card h3{font-size:21px;margin:10px 0 8px}
+.catalog-card p{color:var(--muted);margin:0 0 18px}
+.catalog-card .price{font-size:26px;font-weight:950;letter-spacing:-.03em;margin-top:auto;color:#fff}
+.catalog-card .price small{display:block;font-size:12px;color:#8f8f8f;font-weight:650;letter-spacing:0;margin-top:3px}
+.catalog-card .btn{margin-top:14px;width:100%}
+.price-note{margin:14px 0 0;color:#888;font-size:12px}
+.portfolio-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.media-card{border:1px solid var(--line);background:#111;border-radius:var(--radius);overflow:hidden}
+.media-frame{aspect-ratio:4/3;background:#0d0d0d;display:grid;place-items:center;overflow:hidden}
+.media-frame img,.media-frame video{width:100%;height:100%;object-fit:cover;display:block}
+.media-copy{padding:18px}
+.media-copy small{color:var(--yellow);font-weight:850;text-transform:uppercase;letter-spacing:.08em}
+.media-copy h3{margin:6px 0 6px;font-size:19px}
+.media-copy p{margin:0;color:#999;font-size:14px}
+.portfolio-empty{border:1px dashed #343434;border-radius:var(--radius);padding:28px;color:#999;background:#101010}
 footer{padding:34px 0 90px;color:#888}
 .footer{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
 .float-wa{position:fixed;right:18px;bottom:18px;width:58px;height:58px;border:0;border-radius:50%;background:#25d366;color:#06180d;font-size:24px;font-weight:900;box-shadow:0 16px 40px rgba(0,0,0,.4);cursor:pointer}
@@ -103,7 +156,7 @@ footer{padding:34px 0 90px;color:#888}
 @media(max-width:900px){
   .links{display:none}
   .hero-grid,.quote{grid-template-columns:1fr}
-  .services{grid-template-columns:1fr 1fr}
+  .services,.catalog-grid,.portfolio-grid{grid-template-columns:1fr 1fr}
   .process{grid-template-columns:1fr 1fr}
 }
 @media(max-width:620px){
@@ -113,7 +166,9 @@ footer{padding:34px 0 90px;color:#888}
   .nav>.btn-primary{display:none}
   .hero{padding-top:40px}
   h1{font-size:48px}
-  .quick,.services,.process,.form-grid{grid-template-columns:1fr}
+  .quick,.services,.catalog-grid,.portfolio-grid,.process,.form-grid{grid-template-columns:1fr}
+  .section-intro{display:block}
+  .section-intro p{margin-top:10px}
   section{padding:54px 0}
 }
 CSS
@@ -151,6 +206,67 @@ cat > js/public.js <<'JS'
     window.open(wa(msg), "_blank", "noopener");
   });
 
+  async function cargarPortfolio(){
+    const grid = document.getElementById("portfolioGrid");
+    const empty = document.getElementById("portfolioEmpty");
+    if (!grid) return;
+
+    try{
+      const response = await fetch("assets/public/trabajos/manifest.json", { cache: "no-store" });
+      if (!response.ok) throw new Error("No se pudo leer el portfolio.");
+      const items = await response.json();
+      if (!Array.isArray(items) || !items.length) return;
+
+      grid.innerHTML = "";
+      if (empty) empty.hidden = true;
+
+      items.forEach((item) => {
+        const card = document.createElement("article");
+        card.className = "media-card";
+
+        const frame = document.createElement("div");
+        frame.className = "media-frame";
+
+        const path = "assets/public/trabajos/" + String(item.archivo || "").replace(/^\/+/, "");
+        if (String(item.tipo || "").toLowerCase() === "video"){
+          const video = document.createElement("video");
+          video.src = path;
+          video.controls = true;
+          video.preload = "metadata";
+          video.playsInline = true;
+          if (item.poster) video.poster = "assets/public/trabajos/" + String(item.poster).replace(/^\/+/, "");
+          frame.appendChild(video);
+        } else {
+          const img = document.createElement("img");
+          img.src = path;
+          img.alt = item.titulo || "Trabajo realizado por La Solución";
+          img.loading = "lazy";
+          frame.appendChild(img);
+        }
+
+        const copy = document.createElement("div");
+        copy.className = "media-copy";
+
+        const rubro = document.createElement("small");
+        rubro.textContent = item.rubro || "Trabajo realizado";
+
+        const h3 = document.createElement("h3");
+        h3.textContent = item.titulo || "Trabajo La Solución";
+
+        const p = document.createElement("p");
+        p.textContent = item.descripcion || "";
+
+        copy.append(rubro, h3, p);
+        card.append(frame, copy);
+        grid.appendChild(card);
+      });
+    }catch(error){
+      console.warn("Portfolio:", error);
+    }
+  }
+
+  cargarPortfolio();
+
   const year = document.getElementById("year");
   if (year) year.textContent = new Date().getFullYear();
 })();
@@ -176,6 +292,8 @@ cat > index.html <<'HTML'
     </a>
     <nav class="links">
       <a href="#servicios">Servicios</a>
+      <a href="#catalogo">Catálogo</a>
+      <a href="#trabajos">Trabajos</a>
       <a href="#como">Cómo trabajamos</a>
       <a href="#presupuesto">Presupuesto</a>
       <a href="https://www.instagram.com/lasolucioncba/" target="_blank" rel="noopener">Instagram</a>
@@ -222,6 +340,93 @@ cat > index.html <<'HTML'
       <article class="service"><div><div>⚡</div><h3>Electricidad</h3><p>Tomas, iluminación, artefactos, reparaciones y modificaciones.</p></div><div class="tags"><span class="tag">Iluminación</span><span class="tag">Tomas</span></div></article>
       <article class="service"><div><div>🧱</div><h3>Obra & terminaciones</h3><p>Cerámicos, porcelanatos, reparaciones y trabajos de terminación.</p></div><div class="tags"><span class="tag">Cerámicos</span><span class="tag">Porcelanato</span></div></article>
     </div>
+  </div>
+</section>
+
+<section id="catalogo">
+  <div class="wrap">
+    <div class="section-intro">
+      <div><div class="kicker">Catálogo</div><h2>Precios claros cuando se puede.</h2></div>
+      <p>Algunos trabajos tienen un valor de referencia. Otros dependen de medidas, materiales, estado de la instalación o adaptación necesaria.</p>
+    </div>
+
+    <div class="catalog-grid">
+      <article class="catalog-card">
+        <div class="meta">Gas · Calefones</div>
+        <h3>Recambio de calefón tiro balanceado posterior</h3>
+        <p>Mano de obra de recambio / instalación. Materiales, adaptaciones, flexibles, llaves, cañerías y modificaciones de salida se cotizan aparte.</p>
+        <div class="price">$220.000 <small>Mano de obra · referencia septiembre 2026</small></div>
+        <a class="btn btn-primary" href="#" data-wa="Hola, vi en el catálogo de La Solución el recambio de calefón tiro balanceado posterior por $220.000 de mano de obra. Quiero consultar por mi instalación.">Consultar este servicio →</a>
+      </article>
+
+      <article class="catalog-card">
+        <div class="meta">Gas · Reparación</div>
+        <h3>Reparación de calefón</h3>
+        <p>Diagnóstico, limpieza, repuestos y reparación según modelo y falla.</p>
+        <div class="price">Consultar <small>Según diagnóstico y repuestos</small></div>
+        <a class="btn btn-primary" href="#" data-wa="Hola, vi el servicio de reparación de calefón en La Solución. Quiero consultar por una falla.">Consultar reparación →</a>
+      </article>
+
+      <article class="catalog-card">
+        <div class="meta">Gas · Agua caliente</div>
+        <h3>Instalación / recambio de termotanque</h3>
+        <p>Evaluación de conexiones existentes, ventilación, ubicación y adaptación necesaria.</p>
+        <div class="price">Consultar <small>Se cotiza según instalación</small></div>
+        <a class="btn btn-primary" href="#" data-wa="Hola, vi el servicio de instalación o recambio de termotanque en La Solución. Quiero consultar precio.">Consultar termotanque →</a>
+      </article>
+
+      <article class="catalog-card">
+        <div class="meta">Gas · Instalaciones</div>
+        <h3>Instalaciones y modificaciones de gas</h3>
+        <p>Cañerías, artefactos, adecuaciones, pruebas y trabajos residenciales.</p>
+        <div class="price">Presupuesto <small>Según recorrido y alcance</small></div>
+        <a class="btn btn-primary" href="#" data-wa="Hola, vi el servicio de instalaciones de gas en La Solución. Quiero pedir presupuesto.">Consultar instalación →</a>
+      </article>
+
+      <article class="catalog-card">
+        <div class="meta">Comercial</div>
+        <h3>Gas comercial y gastronómico</h3>
+        <p>Cocinas, hornos, planchas, freidoras, termotanques, ramales y adecuaciones.</p>
+        <div class="price">Presupuesto <small>Obras y comercios</small></div>
+        <a class="btn btn-primary" href="#" data-wa="Hola, vi el servicio de gas comercial y gastronómico de La Solución. Quiero consultar por mi local.">Consultar comercial →</a>
+      </article>
+
+      <article class="catalog-card">
+        <div class="meta">Agua</div>
+        <h3>Plomería</h3>
+        <p>Pérdidas, sanitarios, griferías, bombas, conexiones y reparaciones.</p>
+        <div class="price">Consultar <small>Según trabajo</small></div>
+        <a class="btn btn-primary" href="#" data-wa="Hola, vi los servicios de plomería de La Solución. Quiero consultar por un trabajo.">Consultar plomería →</a>
+      </article>
+
+      <article class="catalog-card">
+        <div class="meta">Refrigeración</div>
+        <h3>Aire acondicionado y frío</h3>
+        <p>Instalación, mantenimiento, diagnóstico y soluciones de refrigeración.</p>
+        <div class="price">Consultar <small>Según equipo y trabajo</small></div>
+        <a class="btn btn-primary" href="#" data-wa="Hola, vi los servicios de refrigeración de La Solución. Quiero consultar por un equipo.">Consultar refrigeración →</a>
+      </article>
+
+      <article class="catalog-card">
+        <div class="meta">Terminaciones</div>
+        <h3>Cerámicos y porcelanatos</h3>
+        <p>Colocación, reparaciones y terminaciones en baños, cocinas y otros ambientes.</p>
+        <div class="price">Presupuesto <small>Según superficie y material</small></div>
+        <a class="btn btn-primary" href="#" data-wa="Hola, vi el servicio de cerámicos y terminaciones de La Solución. Quiero pedir presupuesto.">Consultar terminaciones →</a>
+      </article>
+    </div>
+    <p class="price-note">Los valores publicados son de referencia y se confirman antes de coordinar el trabajo. No incluyen materiales ni modificaciones no indicadas, salvo que se aclare expresamente.</p>
+  </div>
+</section>
+
+<section id="trabajos">
+  <div class="wrap">
+    <div class="section-intro">
+      <div><div class="kicker">Trabajos reales</div><h2>Hecho por La Solución.</h2></div>
+      <p>Fotos y videos reales para mostrar cómo trabajamos. Esta galería se alimenta desde la misma app, sin armar otra web aparte.</p>
+    </div>
+    <div id="portfolioGrid" class="portfolio-grid"></div>
+    <div id="portfolioEmpty" class="portfolio-empty">La sección ya está lista. Apenas carguemos las primeras fotos o videos de trabajos, aparecen acá automáticamente.</div>
   </div>
 </section>
 
