@@ -21,8 +21,17 @@ cp js/auth.js "$backup/js/auth.js"
 cp js/login.js "$backup/js/login.js"
 [[ -f css/style.css ]] && cp css/style.css "$backup/css/style.css"
 
-# El login actual se conserva intacto en login.html.
-cp index.html login.html
+# El acceso interno se conserva intacto, pero queda fuera de la vidriera pública.
+cp index.html acceso-interno.html
+
+python3 - <<'PY'
+from pathlib import Path
+p = Path("acceso-interno.html")
+txt = p.read_text(encoding="utf-8-sig")
+if '<meta name="robots" content="noindex,nofollow">' not in txt:
+    txt = txt.replace("<head>", '<head>\n    <meta name="robots" content="noindex,nofollow">', 1)
+p.write_text(txt, encoding="utf-8")
+PY
 
 mkdir -p css js
 
@@ -87,9 +96,6 @@ label{display:block;font-size:13px;font-weight:800;color:#ccc;margin-bottom:6px}
 input,select,textarea{width:100%;background:#0c0c0c;border:1px solid #303030;color:#fff;border-radius:13px;padding:13px 14px;outline:none}
 textarea{min-height:115px;resize:vertical}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.login-strip{background:#111;border-top:1px solid #222;border-bottom:1px solid #222}
-.login-inner{display:flex;justify-content:space-between;gap:20px;align-items:center;padding:22px 0}
-.login-inner p{margin:4px 0 0;color:#999}
 footer{padding:34px 0 90px;color:#888}
 .footer{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
 .float-wa{position:fixed;right:18px;bottom:18px;width:58px;height:58px;border:0;border-radius:50%;background:#25d366;color:#06180d;font-size:24px;font-weight:900;box-shadow:0 16px 40px rgba(0,0,0,.4);cursor:pointer}
@@ -109,7 +115,6 @@ footer{padding:34px 0 90px;color:#888}
   h1{font-size:48px}
   .quick,.services,.process,.form-grid{grid-template-columns:1fr}
   section{padding:54px 0}
-  .login-inner{align-items:flex-start;flex-direction:column}
 }
 CSS
 
@@ -174,8 +179,7 @@ cat > index.html <<'HTML'
       <a href="#como">Cómo trabajamos</a>
       <a href="#presupuesto">Presupuesto</a>
       <a href="https://www.instagram.com/lasolucioncba/" target="_blank" rel="noopener">Instagram</a>
-      <a href="login.html">Ingresar</a>
-    </nav>
+          </nav>
     <a class="btn btn-primary" href="#presupuesto">Pedir presupuesto</a>
   </div>
 </header>
@@ -254,12 +258,6 @@ cat > index.html <<'HTML'
   </div>
 </section>
 
-<section class="login-strip">
-  <div class="wrap login-inner">
-    <div><strong>Acceso al sistema La Solución</strong><p>Administración, colaboradores, técnicos y clientes ingresan al mismo CRM.</p></div>
-    <a class="btn btn-secondary" href="login.html">Ingresar al sistema →</a>
-  </div>
-</section>
 </main>
 
 <footer>
@@ -280,14 +278,14 @@ from pathlib import Path
 
 auth = Path("js/auth.js")
 txt = auth.read_text(encoding="utf-8-sig")
-txt = txt.replace('window.location.href = "index.html";', 'window.location.href = "login.html";')
-txt = txt.replace("window.location.href = 'index.html';", "window.location.href = 'login.html';")
+txt = txt.replace('window.location.href = "index.html";', 'window.location.href = "acceso-interno.html";')
+txt = txt.replace("window.location.href = 'index.html';", "window.location.href = 'acceso-interno.html';")
 auth.write_text(txt, encoding="utf-8")
 
 login = Path("js/login.js")
 txt = login.read_text(encoding="utf-8-sig")
 old = 'if (pagina === "" || pagina === "index.html") {'
-new = 'if (pagina === "login.html") {'
+new = 'if (pagina === "acceso-interno.html") {'
 if old not in txt and new not in txt:
     raise SystemExit("No encontré la condición de página de login esperada en js/login.js; no seguí para no romper el CRM.")
 txt = txt.replace(old, new)
@@ -298,7 +296,7 @@ echo
 echo "Integración completada."
 echo "Backup: $backup"
 echo "Portada pública: index.html"
-echo "Login: login.html"
+echo "Acceso interno: acceso-interno.html (no enlazado desde la vidriera)"
 echo "Dashboard: dashboard.html (sin modificar)"
 echo
 echo "Probá con: python3 -m http.server 5500"
