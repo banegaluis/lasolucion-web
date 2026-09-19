@@ -1,464 +1,249 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>La Solución | Servicios técnicos en Córdoba</title>
-  <meta name="description" content="Gas, calefacción, plomería, refrigeración, electricidad y terminaciones en Córdoba. Pedí tu presupuesto por WhatsApp.">
-  <meta name="theme-color" content="#0a0a0a">
-  <meta property="og:title" content="La Solución | Servicios técnicos">
-  <meta property="og:description" content="Va a funcionar, pero aparte va a quedar fachero. Servicios técnicos en Córdoba.">
-  <meta property="og:type" content="website">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%230a0a0a'/%3E%3Cpath d='M22 27h18v35h28v15H22z' fill='%23ffd400'/%3E%3Cpath d='M59 23h19v17H59z' fill='%23fff'/%3E%3C/svg%3E">
-  <style>
-    :root{
-      --bg:#090909;--bg2:#101010;--card:#151515;--line:#2a2a2a;--text:#f5f5f5;
-      --muted:#aaa;--yellow:#ffd400;--yellow2:#f2c500;--blue:#2d8cff;--red:#ff453a;
-      --radius:24px;--shadow:0 24px 70px rgba(0,0,0,.35)
-    }
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.5}
-    a{color:inherit;text-decoration:none}
-    button,input,select,textarea{font:inherit}
-    .wrap{width:min(1180px,calc(100% - 36px));margin:auto}
-    .top{position:sticky;top:0;z-index:20;background:rgba(9,9,9,.86);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.07)}
-    .nav{height:76px;display:flex;align-items:center;justify-content:space-between;gap:24px}
-    .brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:.04em}
-    .mark{width:42px;height:42px;border-radius:12px;background:var(--yellow);display:grid;place-items:center;color:#080808;font-size:18px;box-shadow:0 8px 30px rgba(255,212,0,.18)}
-    .brand small{display:block;color:var(--muted);font-weight:600;letter-spacing:.02em;font-size:11px;margin-top:-2px}
-    nav{display:flex;gap:26px;align-items:center;color:#cfcfcf;font-weight:650;font-size:14px}
-    nav a:hover{color:white}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border-radius:999px;padding:14px 20px;font-weight:850;border:1px solid transparent;cursor:pointer;transition:.2s}
-    .btn-primary{background:var(--yellow);color:#0a0a0a}
-    .btn-primary:hover{background:#ffe04d;transform:translateY(-1px)}
-    .btn-secondary{border-color:#363636;background:#111;color:white}
-    .hero{padding:72px 0 46px;overflow:hidden}
-    .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:58px;align-items:center}
-    .eyebrow{display:inline-flex;align-items:center;gap:9px;padding:7px 11px;border:1px solid #303030;border-radius:999px;color:#d1d1d1;background:#111;font-size:13px;font-weight:750}
-    .dot{width:8px;height:8px;border-radius:50%;background:var(--yellow);box-shadow:0 0 0 6px rgba(255,212,0,.08)}
-    h1{font-size:clamp(44px,7vw,84px);line-height:.94;margin:24px 0 24px;letter-spacing:-.055em;max-width:850px}
-    .accent{color:var(--yellow)}
-    .lead{font-size:clamp(18px,2.1vw,24px);color:#c8c8c8;max-width:680px;margin:0 0 28px}
-    .slogan{font-size:18px;font-weight:800;color:white;margin:0 0 32px}
-    .hero-actions{display:flex;flex-wrap:wrap;gap:12px}
-    .trust{display:flex;flex-wrap:wrap;gap:18px;margin-top:28px;color:#a9a9a9;font-size:13px}
-    .trust span{display:flex;align-items:center;gap:8px}
-    .tick{color:var(--yellow);font-weight:900}
-    .hero-panel{position:relative;min-height:540px;border:1px solid #252525;background:linear-gradient(145deg,#171717,#0c0c0c);border-radius:34px;padding:22px;box-shadow:var(--shadow);overflow:hidden}
-    .hero-panel:before{content:"";position:absolute;width:320px;height:320px;border-radius:50%;background:var(--yellow);filter:blur(100px);opacity:.12;right:-80px;top:-80px}
-    .panel-title{position:relative;display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding:8px 6px 22px}
-    .panel-title h3{font-size:25px;margin:0}
-    .panel-title p{margin:4px 0 0;color:var(--muted);font-size:13px}
-    .badge{font-size:12px;font-weight:850;padding:7px 10px;border-radius:999px;background:#202020;border:1px solid #333;color:#ddd}
-    .service-mini{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .mini{min-height:128px;background:#111;border:1px solid #292929;border-radius:20px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;transition:.2s}
-    .mini:hover{transform:translateY(-2px);border-color:#3b3b3b}
-    .mini .ico{font-size:24px}
-    .mini strong{font-size:16px}
-    .mini small{color:#8e8e8e}
-    .mini.gas{border-top:3px solid var(--yellow)}
-    .mini.heat{border-top:3px solid var(--red)}
-    .mini.water{border-top:3px solid var(--blue)}
-    .mini.cool{border-top:3px solid #e9f3ff}
-    .panel-cta{position:relative;margin-top:12px;padding:18px;border-radius:20px;background:var(--yellow);color:#090909;display:flex;justify-content:space-between;gap:18px;align-items:center}
-    .panel-cta strong{font-size:18px}
-    section{padding:76px 0}
-    .section-head{display:flex;justify-content:space-between;gap:24px;align-items:end;margin-bottom:30px}
-    .kicker{color:var(--yellow);font-size:13px;text-transform:uppercase;font-weight:900;letter-spacing:.14em}
-    h2{font-size:clamp(34px,4vw,54px);line-height:1.02;letter-spacing:-.04em;margin:8px 0}
-    .section-head p{max-width:520px;color:var(--muted);margin:0}
-    .services{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-    .card{background:var(--card);border:1px solid #282828;border-radius:var(--radius);padding:26px;min-height:260px;display:flex;flex-direction:column;justify-content:space-between;transition:.2s}
-    .card:hover{border-color:#3a3a3a;transform:translateY(-3px)}
-    .card-icon{font-size:30px}
-    .card h3{font-size:23px;margin:18px 0 8px}
-    .card p{color:#a8a8a8;margin:0 0 18px}
-    .tags{display:flex;flex-wrap:wrap;gap:7px}
-    .tag{font-size:12px;border:1px solid #343434;border-radius:999px;padding:6px 9px;color:#c9c9c9;background:#111}
-    .feature{background:linear-gradient(145deg,#151515,#0c0c0c);border:1px solid #2a2a2a;border-radius:32px;padding:34px;display:grid;grid-template-columns:.85fr 1.15fr;gap:34px}
-    .feature-copy p{color:#aaa;font-size:17px}
-    .list{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .list div{background:#111;border:1px solid #282828;border-radius:16px;padding:15px;display:flex;gap:10px;align-items:center}
-    .list b{color:var(--yellow)}
-    .catalog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-    .catalog-card{background:linear-gradient(180deg,#161616,#101010);border:1px solid #2a2a2a;border-radius:var(--radius);padding:24px;display:flex;flex-direction:column;min-height:285px;transition:.2s}
-    .catalog-card:hover{transform:translateY(-3px);border-color:#3a3a3a}
-    .catalog-meta{color:#8e8e8e;font-size:12px;font-weight:850;letter-spacing:.1em;text-transform:uppercase}
-    .catalog-card h3{font-size:22px;margin:10px 0 8px}
-    .catalog-card p{color:#aaa;margin:0 0 18px}
-    .catalog-price{font-size:28px;font-weight:950;letter-spacing:-.03em;margin-top:auto}
-    .catalog-price small{display:block;color:#8f8f8f;font-size:12px;font-weight:650;letter-spacing:0;margin-top:2px}
-    .catalog-card .btn{margin-top:16px;width:100%}
-    .catalog-note{margin:16px 0 0;color:#8e8e8e;font-size:12px}
-    .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;counter-reset:step}
-    .step{counter-increment:step;border-top:1px solid #333;padding:22px 12px 12px}
-    .step:before{content:"0" counter(step);color:var(--yellow);font-weight:900;font-size:13px}
-    .step h3{margin:10px 0 6px;font-size:20px}
-    .step p{margin:0;color:#999}
-    .projects{display:grid;grid-template-columns:1.35fr .65fr .65fr;gap:14px}
-    .project{min-height:260px;border-radius:24px;border:1px solid #2a2a2a;overflow:hidden;position:relative;background:
-      linear-gradient(135deg,rgba(255,212,0,.08),transparent 42%),
-      repeating-linear-gradient(90deg,#121212 0,#121212 1px,#0d0d0d 1px,#0d0d0d 34px)}
-    .project:nth-child(2){background:linear-gradient(135deg,rgba(45,140,255,.11),transparent 45%),#111}
-    .project:nth-child(3){background:linear-gradient(135deg,rgba(255,69,58,.1),transparent 45%),#111}
-    .project-content{position:absolute;left:22px;right:22px;bottom:20px}
-    .project small{color:#999}
-    .project h3{margin:4px 0 0;font-size:22px}
-    .quote{display:grid;grid-template-columns:.8fr 1.2fr;gap:36px;align-items:start}
-    .quote-copy{position:sticky;top:110px}
-    .quote-copy p{color:#aaa;font-size:18px}
-    form{background:#141414;border:1px solid #292929;border-radius:30px;padding:28px}
-    .field{margin-bottom:15px}
-    label{display:block;font-size:13px;font-weight:800;color:#c9c9c9;margin:0 0 7px}
-    input,select,textarea{width:100%;background:#0d0d0d;border:1px solid #313131;color:white;border-radius:14px;padding:14px 15px;outline:none}
-    input:focus,select:focus,textarea:focus{border-color:#6a5b00;box-shadow:0 0 0 3px rgba(255,212,0,.08)}
-    textarea{min-height:120px;resize:vertical}
-    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .form-note{font-size:12px;color:#8d8d8d;margin:12px 0 0}
-    footer{border-top:1px solid #222;padding:34px 0 90px;color:#8f8f8f}
-    .footer-grid{display:flex;justify-content:space-between;gap:28px;align-items:center}
-    .footer-links{display:flex;gap:18px;flex-wrap:wrap}
-    .float-wa{position:fixed;right:18px;bottom:18px;z-index:30;width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:#25d366;color:#07190e;font-size:24px;font-weight:900;box-shadow:0 14px 40px rgba(0,0,0,.4);border:0;cursor:pointer}
-    .float-wa:hover{transform:translateY(-2px)}
-    .mobile-toggle{display:none;background:#151515;border:1px solid #333;color:white;width:42px;height:42px;border-radius:12px}
-    .reveal{opacity:0;transform:translateY(18px);transition:.65s ease}
-    .reveal.show{opacity:1;transform:none}
-    @media(max-width:900px){
-      nav{display:none;position:absolute;top:76px;left:18px;right:18px;background:#111;border:1px solid #2d2d2d;border-radius:20px;padding:18px;flex-direction:column;align-items:stretch}
-      nav.open{display:flex}
-      .mobile-toggle{display:block}
-      .nav>.btn{display:none}
-      .hero-grid,.feature,.quote{grid-template-columns:1fr}
-      .hero{padding-top:48px}
-      .hero-panel{min-height:auto}
-      .services,.catalog-grid{grid-template-columns:1fr 1fr}
-      .steps{grid-template-columns:1fr 1fr}
-      .projects{grid-template-columns:1fr 1fr}
-      .projects .project:first-child{grid-column:1/-1}
-      .quote-copy{position:static}
-    }
-    @media(max-width:620px){
-      .wrap{width:min(100% - 24px,1180px)}
-      .nav{height:68px}
-      nav{top:68px}
-      .brand small{display:none}
-      .hero{padding-top:36px}
-      h1{font-size:48px}
-      .hero-panel{border-radius:26px;padding:14px}
-      .service-mini,.services,.catalog-grid,.list,.steps,.projects,.form-grid{grid-template-columns:1fr}
-      .projects .project:first-child{grid-column:auto}
-      .mini{min-height:112px}
-      section{padding:58px 0}
-      .section-head{display:block}
-      .section-head p{margin-top:12px}
-      .feature{padding:22px;border-radius:24px}
-      form{padding:20px;border-radius:24px}
-      .footer-grid{align-items:flex-start;flex-direction:column}
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La Solución | Servicios técnicos en Córdoba</title>
+<meta name="description" content="Gas, calefacción, plomería, refrigeración, electricidad y terminaciones en Córdoba. Consultá por WhatsApp.">
+<meta name="theme-color" content="#050607">
+<style>
+:root{
+  --bg:#050607;--panel:#111318;--panel2:#0b0d11;--line:rgba(255,255,255,.10);
+  --text:#fff;--muted:#aeb4bf;--yellow:#f5c518;--red:#ff553d;--blue:#2d8cff;--white:#e9eef5;--green:#69b578;
+  --radius:14px;--shadow:0 18px 50px rgba(0,0,0,.42)
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#050607;color:var(--text);font-family:Arial,Helvetica,sans-serif;line-height:1.45}
+a{color:inherit;text-decoration:none}
+button,input,select,textarea{font:inherit}
+.wrap{width:min(1180px,calc(100% - 28px));margin:auto}
+
+/* APP-LIKE TOPBAR */
+.topbar{position:sticky;top:0;z-index:30;height:78px;display:flex;align-items:center;border-bottom:1px solid var(--line);background:#050607;box-shadow:0 12px 34px rgba(0,0,0,.34)}
+.topbar-inner{width:min(1180px,calc(100% - 20px));margin:auto;display:flex;align-items:center;gap:12px}
+.brand-plate{flex:0 0 auto;width:226px;height:62px;border:2px solid #e9e9e9;border-radius:12px;background:#050505;padding:5px 7px 6px;box-shadow:inset 0 0 0 1px #777}
+.brand-word{height:36px;display:flex;align-items:center;justify-content:center;font-family:Impact,"Arial Narrow",Arial,sans-serif;font-style:italic;font-size:29px;letter-spacing:.5px;transform:skew(-5deg)}
+.brand-bars{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;height:14px;margin-top:2px;overflow:hidden;border-radius:1px}
+.brand-bars span{display:grid;place-items:center;color:#080808;font-size:10px;font-weight:900;transform:skew(-18deg)}
+.brand-bars span>*{transform:skew(18deg)}
+.brand-bars .y{background:var(--yellow)} .brand-bars .r{background:#e72119} .brand-bars .b{background:#175bb1;color:#071421} .brand-bars .w{background:#efefef}
+.public-search{flex:1;min-width:0;height:54px;border:1px solid var(--line);border-radius:13px;background:linear-gradient(180deg,#101217,#0b0d11);display:flex;align-items:center;padding:0 16px;color:#c9ced7;font-size:13px;box-shadow:inset 0 1px 0 rgba(255,255,255,.045)}
+.public-search b{color:var(--yellow);margin-right:9px}
+.top-cta{height:46px;display:inline-flex;align-items:center;justify-content:center;padding:0 17px;border-radius:9px;background:var(--yellow);color:#101010;font-size:13px;font-weight:900;white-space:nowrap}
+
+/* HERO FROM DASHBOARD LANGUAGE */
+.hero{padding:24px 0 18px}
+.welcome{position:relative;min-height:310px;overflow:hidden;border:1px solid rgba(255,255,255,.16);border-radius:16px;background:
+  radial-gradient(circle at 43% 44%,rgba(245,197,24,.07),transparent 24%),
+  linear-gradient(145deg,#0e1014,#070809 72%);
+  box-shadow:var(--shadow)}
+.welcome:before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.08) .7px,transparent .7px);background-size:8px 8px;opacity:.18;mask-image:linear-gradient(90deg,#000,transparent 58%)}
+.welcome-copy{position:relative;z-index:3;width:58%;padding:47px 42px}
+.role-pill{display:inline-flex;align-items:center;gap:10px;border:1px solid rgba(245,197,24,.40);clip-path:polygon(4% 0,96% 0,100% 50%,96% 100%,4% 100%,0 50%);padding:11px 28px;color:var(--yellow);font-size:12px;font-weight:900;letter-spacing:.35em}
+.welcome h1{margin:24px 0 8px;font-size:clamp(38px,5.4vw,70px);line-height:.96;font-weight:500;letter-spacing:-.045em}
+.welcome h1 strong{color:var(--yellow);font-weight:700}
+.welcome p{max-width:650px;color:#b8bec7;font-size:18px;margin:0 0 24px}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 17px;border-radius:9px;border:1px solid var(--line);font-weight:850;font-size:13px;cursor:pointer}
+.btn-primary{background:var(--yellow);color:#0b0b0b;border-color:var(--yellow)}
+.btn-dark{background:#111318;color:#fff}
+.ribbons{position:absolute;right:-60px;top:0;bottom:0;width:48%;display:grid;grid-template-columns:repeat(4,1fr);transform:skew(-24deg);transform-origin:center}
+.ribbon{position:relative;border-left:2px solid rgba(255,255,255,.18);display:grid;place-items:center;overflow:hidden}
+.ribbon:after{content:"";position:absolute;inset:-15%;background:radial-gradient(circle,rgba(255,255,255,.22),transparent 55%);opacity:.35}
+.ribbon span{position:relative;z-index:2;transform:skew(24deg);font-size:64px;filter:drop-shadow(0 0 14px rgba(255,255,255,.18))}
+.ribbon.y{background:linear-gradient(180deg,rgba(245,197,24,.42),rgba(91,70,0,.11));box-shadow:inset 2px 0 18px rgba(245,197,24,.30)}
+.ribbon.r{background:linear-gradient(180deg,rgba(255,40,20,.34),rgba(82,0,0,.09))}
+.ribbon.b{background:linear-gradient(180deg,rgba(45,140,255,.31),rgba(0,42,90,.08))}
+.ribbon.w{background:linear-gradient(180deg,rgba(235,242,250,.22),rgba(80,88,98,.05))}
+
+/* DASHBOARD CARDS */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 0}
+.metric{min-height:120px;background:linear-gradient(145deg,rgba(20,21,24,.97),rgba(9,10,12,.97));border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between}
+.metric-top{display:flex;justify-content:space-between;align-items:center}
+.metric-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#afb4bc;font-weight:850}
+.metric-icon{width:35px;height:35px;border-radius:8px;display:grid;place-items:center;background:#0b0c0f;font-size:19px}
+.metric h3{margin:7px 0 0;font-size:24px}
+.metric small{color:#8f96a0}.metric.gas .metric-icon{color:var(--yellow)}.metric.heat .metric-icon{color:var(--red)}.metric.water .metric-icon{color:var(--blue)}.metric.cool .metric-icon{color:var(--white)}
+
+.section{padding:42px 0}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:18px}
+.kicker{color:var(--yellow);font-size:11px;font-weight:900;letter-spacing:.15em;text-transform:uppercase}
+h2{margin:5px 0 0;font-size:clamp(28px,4vw,46px);letter-spacing:-.035em}
+.section-head p{max-width:510px;color:var(--muted);margin:0;font-size:14px}
+
+/* CATALOG */
+.catalog{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.catalog-card{min-height:265px;background:linear-gradient(180deg,rgba(21,23,28,.98),rgba(13,15,19,.98));border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column}
+.catalog-card .type{font-size:10px;color:var(--yellow);font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+.catalog-card h3{margin:9px 0 8px;font-size:20px}.catalog-card p{color:#aeb4bf;margin:0 0 16px;font-size:14px}
+.price{margin-top:auto;font-size:27px;font-weight:900}.price small{display:block;color:#89909a;font-size:11px;font-weight:700;margin-top:2px}
+.catalog-card .btn{width:100%;margin-top:13px}
+
+/* PORTFOLIO */
+.work-grid{display:grid;grid-template-columns:1.25fr .75fr .75fr;gap:10px}
+.work-card{position:relative;min-height:235px;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:
+ linear-gradient(145deg,rgba(20,21,24,.97),rgba(9,10,12,.97))}
+.work-card:before{content:"";position:absolute;inset:0;background:
+ linear-gradient(115deg,transparent 0 62%,rgba(245,197,24,.20) 62% 67%,transparent 67%),
+ radial-gradient(circle at 80% 18%,rgba(245,197,24,.14),transparent 30%)}
+.work-card:nth-child(2):before{background:linear-gradient(115deg,transparent 0 65%,rgba(255,85,61,.18) 65% 70%,transparent 70%)}
+.work-card:nth-child(3):before{background:linear-gradient(115deg,transparent 0 65%,rgba(45,140,255,.20) 65% 70%,transparent 70%)}
+.work-copy{position:absolute;left:18px;right:18px;bottom:17px}.work-copy small{color:#858c96;font-weight:800}.work-copy h3{margin:5px 0 0;font-size:21px}
+.empty-note{margin-top:10px;color:#8d949e;font-size:12px}
+
+/* PROCESS */
+.process{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.step{background:#101114;border:1px solid var(--line);border-radius:10px;padding:17px}.step b{color:var(--yellow);font-size:11px}.step h3{font-size:17px;margin:8px 0 5px}.step p{font-size:13px;color:#9ca3ad;margin:0}
+
+/* FORM */
+.quote-shell{display:grid;grid-template-columns:.75fr 1.25fr;gap:12px}
+.quote-copy,.quote-form{background:linear-gradient(180deg,rgba(21,23,28,.98),rgba(13,15,19,.98));border:1px solid var(--line);border-radius:12px;padding:22px}
+.quote-copy p{color:#aeb4bf}.field{margin-bottom:12px}label{display:block;color:#d8dbe0;font-size:12px;font-weight:800;margin-bottom:6px}
+input,select,textarea{width:100%;background:#0b0d11;border:1px solid var(--line);border-radius:9px;color:#fff;padding:12px 13px;outline:none}
+textarea{min-height:108px;resize:vertical}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-note{font-size:11px;color:#858c96;margin:10px 0 0}
+
+footer{border-top:1px solid var(--line);padding:24px 0 80px;color:#858c96;font-size:12px}
+.footer-inner{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.float-wa{position:fixed;right:17px;bottom:17px;width:58px;height:58px;border-radius:50%;border:1px solid rgba(245,197,24,.55);background:#111318;color:var(--yellow);font-size:24px;font-weight:900;box-shadow:0 14px 38px rgba(0,0,0,.55);cursor:pointer}
+
+@media(max-width:900px){
+ .public-search{display:none}.welcome-copy{width:68%;padding:34px 28px}.ribbons{width:43%;opacity:.86}
+ .metrics,.catalog{grid-template-columns:1fr 1fr}.work-grid{grid-template-columns:1fr 1fr}.work-card:first-child{grid-column:1/-1}
+ .process{grid-template-columns:1fr 1fr}.quote-shell{grid-template-columns:1fr}
+}
+@media(max-width:620px){
+ .topbar{height:68px}.brand-plate{width:180px;height:52px}.brand-word{font-size:23px;height:29px}.brand-bars{height:11px}.top-cta{font-size:11px;padding:0 10px}
+ .hero{padding-top:13px}.welcome{min-height:470px}.welcome-copy{width:100%;padding:27px 20px 230px}.welcome h1{font-size:43px}.welcome p{font-size:16px}
+ .ribbons{top:auto;left:-12%;right:-12%;bottom:0;width:124%;height:205px}
+ .metrics,.catalog,.work-grid,.process,.form-grid{grid-template-columns:1fr}.work-card:first-child{grid-column:auto}
+ .section{padding:31px 0}.section-head{display:block}.section-head p{margin-top:8px}.wrap{width:min(100% - 18px,1180px)}
+}
+</style>
 </head>
 <body>
-<header class="top">
-  <div class="wrap nav">
-    <a class="brand" href="#inicio" aria-label="La Solución">
-      <span class="mark">LS</span>
-      <span>LA SOLUCIÓN<small>Servicios técnicos · Córdoba</small></span>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand-plate" href="#inicio" aria-label="La Solución">
+      <div class="brand-word">LASOLUCIÓN</div>
+      <div class="brand-bars">
+        <span class="y"><i>☀</i></span><span class="r"><i>♨</i></span><span class="b"><i>●</i></span><span class="w"><i>❄</i></span>
+      </div>
     </a>
-    <nav id="menu">
-      <a href="#servicios">Servicios</a>
-      <a href="#catalogo">Catálogo</a>
-      <a href="#como-trabajamos">Cómo trabajamos</a>
-      <a href="#trabajos">Trabajos</a>
-      <a href="#presupuesto">Presupuesto</a>
-      <a href="https://www.instagram.com/lasolucioncba/" target="_blank" rel="noopener">Instagram</a>
-    </nav>
-    <a class="btn btn-primary wa-action" href="#" data-message="Hola, vi la web de La Solución y quiero pedir un presupuesto.">Pedir presupuesto</a>
-    <button class="mobile-toggle" id="mobileToggle" aria-label="Abrir menú">☰</button>
+    <div class="public-search"><b>⌕</b> Gas, calefacción, agua, refrigeración, electricidad y terminaciones.</div>
+    <a class="top-cta wa-action" href="#" data-message="Hola, vi la web de La Solución y quiero hacer una consulta.">CONSULTAR</a>
   </div>
 </header>
 
 <main id="inicio">
-  <section class="hero">
-    <div class="wrap hero-grid">
-      <div>
-        <div class="eyebrow"><span class="dot"></span> Córdoba Capital y alrededores</div>
-        <h1>El trabajo tiene que <span class="accent">quedar bien.</span></h1>
-        <p class="lead">Gas, calefacción, agua, refrigeración, electricidad y terminaciones. Un solo contacto para resolver trabajos técnicos de punta a punta.</p>
-        <p class="slogan">Va a funcionar, pero aparte va a quedar fachero.</p>
+<section class="hero">
+  <div class="wrap">
+    <div class="welcome">
+      <div class="welcome-copy">
+        <div class="role-pill">SERVICIOS TÉCNICOS</div>
+        <h1>Bienvenido a <strong>La Solución</strong></h1>
+        <p>Un solo lugar para resolver gas, calefacción, agua, refrigeración, electricidad y terminaciones en Córdoba.</p>
         <div class="hero-actions">
-          <a class="btn btn-primary wa-action" href="#" data-message="Hola, vi la web de La Solución y necesito presupuesto para un trabajo.">Pedir presupuesto por WhatsApp →</a>
-          <a class="btn btn-secondary" href="#servicios">Ver servicios</a>
-        </div>
-        <div class="trust">
-          <span><b class="tick">✓</b> Atención residencial y comercial</span>
-          <span><b class="tick">✓</b> Presupuestos claros</span>
-          <span><b class="tick">✓</b> Coordinación por WhatsApp</span>
+          <a class="btn btn-primary wa-action" href="#" data-message="Hola, vi la web de La Solución y quiero pedir un presupuesto.">PEDIR PRESUPUESTO</a>
+          <a class="btn btn-dark" href="#catalogo">VER CATÁLOGO</a>
         </div>
       </div>
-
-      <aside class="hero-panel reveal">
-        <div class="panel-title">
-          <div><h3>¿Qué necesitás resolver?</h3><p>Elegí el rubro y contanos qué pasa.</p></div>
-          <span class="badge">LA SOLUCIÓN</span>
-        </div>
-        <div class="service-mini">
-          <a href="#gas" class="mini gas"><span class="ico">🔥</span><div><strong>Gas</strong><br><small>Instalación · reparación</small></div></a>
-          <a href="#gas" class="mini heat"><span class="ico">♨️</span><div><strong>Calefacción</strong><br><small>Calefones · termotanques</small></div></a>
-          <a href="#servicios" class="mini water"><span class="ico">💧</span><div><strong>Agua</strong><br><small>Plomería · sanitarios</small></div></a>
-          <a href="#servicios" class="mini cool"><span class="ico">❄️</span><div><strong>Refrigeración</strong><br><small>Aire · frío comercial</small></div></a>
-        </div>
-        <a href="#presupuesto" class="panel-cta">
-          <span><strong>Mandanos fotos o video</strong><br><small>Con eso podemos orientarte mejor.</small></span>
-          <span style="font-size:28px">→</span>
-        </a>
-      </aside>
-    </div>
-  </section>
-
-  <section id="servicios">
-    <div class="wrap">
-      <div class="section-head reveal">
-        <div><div class="kicker">Servicios</div><h2>Una solución para cada rubro.</h2></div>
-        <p>No llenamos la web de cosas. Mostramos lo que hacemos y te llevamos rápido al presupuesto.</p>
-      </div>
-
-      <div class="services">
-        <article class="card reveal"><div><div class="card-icon">🔥</div><h3>Gas</h3><p>Instalaciones, recambios, reparaciones, pruebas y adecuaciones.</p></div><div class="tags"><span class="tag">Cañerías</span><span class="tag">Cocinas</span><span class="tag">Artefactos</span></div></article>
-        <article class="card reveal"><div><div class="card-icon">♨️</div><h3>Calefacción</h3><p>Calefones, termotanques, calefactores y mantenimiento.</p></div><div class="tags"><span class="tag">Recambio</span><span class="tag">Service</span><span class="tag">Diagnóstico</span></div></article>
-        <article class="card reveal"><div><div class="card-icon">💧</div><h3>Plomería</h3><p>Agua, sanitarios, griferías, bombas, pérdidas y reparaciones.</p></div><div class="tags"><span class="tag">Baños</span><span class="tag">Bombas</span><span class="tag">Pérdidas</span></div></article>
-        <article class="card reveal"><div><div class="card-icon">❄️</div><h3>Refrigeración</h3><p>Climatización, mantenimiento y soluciones de frío.</p></div><div class="tags"><span class="tag">Aire acondicionado</span><span class="tag">Frío comercial</span></div></article>
-        <article class="card reveal"><div><div class="card-icon">⚡</div><h3>Electricidad</h3><p>Tomas, iluminación, artefactos, reparaciones y modificaciones.</p></div><div class="tags"><span class="tag">Iluminación</span><span class="tag">Tomas</span><span class="tag">Reparaciones</span></div></article>
-        <article class="card reveal"><div><div class="card-icon">🧱</div><h3>Obra & terminaciones</h3><p>Cerámicos, porcelanatos, reparaciones y trabajos de terminación.</p></div><div class="tags"><span class="tag">Cerámicos</span><span class="tag">Porcelanato</span><span class="tag">Terminaciones</span></div></article>
+      <div class="ribbons" aria-hidden="true">
+        <div class="ribbon y"><span>☀</span></div>
+        <div class="ribbon r"><span>♨</span></div>
+        <div class="ribbon b"><span>💧</span></div>
+        <div class="ribbon w"><span>❄</span></div>
       </div>
     </div>
-  </section>
 
-  <section id="catalogo">
-    <div class="wrap">
-      <div class="section-head reveal">
-        <div><div class="kicker">Catálogo</div><h2>Precios claros cuando se puede.</h2></div>
-        <p>Publicamos valores cuando el trabajo es suficientemente estándar. Si depende de medidas, materiales o del estado de la instalación, te llevamos directo a WhatsApp.</p>
-      </div>
-
-      <div class="catalog-grid">
-        <article class="catalog-card reveal">
-          <div class="catalog-meta">Gas · Calefones</div>
-          <h3>Recambio de calefón tiro balanceado posterior</h3>
-          <p>Mano de obra de recambio / instalación. Materiales, flexibles, llaves, cañerías, adaptaciones y modificaciones de salida se cotizan aparte.</p>
-          <div class="catalog-price">$220.000<small>Mano de obra · referencia septiembre 2026</small></div>
-          <a class="btn btn-primary wa-action" href="#" data-message="Hola, vi en el catálogo de La Solución el recambio de calefón tiro balanceado posterior por $220.000 de mano de obra. Quiero consultar por mi instalación.">Consultar este servicio →</a>
-        </article>
-
-        <article class="catalog-card reveal">
-          <div class="catalog-meta">Gas · Reparación</div>
-          <h3>Reparación de calefón</h3>
-          <p>Diagnóstico, limpieza, repuestos y reparación según modelo y falla.</p>
-          <div class="catalog-price">Consultar<small>Según diagnóstico y repuestos</small></div>
-          <a class="btn btn-primary wa-action" href="#" data-message="Hola, vi el servicio de reparación de calefón en La Solución. Quiero consultar por una falla.">Consultar reparación →</a>
-        </article>
-
-        <article class="catalog-card reveal">
-          <div class="catalog-meta">Gas · Agua caliente</div>
-          <h3>Instalación o recambio de termotanque</h3>
-          <p>Evaluamos conexiones, ventilación, ubicación y las adaptaciones necesarias.</p>
-          <div class="catalog-price">Consultar<small>Según instalación</small></div>
-          <a class="btn btn-primary wa-action" href="#" data-message="Hola, vi el servicio de instalación o recambio de termotanque en La Solución. Quiero consultar precio.">Consultar termotanque →</a>
-        </article>
-
-        <article class="catalog-card reveal">
-          <div class="catalog-meta">Gas · Instalaciones</div>
-          <h3>Instalaciones y modificaciones de gas</h3>
-          <p>Cañerías, artefactos, pruebas, adecuaciones y trabajos residenciales.</p>
-          <div class="catalog-price">Presupuesto<small>Según recorrido y alcance</small></div>
-          <a class="btn btn-primary wa-action" href="#" data-message="Hola, vi el servicio de instalaciones de gas de La Solución. Quiero pedir presupuesto.">Consultar instalación →</a>
-        </article>
-
-        <article class="catalog-card reveal">
-          <div class="catalog-meta">Comercial</div>
-          <h3>Gas comercial y gastronómico</h3>
-          <p>Cocinas, hornos, planchas, freidoras, termotanques, ramales y adecuaciones.</p>
-          <div class="catalog-price">Presupuesto<small>Locales y gastronomía</small></div>
-          <a class="btn btn-primary wa-action" href="#" data-message="Hola, vi el servicio de gas comercial y gastronómico de La Solución. Quiero consultar por mi local.">Consultar comercial →</a>
-        </article>
-
-        <article class="catalog-card reveal">
-          <div class="catalog-meta">Otros rubros</div>
-          <h3>Plomería, refrigeración, electricidad y terminaciones</h3>
-          <p>Contanos qué necesitás y te orientamos según el trabajo.</p>
-          <div class="catalog-price">Consultar<small>Presupuesto según trabajo</small></div>
-          <a class="btn btn-primary wa-action" href="#" data-message="Hola, vi el catálogo de La Solución. Quiero consultar por un trabajo de otro rubro.">Consultar →</a>
-        </article>
-      </div>
-
-      <p class="catalog-note">Los valores publicados son de referencia y se confirman antes de coordinar. No incluyen materiales ni modificaciones no indicadas, salvo aclaración expresa.</p>
-    </div>
-  </section>
-
-  <section id="gas">
-    <div class="wrap feature reveal">
-      <div class="feature-copy">
-        <div class="kicker">Gas & calefacción</div>
-        <h2>Lo técnico, explicado claro.</h2>
-        <p>Desde el recambio de un calefón hasta una instalación comercial: evaluamos el trabajo, definimos el alcance y presupuestamos antes de avanzar.</p>
-        <a class="btn btn-primary wa-action" href="#" data-message="Hola, vi la web de La Solución. Quiero consultar por un trabajo de gas o calefacción.">Consultar por gas →</a>
-      </div>
-      <div class="list">
-        <div><b>01</b> Recambio de calefones</div>
-        <div><b>02</b> Reparación y service</div>
-        <div><b>03</b> Termotanques</div>
-        <div><b>04</b> Calefactores</div>
-        <div><b>05</b> Cocinas y hornos</div>
-        <div><b>06</b> Pruebas de hermeticidad</div>
-        <div><b>07</b> Cañerías y adecuaciones</div>
-        <div><b>08</b> Gas comercial / gastronómico</div>
-      </div>
-    </div>
-  </section>
-
-  <section id="como-trabajamos">
-    <div class="wrap">
-      <div class="section-head reveal">
-        <div><div class="kicker">Cómo trabajamos</div><h2>Simple para vos. Ordenado para nosotros.</h2></div>
-      </div>
-      <div class="steps">
-        <div class="step reveal"><h3>Escribinos</h3><p>Mandá una breve descripción junto con fotos o video del trabajo.</p></div>
-        <div class="step reveal"><h3>Evaluamos</h3><p>Te pedimos sólo la información necesaria para entender el alcance.</p></div>
-        <div class="step reveal"><h3>Presupuestamos</h3><p>Definimos qué incluye el trabajo, materiales y condiciones.</p></div>
-        <div class="step reveal"><h3>Coordinamos</h3><p>Agendamos la visita o ejecución y seguimos todo por WhatsApp.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <section id="trabajos">
-    <div class="wrap">
-      <div class="section-head reveal">
-        <div><div class="kicker">Trabajos</div><h2>Trabajo real. Resultado visible.</h2></div>
-        <p>Acá vamos mostrando instalaciones, reparaciones y terminaciones reales de La Solución. Sin renders vendidos como trabajos: sólo trabajos hechos de verdad.</p>
-      </div>
-      <div class="projects">
-        <div class="project reveal"><div class="project-content"><small>PORTFOLIO</small><h3>Gas residencial y comercial</h3></div></div>
-        <div class="project reveal"><div class="project-content"><small>PORTFOLIO</small><h3>Calefones y calefacción</h3></div></div>
-        <div class="project reveal"><div class="project-content"><small>PORTFOLIO</small><h3>Baños y terminaciones</h3></div></div>
-      </div>
-    </div>
-  </section>
-
-  <section id="presupuesto">
-    <div class="wrap quote">
-      <div class="quote-copy reveal">
-        <div class="kicker">Presupuesto</div>
-        <h2>Contanos qué necesitás.</h2>
-        <p>Completá lo básico y armamos un mensaje ordenado para WhatsApp. Después podés adjuntar las fotos o videos del trabajo.</p>
-        <p><strong style="color:white">@lasolucioncba</strong><br>Córdoba, Argentina</p>
-      </div>
-
-      <form id="quoteForm" class="reveal">
-        <div class="form-grid">
-          <div class="field">
-            <label for="service">Servicio</label>
-            <select id="service" required>
-              <option value="">Elegir…</option>
-              <option>Gas</option>
-              <option>Calefón / termotanque</option>
-              <option>Calefacción</option>
-              <option>Plomería</option>
-              <option>Refrigeración / aire</option>
-              <option>Electricidad</option>
-              <option>Cerámicos / terminaciones</option>
-              <option>Otro</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="zone">Barrio / localidad</label>
-            <input id="zone" placeholder="Ej.: Nueva Córdoba" required>
-          </div>
-        </div>
-        <div class="field">
-          <label for="detail">¿Qué hay que hacer?</label>
-          <textarea id="detail" placeholder="Contanos brevemente el problema o trabajo…" required></textarea>
-        </div>
-        <div class="field">
-          <label for="timing">¿Para cuándo?</label>
-          <select id="timing">
-            <option>Sin urgencia</option>
-            <option>Esta semana</option>
-            <option>Lo antes posible</option>
-          </select>
-        </div>
-        <button class="btn btn-primary" style="width:100%" type="submit">Enviar por WhatsApp →</button>
-        <p class="form-note">Tip: después de abrir WhatsApp, adjuntá fotos o un video. Eso ayuda a cotizar mejor.</p>
-      </form>
-    </div>
-  </section>
-</main>
-
-<footer>
-  <div class="wrap footer-grid">
-    <div class="brand"><span class="mark">LS</span><span>LA SOLUCIÓN<small>Va a funcionar, pero aparte va a quedar fachero.</small></span></div>
-    <div class="footer-links">
-      <a href="#servicios">Servicios</a>
-      <a href="#presupuesto">Presupuesto</a>
-      <a href="https://www.instagram.com/lasolucioncba/" target="_blank" rel="noopener">@lasolucioncba</a>
-      <span>© <span id="year"></span></span>
+    <div class="metrics">
+      <a class="metric gas" href="#catalogo"><div class="metric-top"><span class="metric-label">Gas</span><span class="metric-icon">🔥</span></div><div><h3>Instalación</h3><small>Reparación · recambio · adecuación</small></div></a>
+      <a class="metric heat" href="#catalogo"><div class="metric-top"><span class="metric-label">Calefacción</span><span class="metric-icon">♨</span></div><div><h3>Agua caliente</h3><small>Calefones · termotanques · calefactores</small></div></a>
+      <a class="metric water" href="#catalogo"><div class="metric-top"><span class="metric-label">Agua</span><span class="metric-icon">💧</span></div><div><h3>Plomería</h3><small>Sanitarios · bombas · pérdidas</small></div></a>
+      <a class="metric cool" href="#catalogo"><div class="metric-top"><span class="metric-label">Refrigeración</span><span class="metric-icon">❄</span></div><div><h3>Climatización</h3><small>Aire acondicionado · frío comercial</small></div></a>
     </div>
   </div>
-</footer>
+</section>
 
+<section class="section" id="catalogo">
+  <div class="wrap">
+    <div class="section-head">
+      <div><div class="kicker">Catálogo</div><h2>Servicios de La Solución</h2></div>
+      <p>Cuando el trabajo es estándar publicamos un valor de referencia. Cuando depende de la instalación, te llevamos directo a WhatsApp con la consulta ya armada.</p>
+    </div>
+    <div class="catalog">
+      <article class="catalog-card"><div class="type">Gas · Calefones</div><h3>Recambio de calefón tiro balanceado posterior</h3><p>Mano de obra de recambio / instalación. Materiales, flexibles, llaves, cañerías, adaptaciones y modificaciones de salida se cotizan aparte.</p><div class="price">$220.000<small>Mano de obra · referencia septiembre 2026</small></div><a class="btn btn-primary wa-action" href="#" data-message="Hola, vi en el catálogo de La Solución el recambio de calefón tiro balanceado posterior por $220.000 de mano de obra. Quiero consultar por mi instalación.">CONSULTAR ESTE SERVICIO</a></article>
+      <article class="catalog-card"><div class="type">Gas · Reparación</div><h3>Reparación y service de calefón</h3><p>Diagnóstico, limpieza y reparación según modelo, falla y repuestos necesarios.</p><div class="price">Consultar<small>Según diagnóstico</small></div><a class="btn btn-primary wa-action" href="#" data-message="Hola, vi el servicio de reparación de calefón en La Solución. Quiero consultar por una falla.">CONSULTAR REPARACIÓN</a></article>
+      <article class="catalog-card"><div class="type">Gas · Agua caliente</div><h3>Instalación o recambio de termotanque</h3><p>Evaluación de conexiones existentes, ventilación, ubicación y adaptación necesaria.</p><div class="price">Consultar<small>Según instalación</small></div><a class="btn btn-primary wa-action" href="#" data-message="Hola, vi el servicio de instalación o recambio de termotanque en La Solución. Quiero consultar precio.">CONSULTAR TERMOTANQUE</a></article>
+      <article class="catalog-card"><div class="type">Gas · Instalaciones</div><h3>Instalaciones y modificaciones de gas</h3><p>Cañerías, artefactos, pruebas, adecuaciones y trabajos residenciales.</p><div class="price">Presupuesto<small>Según recorrido y alcance</small></div><a class="btn btn-primary wa-action" href="#" data-message="Hola, vi el servicio de instalaciones de gas de La Solución. Quiero pedir presupuesto.">PEDIR PRESUPUESTO</a></article>
+      <article class="catalog-card"><div class="type">Comercial</div><h3>Gas comercial y gastronómico</h3><p>Cocinas, hornos, planchas, freidoras, termotanques, ramales y adecuaciones.</p><div class="price">Presupuesto<small>Locales y gastronomía</small></div><a class="btn btn-primary wa-action" href="#" data-message="Hola, vi el servicio de gas comercial y gastronómico de La Solución. Quiero consultar por mi local.">CONSULTAR COMERCIAL</a></article>
+      <article class="catalog-card"><div class="type">Otros rubros</div><h3>Plomería, refrigeración, electricidad y terminaciones</h3><p>Contanos qué necesitás y ordenamos la consulta según el rubro.</p><div class="price">Consultar<small>Presupuesto según trabajo</small></div><a class="btn btn-primary wa-action" href="#" data-message="Hola, vi el catálogo de La Solución. Quiero consultar por un trabajo de otro rubro.">CONSULTAR</a></article>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="trabajos">
+  <div class="wrap">
+    <div class="section-head">
+      <div><div class="kicker">Portfolio</div><h2>Trabajos hechos</h2></div>
+      <p>Acá van a aparecer fotos y videos reales de La Solución. Nada de imágenes inventadas vendidas como obra propia.</p>
+    </div>
+    <div class="work-grid">
+      <div class="work-card"><div class="work-copy"><small>GAS</small><h3>Instalaciones residenciales y comerciales</h3></div></div>
+      <div class="work-card"><div class="work-copy"><small>CALEFACCIÓN</small><h3>Recambios y puesta a punto</h3></div></div>
+      <div class="work-card"><div class="work-copy"><small>TERMINACIONES</small><h3>Baños y cerámicos</h3></div></div>
+    </div>
+    <div class="empty-note">La estructura ya está lista para reemplazar estos paneles por tus fotos y videos reales.</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head"><div><div class="kicker">Proceso</div><h2>Cómo trabajamos</h2></div></div>
+    <div class="process">
+      <div class="step"><b>01</b><h3>Nos escribís</h3><p>Mandás una descripción, fotos o video.</p></div>
+      <div class="step"><b>02</b><h3>Evaluamos</h3><p>Pedimos sólo los datos necesarios.</p></div>
+      <div class="step"><b>03</b><h3>Presupuestamos</h3><p>Definimos alcance, materiales y condiciones.</p></div>
+      <div class="step"><b>04</b><h3>Coordinamos</h3><p>Agendamos y hacemos seguimiento por WhatsApp.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="presupuesto">
+  <div class="wrap quote-shell">
+    <div class="quote-copy">
+      <div class="kicker">Consulta</div><h2>Contanos qué necesitás</h2>
+      <p>Completá lo básico. Te abrimos WhatsApp con la consulta ordenada y después podés adjuntar fotos o videos.</p>
+      <p><strong>@lasolucioncba</strong><br>Córdoba, Argentina</p>
+    </div>
+    <form class="quote-form" id="quoteForm">
+      <div class="form-grid">
+        <div class="field"><label for="service">Servicio</label><select id="service" required><option value="">Elegir…</option><option>Gas</option><option>Calefón / termotanque</option><option>Calefacción</option><option>Plomería</option><option>Refrigeración / aire</option><option>Electricidad</option><option>Cerámicos / terminaciones</option><option>Otro</option></select></div>
+        <div class="field"><label for="zone">Barrio / localidad</label><input id="zone" placeholder="Ej.: Nueva Córdoba" required></div>
+      </div>
+      <div class="field"><label for="detail">¿Qué hay que hacer?</label><textarea id="detail" placeholder="Contanos brevemente el problema o trabajo…" required></textarea></div>
+      <div class="field"><label for="timing">¿Para cuándo?</label><select id="timing"><option>Sin urgencia</option><option>Esta semana</option><option>Lo antes posible</option></select></div>
+      <button class="btn btn-primary" style="width:100%" type="submit">ENVIAR POR WHATSAPP</button>
+      <div class="form-note">Después podés sumar fotos o video directamente en WhatsApp.</div>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap footer-inner"><span>LA SOLUCIÓN · Córdoba</span><span>@lasolucioncba · © <span id="year"></span></span></div></footer>
 <button class="float-wa wa-action" data-message="Hola, vi la web de La Solución y quiero hacer una consulta." aria-label="WhatsApp">◉</button>
 
 <script>
-  // Para apuntar directamente al WhatsApp Business de La Solución,
-  // completar sólo los dígitos con código de país. Ejemplo Argentina: 549351XXXXXXX
-  const WHATSAPP_NUMBER = "5493515439183";
-
-  const waUrl = (message) => {
-    const base = WHATSAPP_NUMBER
-      ? "https://wa.me/" + WHATSAPP_NUMBER
-      : "https://wa.me/";
-    return base + "?text=" + encodeURIComponent(message);
-  };
-
-  document.querySelectorAll(".wa-action").forEach(el => {
-    el.addEventListener("click", e => {
-      e.preventDefault();
-      const msg = el.dataset.message || "Hola, vi la web de La Solución y quiero hacer una consulta.";
-      window.open(waUrl(msg), "_blank", "noopener");
-    });
-  });
-
-  document.getElementById("quoteForm").addEventListener("submit", e => {
-    e.preventDefault();
-    const service = document.getElementById("service").value;
-    const zone = document.getElementById("zone").value.trim();
-    const detail = document.getElementById("detail").value.trim();
-    const timing = document.getElementById("timing").value;
-    const message =
-      "Hola, vi la web de La Solución y quiero pedir presupuesto.\n\n" +
-      "Servicio: " + service + "\n" +
-      "Zona: " + zone + "\n" +
-      "Plazo: " + timing + "\n" +
-      "Trabajo: " + detail + "\n\n" +
-      "Ahora adjunto fotos/video si hace falta.";
-    window.open(waUrl(message), "_blank", "noopener");
-  });
-
-  const toggle = document.getElementById("mobileToggle");
-  const menu = document.getElementById("menu");
-  toggle.addEventListener("click", () => menu.classList.toggle("open"));
-  menu.querySelectorAll("a").forEach(a => a.addEventListener("click", () => menu.classList.remove("open")));
-
-  document.getElementById("year").textContent = new Date().getFullYear();
-
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if(entry.isIntersecting){
-        entry.target.classList.add("show");
-        observer.unobserve(entry.target);
-      }
-    });
-  }, {threshold:.08});
-  document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
+const WHATSAPP_NUMBER="5493515439183";
+const waUrl=msg=>"https://wa.me/"+WHATSAPP_NUMBER+"?text="+encodeURIComponent(msg);
+document.querySelectorAll(".wa-action").forEach(el=>el.addEventListener("click",e=>{e.preventDefault();window.open(waUrl(el.dataset.message||"Hola, vi la web de La Solución y quiero hacer una consulta."),"_blank","noopener")}));
+document.getElementById("quoteForm").addEventListener("submit",e=>{
+ e.preventDefault();
+ const s=document.getElementById("service").value,z=document.getElementById("zone").value.trim(),d=document.getElementById("detail").value.trim(),t=document.getElementById("timing").value;
+ window.open(waUrl("Hola, vi la web de La Solución y quiero pedir presupuesto.\n\nServicio: "+s+"\nZona: "+z+"\nPlazo: "+t+"\nTrabajo: "+d+"\n\nAhora adjunto fotos/video."),"_blank","noopener");
+});
+document.getElementById("year").textContent=new Date().getFullYear();
 </script>
 </body>
 </html>
