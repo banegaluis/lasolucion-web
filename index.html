@@ -740,6 +740,35 @@
     }
   </style>
 
+
+  <style id="logo-and-catalog-integration">
+    .app-public-brand{
+      overflow:hidden !important;
+      border-radius:10px;
+      background:#050607;
+    }
+    .app-public-brand img{
+      width:112% !important;
+      max-width:none !important;
+      max-height:none !important;
+      transform:scale(1.10);
+      transform-origin:center;
+      clip-path:inset(11% 4% 10% 4% round 10px);
+    }
+    .app-public-brand-footer img{
+      transform:scale(1.10);
+      clip-path:inset(11% 4% 10% 4% round 10px);
+    }
+    .catalog-card[id],
+    .catalog-anchor{
+      scroll-margin-top:96px;
+    }
+    .catalog-card:target{
+      border-color:rgba(245,197,24,.78) !important;
+      box-shadow:0 0 0 3px rgba(245,197,24,.10),0 20px 46px rgba(0,0,0,.34) !important;
+    }
+  </style>
+
 </head>
 <body data-public-ui="canonical-app-skin-20260919">
 <header class="top">
@@ -767,7 +796,7 @@
         <div class="eyebrow"><span class="dot"></span> Córdoba Capital y alrededores</div>
         <h1>El trabajo tiene que <span class="accent">quedar bien.</span></h1>
         <p class="lead">Gas, calefacción, agua, refrigeración, electricidad y terminaciones. Un solo contacto para resolver trabajos técnicos de punta a punta.</p>
-        <p class="slogan">Va a funcionar, pero aparte va a quedar fachero.</p>
+        <p class="slogan">De resolverlo nos ocupamos nosotros.</p>
         <div class="hero-actions">
           <a class="btn btn-primary wa-action" href="#" data-message="Hola, vi la web de La Solución y necesito presupuesto para un trabajo.">Pedir presupuesto por WhatsApp →</a>
           <a class="btn btn-secondary" href="#servicios">Ver servicios</a>
@@ -825,7 +854,7 @@
 
       <div class="catalog-grid">
         <article class="catalog-card reveal">
-          <div class="catalog-meta">Gas · Calefones</div>
+          <span id="recambio-calefon-tb" class="catalog-anchor"></span><div class="catalog-meta">Gas · Calefones</div>
           <h3>Recambio de calefón tiro balanceado posterior</h3>
           <p>Mano de obra de recambio / instalación. Materiales, flexibles, llaves, cañerías, adaptaciones y modificaciones de salida se cotizan aparte.</p>
           <div class="catalog-price">$220.000<small>Mano de obra · referencia septiembre 2026</small></div>
@@ -833,7 +862,7 @@
         </article>
 
         <article class="catalog-card reveal">
-          <div class="catalog-meta">Gas · Reparación</div>
+          <span id="reparacion-calefon" class="catalog-anchor"></span><div class="catalog-meta">Gas · Reparación</div>
           <h3>Reparación de calefón</h3>
           <p>Diagnóstico, limpieza, repuestos y reparación según modelo y falla.</p>
           <div class="catalog-price">Consultar<small>Según diagnóstico y repuestos</small></div>
@@ -841,7 +870,7 @@
         </article>
 
         <article class="catalog-card reveal">
-          <div class="catalog-meta">Gas · Agua caliente</div>
+          <span id="termotanque" class="catalog-anchor"></span><div class="catalog-meta">Gas · Agua caliente</div>
           <h3>Instalación o recambio de termotanque</h3>
           <p>Evaluamos conexiones, ventilación, ubicación y las adaptaciones necesarias.</p>
           <div class="catalog-price">Consultar<small>Según instalación</small></div>
@@ -849,7 +878,7 @@
         </article>
 
         <article class="catalog-card reveal">
-          <div class="catalog-meta">Gas · Instalaciones</div>
+          <span id="instalaciones-gas" class="catalog-anchor"></span><div class="catalog-meta">Gas · Instalaciones</div>
           <h3>Instalaciones y modificaciones de gas</h3>
           <p>Cañerías, artefactos, pruebas, adecuaciones y trabajos residenciales.</p>
           <div class="catalog-price">Presupuesto<small>Según recorrido y alcance</small></div>
@@ -857,7 +886,7 @@
         </article>
 
         <article class="catalog-card reveal">
-          <div class="catalog-meta">Comercial</div>
+          <span id="gas-comercial" class="catalog-anchor"></span><div class="catalog-meta">Comercial</div>
           <h3>Gas comercial y gastronómico</h3>
           <p>Cocinas, hornos, planchas, freidoras, termotanques, ramales y adecuaciones.</p>
           <div class="catalog-price">Presupuesto<small>Locales y gastronomía</small></div>
@@ -865,7 +894,7 @@
         </article>
 
         <article class="catalog-card reveal">
-          <div class="catalog-meta">Otros rubros</div>
+          <span id="otros-servicios" class="catalog-anchor"></span><div class="catalog-meta">Otros rubros</div>
           <h3>Plomería, refrigeración, electricidad y terminaciones</h3>
           <p>Contanos qué necesitás y te orientamos según el trabajo.</p>
           <div class="catalog-price">Consultar<small>Presupuesto según trabajo</small></div>
