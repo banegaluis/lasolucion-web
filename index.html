@@ -81,6 +81,16 @@
     .list{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .list div{background:#111;border:1px solid #282828;border-radius:16px;padding:15px;display:flex;gap:10px;align-items:center}
     .list b{color:var(--yellow)}
+    .catalog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .catalog-card{background:linear-gradient(180deg,#161616,#101010);border:1px solid #2a2a2a;border-radius:var(--radius);padding:24px;display:flex;flex-direction:column;min-height:285px;transition:.2s}
+    .catalog-card:hover{transform:translateY(-3px);border-color:#3a3a3a}
+    .catalog-meta{color:#8e8e8e;font-size:12px;font-weight:850;letter-spacing:.1em;text-transform:uppercase}
+    .catalog-card h3{font-size:22px;margin:10px 0 8px}
+    .catalog-card p{color:#aaa;margin:0 0 18px}
+    .catalog-price{font-size:28px;font-weight:950;letter-spacing:-.03em;margin-top:auto}
+    .catalog-price small{display:block;color:#8f8f8f;font-size:12px;font-weight:650;letter-spacing:0;margin-top:2px}
+    .catalog-card .btn{margin-top:16px;width:100%}
+    .catalog-note{margin:16px 0 0;color:#8e8e8e;font-size:12px}
     .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;counter-reset:step}
     .step{counter-increment:step;border-top:1px solid #333;padding:22px 12px 12px}
     .step:before{content:"0" counter(step);color:var(--yellow);font-weight:900;font-size:13px}
@@ -122,7 +132,7 @@
       .hero-grid,.feature,.quote{grid-template-columns:1fr}
       .hero{padding-top:48px}
       .hero-panel{min-height:auto}
-      .services{grid-template-columns:1fr 1fr}
+      .services,.catalog-grid{grid-template-columns:1fr 1fr}
       .steps{grid-template-columns:1fr 1fr}
       .projects{grid-template-columns:1fr 1fr}
       .projects .project:first-child{grid-column:1/-1}
@@ -136,7 +146,7 @@
       .hero{padding-top:36px}
       h1{font-size:48px}
       .hero-panel{border-radius:26px;padding:14px}
-      .service-mini,.services,.list,.steps,.projects,.form-grid{grid-template-columns:1fr}
+      .service-mini,.services,.catalog-grid,.list,.steps,.projects,.form-grid{grid-template-columns:1fr}
       .projects .project:first-child{grid-column:auto}
       .mini{min-height:112px}
       section{padding:58px 0}
@@ -157,6 +167,7 @@
     </a>
     <nav id="menu">
       <a href="#servicios">Servicios</a>
+      <a href="#catalogo">Catálogo</a>
       <a href="#como-trabajamos">Cómo trabajamos</a>
       <a href="#trabajos">Trabajos</a>
       <a href="#presupuesto">Presupuesto</a>
@@ -223,6 +234,67 @@
     </div>
   </section>
 
+  <section id="catalogo">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div><div class="kicker">Catálogo</div><h2>Precios claros cuando se puede.</h2></div>
+        <p>Publicamos valores cuando el trabajo es suficientemente estándar. Si depende de medidas, materiales o del estado de la instalación, te llevamos directo a WhatsApp.</p>
+      </div>
+
+      <div class="catalog-grid">
+        <article class="catalog-card reveal">
+          <div class="catalog-meta">Gas · Calefones</div>
+          <h3>Recambio de calefón tiro balanceado posterior</h3>
+          <p>Mano de obra de recambio / instalación. Materiales, flexibles, llaves, cañerías, adaptaciones y modificaciones de salida se cotizan aparte.</p>
+          <div class="catalog-price">$220.000<small>Mano de obra · referencia septiembre 2026</small></div>
+          <a class="btn btn-primary wa-action" href="#" data-message="Hola, vi en el catálogo de La Solución el recambio de calefón tiro balanceado posterior por $220.000 de mano de obra. Quiero consultar por mi instalación.">Consultar este servicio →</a>
+        </article>
+
+        <article class="catalog-card reveal">
+          <div class="catalog-meta">Gas · Reparación</div>
+          <h3>Reparación de calefón</h3>
+          <p>Diagnóstico, limpieza, repuestos y reparación según modelo y falla.</p>
+          <div class="catalog-price">Consultar<small>Según diagnóstico y repuestos</small></div>
+          <a class="btn btn-primary wa-action" href="#" data-message="Hola, vi el servicio de reparación de calefón en La Solución. Quiero consultar por una falla.">Consultar reparación →</a>
+        </article>
+
+        <article class="catalog-card reveal">
+          <div class="catalog-meta">Gas · Agua caliente</div>
+          <h3>Instalación o recambio de termotanque</h3>
+          <p>Evaluamos conexiones, ventilación, ubicación y las adaptaciones necesarias.</p>
+          <div class="catalog-price">Consultar<small>Según instalación</small></div>
+          <a class="btn btn-primary wa-action" href="#" data-message="Hola, vi el servicio de instalación o recambio de termotanque en La Solución. Quiero consultar precio.">Consultar termotanque →</a>
+        </article>
+
+        <article class="catalog-card reveal">
+          <div class="catalog-meta">Gas · Instalaciones</div>
+          <h3>Instalaciones y modificaciones de gas</h3>
+          <p>Cañerías, artefactos, pruebas, adecuaciones y trabajos residenciales.</p>
+          <div class="catalog-price">Presupuesto<small>Según recorrido y alcance</small></div>
+          <a class="btn btn-primary wa-action" href="#" data-message="Hola, vi el servicio de instalaciones de gas de La Solución. Quiero pedir presupuesto.">Consultar instalación →</a>
+        </article>
+
+        <article class="catalog-card reveal">
+          <div class="catalog-meta">Comercial</div>
+          <h3>Gas comercial y gastronómico</h3>
+          <p>Cocinas, hornos, planchas, freidoras, termotanques, ramales y adecuaciones.</p>
+          <div class="catalog-price">Presupuesto<small>Locales y gastronomía</small></div>
+          <a class="btn btn-primary wa-action" href="#" data-message="Hola, vi el servicio de gas comercial y gastronómico de La Solución. Quiero consultar por mi local.">Consultar comercial →</a>
+        </article>
+
+        <article class="catalog-card reveal">
+          <div class="catalog-meta">Otros rubros</div>
+          <h3>Plomería, refrigeración, electricidad y terminaciones</h3>
+          <p>Contanos qué necesitás y te orientamos según el trabajo.</p>
+          <div class="catalog-price">Consultar<small>Presupuesto según trabajo</small></div>
+          <a class="btn btn-primary wa-action" href="#" data-message="Hola, vi el catálogo de La Solución. Quiero consultar por un trabajo de otro rubro.">Consultar →</a>
+        </article>
+      </div>
+
+      <p class="catalog-note">Los valores publicados son de referencia y se confirman antes de coordinar. No incluyen materiales ni modificaciones no indicadas, salvo aclaración expresa.</p>
+    </div>
+  </section>
+
   <section id="gas">
     <div class="wrap feature reveal">
       <div class="feature-copy">
@@ -262,12 +334,12 @@
     <div class="wrap">
       <div class="section-head reveal">
         <div><div class="kicker">Trabajos</div><h2>Trabajo real. Resultado visible.</h2></div>
-        <p>Esta sección está preparada para sumar fotos reales de instalaciones, reparaciones y terminaciones de La Solución.</p>
+        <p>Acá vamos mostrando instalaciones, reparaciones y terminaciones reales de La Solución. Sin renders vendidos como trabajos: sólo trabajos hechos de verdad.</p>
       </div>
       <div class="projects">
-        <div class="project reveal"><div class="project-content"><small>INSTALACIONES</small><h3>Gas residencial y comercial</h3></div></div>
-        <div class="project reveal"><div class="project-content"><small>CALEFACCIÓN</small><h3>Recambios y puesta a punto</h3></div></div>
-        <div class="project reveal"><div class="project-content"><small>TERMINACIONES</small><h3>Que funcione y quede bien</h3></div></div>
+        <div class="project reveal"><div class="project-content"><small>PORTFOLIO</small><h3>Gas residencial y comercial</h3></div></div>
+        <div class="project reveal"><div class="project-content"><small>PORTFOLIO</small><h3>Calefones y calefacción</h3></div></div>
+        <div class="project reveal"><div class="project-content"><small>PORTFOLIO</small><h3>Baños y terminaciones</h3></div></div>
       </div>
     </div>
   </section>
