@@ -782,6 +782,41 @@
     }
   </style>
 
+  <style id="slogan-formatting">
+    .slogan-block{margin:18px 0 30px}
+    .slogan-main{
+      max-width:760px;
+      margin:0 0 14px;
+      color:#fff;
+      font-size:clamp(42px,6vw,72px);
+      line-height:.98;
+      font-weight:700;
+      letter-spacing:-.052em;
+    }
+    .slogan-main .accent{color:var(--ref-yellow-brand,#f5c518)}
+    .slogan-sub{
+      margin:0 0 6px;
+      color:#d3d7dc;
+      font-size:17px;
+      line-height:1.45;
+      font-weight:750;
+      letter-spacing:-.01em;
+    }
+    .slogan-location{
+      margin:0;
+      color:#9da3ab;
+      font-size:14px;
+      font-weight:800;
+      letter-spacing:.02em;
+    }
+    @media(max-width:620px){
+      .slogan-block{margin:14px 0 24px}
+      .slogan-main{font-size:44px}
+      .slogan-sub{font-size:15px}
+      .slogan-location{font-size:13px}
+    }
+  </style>
+
 </head>
 <body data-public-ui="canonical-app-skin-20260919">
 <header class="top">
@@ -807,7 +842,11 @@
     <div class="wrap hero-grid">
       <div>
         <div class="eyebrow"><span class="dot"></span> Córdoba Capital y alrededores</div>
-        <p class="slogan">Va a funcionar, pero aparte va a quedar fachero.<br>Lasolucioncba y punto - ¿Matrículas? algunas.<br>📍 Córdoba</p>
+        <div class="slogan-block">
+          <h1 class="slogan-main">Va a funcionar, pero aparte va a quedar <span class="accent">fachero.</span></h1>
+          <p class="slogan-sub">Lasolucioncba y punto - ¿Matrículas? algunas.</p>
+          <p class="slogan-location">📍 Córdoba</p>
+        </div>
         <div class="hero-actions">
           <a class="btn btn-primary wa-action" href="#" data-message="Hola, vi la web de La Solución y necesito presupuesto para un trabajo.">Pedir presupuesto por WhatsApp →</a>
           <a class="btn btn-secondary" href="#servicios">Ver servicios</a>
