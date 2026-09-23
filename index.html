@@ -923,6 +923,8 @@
       box-shadow:none!important;
     }
     .card{min-height:220px!important}
+    .service-select-card{cursor:pointer;transition:.16s ease}
+    .service-select-card:focus-visible{outline:3px solid rgba(245,197,24,.18);border-color:var(--crm-yellow)!important}
     .service-card-contact{
       margin-top:14px;
       display:inline-flex;
@@ -1151,12 +1153,12 @@
       </div>
 
       <div class="services">
-        <article class="card reveal"><div><div class="card-icon"><span class="rubric-icon rubric-gas" aria-hidden="true"></span></div><h3>Gas</h3><p>Instalaciones, recambios, reparaciones, pruebas y adecuaciones.</p></div><div class="tags"><span class="tag">Cañerías</span><span class="tag">Cocinas</span><span class="tag">Artefactos</span><span class="service-card-contact">Consultar este rubro →</span></div></article>
-        <article class="card reveal"><div><div class="card-icon"><span class="rubric-icon rubric-heat" aria-hidden="true"></span></div><h3>Calefacción</h3><p>Calefones, termotanques, calefactores y mantenimiento.</p></div><div class="tags"><span class="tag">Recambio</span><span class="tag">Service</span><span class="tag">Diagnóstico</span><span class="service-card-contact">Consultar este rubro →</span></div></article>
-        <article class="card reveal"><div><div class="card-icon"><span class="rubric-icon rubric-water" aria-hidden="true"></span></div><h3>Plomería</h3><p>Agua, sanitarios, griferías, bombas, pérdidas y reparaciones.</p></div><div class="tags"><span class="tag">Baños</span><span class="tag">Bombas</span><span class="tag">Pérdidas</span><span class="service-card-contact">Consultar este rubro →</span></div></article>
-        <article class="card reveal"><div><div class="card-icon"><span class="rubric-icon rubric-cool" aria-hidden="true"></span></div><h3>Refrigeración</h3><p>Climatización, mantenimiento y soluciones de frío.</p></div><div class="tags"><span class="tag">Aire acondicionado</span><span class="tag">Frío comercial</span><span class="service-card-contact">Consultar este rubro →</span></div></article>
-        <article class="card reveal"><div><div class="card-icon card-wordmark">ELEC</div><h3>Electricidad</h3><p>Tomas, iluminación, artefactos, reparaciones y modificaciones.</p></div><div class="tags"><span class="tag">Iluminación</span><span class="tag">Tomas</span><span class="tag">Reparaciones</span><span class="service-card-contact">Consultar este rubro →</span></div></article>
-        <article class="card reveal"><div><div class="card-icon card-wordmark">OBRA</div><h3>Obra & terminaciones</h3><p>Cerámicos, porcelanatos, reparaciones y trabajos de terminación.</p></div><div class="tags"><span class="tag">Cerámicos</span><span class="tag">Porcelanato</span><span class="tag">Terminaciones</span><span class="service-card-contact">Consultar este rubro →</span></div></article>
+        <article class="card reveal service-select-card" data-service="Gas" tabindex="0" role="button"><div><div class="card-icon"><span class="rubric-icon rubric-gas" aria-hidden="true"></span></div><h3>Gas</h3><p>Instalaciones, recambios, reparaciones, pruebas y adecuaciones.</p></div><div class="tags"><span class="tag">Cañerías</span><span class="tag">Cocinas</span><span class="tag">Artefactos</span><span class="service-card-contact">Consultar este rubro →</span></div></article>
+        <article class="card reveal service-select-card" data-service="Calefacción" tabindex="0" role="button"><div><div class="card-icon"><span class="rubric-icon rubric-heat" aria-hidden="true"></span></div><h3>Calefacción</h3><p>Calefones, termotanques, calefactores y mantenimiento.</p></div><div class="tags"><span class="tag">Recambio</span><span class="tag">Service</span><span class="tag">Diagnóstico</span><span class="service-card-contact">Consultar este rubro →</span></div></article>
+        <article class="card reveal service-select-card" data-service="Plomería" tabindex="0" role="button"><div><div class="card-icon"><span class="rubric-icon rubric-water" aria-hidden="true"></span></div><h3>Plomería</h3><p>Agua, sanitarios, griferías, bombas, pérdidas y reparaciones.</p></div><div class="tags"><span class="tag">Baños</span><span class="tag">Bombas</span><span class="tag">Pérdidas</span><span class="service-card-contact">Consultar este rubro →</span></div></article>
+        <article class="card reveal service-select-card" data-service="Refrigeración / aire" tabindex="0" role="button"><div><div class="card-icon"><span class="rubric-icon rubric-cool" aria-hidden="true"></span></div><h3>Refrigeración</h3><p>Climatización, mantenimiento y soluciones de frío.</p></div><div class="tags"><span class="tag">Aire acondicionado</span><span class="tag">Frío comercial</span><span class="service-card-contact">Consultar este rubro →</span></div></article>
+        <article class="card reveal service-select-card" data-service="Electricidad" tabindex="0" role="button"><div><div class="card-icon card-wordmark">ELEC</div><h3>Electricidad</h3><p>Tomas, iluminación, artefactos, reparaciones y modificaciones.</p></div><div class="tags"><span class="tag">Iluminación</span><span class="tag">Tomas</span><span class="tag">Reparaciones</span><span class="service-card-contact">Consultar este rubro →</span></div></article>
+        <article class="card reveal service-select-card" data-service="Cerámicos / terminaciones" tabindex="0" role="button"><div><div class="card-icon card-wordmark">OBRA</div><h3>Obra & terminaciones</h3><p>Cerámicos, porcelanatos, reparaciones y trabajos de terminación.</p></div><div class="tags"><span class="tag">Cerámicos</span><span class="tag">Porcelanato</span><span class="tag">Terminaciones</span><span class="service-card-contact">Consultar este rubro →</span></div></article>
       </div>
     </div>
   </section>
@@ -1367,6 +1369,28 @@
       e.preventDefault();
       const msg = el.dataset.message || "Hola, vi la web de La Solución y quiero hacer una consulta.";
       window.open(waUrl(msg), "_blank", "noopener");
+    });
+  });
+
+
+  const chooseService = (card) => {
+    const service = card.dataset.service;
+    const select = document.getElementById("service");
+    if (select && service) select.value = service;
+    document.getElementById("presupuesto").scrollIntoView({behavior:"smooth", block:"start"});
+    setTimeout(() => {
+      const detail = document.getElementById("detail");
+      if (detail) detail.focus({preventScroll:true});
+    }, 450);
+  };
+
+  document.querySelectorAll(".service-select-card").forEach(card => {
+    card.addEventListener("click", () => chooseService(card));
+    card.addEventListener("keydown", e => {
+      if(e.key === "Enter" || e.key === " "){
+        e.preventDefault();
+        chooseService(card);
+      }
     });
   });
 
