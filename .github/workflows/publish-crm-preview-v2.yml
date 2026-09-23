@@ -1,0 +1,33 @@
+name: Publish CRM preview v2
+on:
+  push:
+    paths:
+      - ".github/workflows/publish-crm-preview-v2.yml"
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build preview
+        run: |
+          curl -fL 'https://sdmntprbrazilsouth.oaiusercontent.com/files/00000000-ccb4-820e-929b-2f9bc31b694d/raw?se=2026-09-23T02%3A34%3A21Z&sp=r&sv=2026-02-06&sr=b&scid=0e034333-cdef-5162-9da6-cabffb8020b1&skoid=33096a49-a96b-4506-9fc4-04a7517f8175&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-09-23T01%3A37%3A34Z&ske=2026-09-24T01%3A37%3A34Z&sks=b&skv=2026-02-06&sig=Jm9u2%2BMmv6Z/t1xj5o6KgY8WKMH6TDiwUYMfd6JZLF8%3D' -o /tmp/crm.zip
+          rm -rf /tmp/crm-unzip crm
+          mkdir -p /tmp/crm-unzip crm
+          unzip -q /tmp/crm.zip -d /tmp/crm-unzip
+          cp -R --no-preserve=mode /tmp/crm-unzip/LaSolucionapp_recuperacion/. crm/
+          chmod -R u+rwX crm
+          rm -rf crm/.git crm/.atl crm/.agents crm/.codex crm/supabase crm/docs
+          rm -f crm/server.js crm/package.json crm/arrancar.cmd crm/.gitignore crm/'#U201cNo'
+          mkdir -p crm/js/config
+          cat > crm/js/config/supabase-config.js <<'EOF'
+          window.LA_SOLUCION_SUPABASE_CONFIG = { url: "", anonKey: "" };
+          EOF
+      - name: Commit preview
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add crm
+          git commit -m "Publish La Solución CRM mobile preview" || exit 0
+          git push
