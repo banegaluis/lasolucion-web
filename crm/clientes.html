@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Solución | Clientes</title>
+    <link rel="icon" type="image/png" href="assets/logo/logo.png">
+    <link rel="stylesheet" href="css/style.css?v=sidebar-hidden-20260713-1">
+    <link rel="stylesheet" href="css/dashboard.css?v=dashboard-shared-20260713-1">
+    <link rel="stylesheet" href="css/clientes.css?v=clientes-edit-principal-20260717-6">
+</head>
+
+<body>
+    <main class="content clientes-page" aria-labelledby="clientesTitulo">
+        <header class="clientes-hero">
+            <div>
+                <p class="clientes-eyebrow">Base comercial</p>
+                <h1 id="clientesTitulo">Clientes</h1>
+                <p>Gestioná la información, direcciones e historial de tus clientes.</p>
+                <p id="clientesMensaje" class="clientes-message" aria-live="polite"></p>
+            </div>
+            <button id="btnNuevoCliente" class="dashboard-primary-action clientes-primary-action" type="button">+ NUEVO CLIENTE</button>
+        </header>
+
+        <section class="clientes-summary dashboard-metrics role-metrics" aria-label="Resumen de clientes">
+            <article class="metric-card clientes-metric-card metric-yellow">
+                <span>Total de clientes</span>
+                <strong id="metricTotalClientes">0</strong>
+            </article>
+            <article class="metric-card clientes-metric-card metric-green">
+                <span>Clientes activos</span>
+                <strong id="metricClientesActivos">0</strong>
+            </article>
+            <article class="metric-card clientes-metric-card metric-purple">
+                <span>Clientes inactivos</span>
+                <strong id="metricClientesInactivos">0</strong>
+            </article>
+            <article class="metric-card clientes-metric-card metric-blue">
+                <span>Trabajos terminados</span>
+                <strong id="metricTrabajosTerminados">0</strong>
+            </article>
+        </section>
+
+        <section class="clientes-toolbar" aria-label="Búsqueda y filtros de clientes">
+            <label class="clientes-search">
+                <span>Buscar</span>
+                <input id="buscarClientes" type="search" placeholder="Nombre, teléfono, email o dirección" autocomplete="off">
+            </label>
+            <label>
+                <span>Estado</span>
+                <select id="filtroEstadoClientes">
+                    <option value="todos">Todos</option>
+                    <option value="activos">Activos</option>
+                    <option value="inactivos">Inactivos</option>
+                </select>
+            </label>
+            <label>
+                <span>Orden</span>
+                <select id="ordenClientes">
+                    <option value="nombre">Nombre A-Z</option>
+                    <option value="recientes">Más recientes</option>
+                    <option value="ultimoTrabajo">Último trabajo</option>
+                </select>
+            </label>
+        </section>
+
+        <section class="clientes-shell" aria-label="Listado y detalle de clientes">
+            <div id="listaClientes" class="clientes-list"></div>
+            <aside id="clienteDetalle" class="clientes-detail" aria-live="polite"></aside>
+        </section>
+    </main>
+
+    <div id="clienteModal" class="clientes-modal" hidden>
+        <div class="clientes-modal-overlay" data-close-cliente-modal></div>
+        <form id="clienteForm" class="clientes-dialog" novalidate>
+            <header class="clientes-dialog-header">
+                <div>
+                    <p class="clientes-eyebrow">Cliente</p>
+                    <h2 id="clienteModalTitulo">Nuevo cliente</h2>
+                </div>
+                <button id="btnCerrarClienteModal" class="clientes-close" type="button" aria-label="Cerrar">&times;</button>
+            </header>
+
+            <div class="clientes-dialog-body">
+                <p id="clienteModalMensaje" class="clientes-modal-message" aria-live="polite" hidden></p>
+                <section class="clientes-form-section">
+                    <h3>Datos principales</h3>
+                    <div class="clientes-form-grid clientes-person-grid">
+                        <label class="span-2"><span>Nombre o razón social</span><input id="clienteNombre" required autocomplete="organization"></label>
+                        <label><span>Teléfono principal</span><input id="clienteTelefono" required inputmode="tel" autocomplete="tel"></label>
+                        <label><span>Teléfono alternativo <em class="clientes-optional">Opcional</em></span><input id="clienteTelefonoAlternativo" inputmode="tel" autocomplete="tel"></label>
+                        <label class="span-2"><span>Email <em class="clientes-optional">Opcional</em></span><input id="clienteEmail" type="email" autocomplete="email"></label>
+                        <label><span>DNI/CUIT <em class="clientes-optional">Opcional</em></span><input id="clienteDni" inputmode="numeric" autocomplete="off"></label>                    
+                    </div>
+                </section>
+
+                <section id="clienteDireccionInicial" class="clientes-form-section cliente-address-initial">
+                    <div class="clientes-section-heading">
+                        <div>
+                            <h3>Dirección principal</h3>
+                            <p>Necesaria para crear el cliente y reutilizarlo en órdenes.</p>
+                        </div>
+                    </div>
+                    <div class="clientes-form-grid clientes-address-grid">
+                        <label><span>Alias <em class="clientes-optional">Opcional</em></span><input id="clienteDireccionAlias" placeholder="Casa, local, obra"></label>
+                        <label class="span-2"><span>Calle</span><input id="clienteDireccionCalle" required autocomplete="address-line1"></label>
+                        <label><span>Número</span><input id="clienteDireccionNumero" required autocomplete="address-line2"></label>
+                        <label><span>Piso <em class="clientes-optional">Opcional</em></span><input id="clienteDireccionPiso"></label>
+                        <label><span>Departamento <em class="clientes-optional">Opcional</em></span><input id="clienteDireccionDepartamento"></label>
+                        <label><span>Barrio <em class="clientes-optional">Opcional</em></span><input id="clienteDireccionBarrio"></label>
+                        <label><span>Ciudad</span><input id="clienteDireccionCiudad" value="Córdoba" autocomplete="address-level2"></label>
+                        <label><span>Provincia</span><input id="clienteDireccionProvincia" value="Córdoba" autocomplete="address-level1"></label>
+                        <label><span>Código postal <em class="clientes-optional">Opcional</em></span><input id="clienteDireccionCodigoPostal" inputmode="numeric" autocomplete="postal-code"></label>
+                        <label class="clientes-check"><input id="clienteDireccionPrincipal" type="checkbox" checked><span>Es principal</span></label>                    
+                    </div>
+                </section>
+
+                <section class="clientes-form-section">
+                    <h3>Notas</h3>
+                    <label class="clientes-full-field span-full"><span>Observaciones</span><textarea id="clienteNotas" placeholder="Datos útiles para atención, preferencias o contexto comercial."></textarea></label>
+                </section>
+
+                <div id="clienteDuplicados" class="cliente-duplicates" hidden></div>
+            </div>
+
+            <footer class="clientes-dialog-footer">
+                <button id="btnCancelarCliente" class="role-action-button" type="button">Cancelar</button>
+                <button id="btnGuardarCliente" type="submit" class="dashboard-primary-action">Guardar cliente</button>
+            </footer>
+        </form>
+    </div>
+
+    <div id="direccionModal" class="clientes-modal" hidden>
+        <div class="clientes-modal-overlay" data-close-direccion-modal></div>
+        <form id="direccionForm" class="clientes-dialog" novalidate>
+            <header class="clientes-dialog-header">
+                <div>
+                    <p class="clientes-eyebrow">Dirección</p>
+                    <h2 id="direccionModalTitulo">Nueva dirección</h2>
+                </div>
+                <button id="btnCerrarDireccionModal" class="clientes-close" type="button" aria-label="Cerrar">&times;</button>
+            </header>
+
+            <div class="clientes-dialog-body">
+                <p id="direccionModalMensaje" class="clientes-modal-message" aria-live="polite" hidden></p>
+                <div class="clientes-form-grid">
+                    <label><span>Alias <em class="clientes-optional">Opcional</em></span><input id="direccionAlias" placeholder="Casa, local, obra"></label>
+                    <label><span>Calle</span><input id="direccionCalle" required></label>
+                    <label><span>Número</span><input id="direccionNumero"></label>
+                    <label><span>Piso <em class="clientes-optional">Opcional</em></span><input id="direccionPiso"></label>
+                    <label><span>Departamento <em class="clientes-optional">Opcional</em></span><input id="direccionDepartamento"></label>
+                    <label><span>Barrio <em class="clientes-optional">Opcional</em></span><input id="direccionBarrio"></label>
+                    <label><span>Ciudad</span><input id="direccionCiudad" value="Córdoba"></label>
+                    <label><span>Provincia</span><input id="direccionProvincia" value="Córdoba"></label>
+                    <label><span>Código postal <em class="clientes-optional">Opcional</em></span><input id="direccionCodigoPostal" inputmode="numeric"></label>
+                    <label class="clientes-check"><input id="direccionPrincipal" type="checkbox"><span>Es principal</span></label>
+                    <label class="clientes-check"><input id="direccionActiva" type="checkbox" checked><span>Dirección activa</span></label>                
+                </div>
+            </div>
+
+            <footer class="clientes-dialog-footer">
+                <button id="btnCancelarDireccion" class="role-action-button" type="button">Cancelar</button>
+                <button id="btnGuardarDireccion" type="submit" class="dashboard-primary-action">Guardar dirección</button>
+            </footer>
+        </form>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/permisos.js"></script>
+    <script src="js/login.js"></script>
+    <script src="js/config/supabase-config.js"></script>
+    <script src="js/services/supabaseClient.js"></script>
+    <script src="js/services/authService.js"></script>
+    <script src="js/services/clientesService.js?v=clientes-edit-principal-20260717-6"></script>
+    <script src="js/clientes.js?v=clientes-edit-principal-20260717-6"></script>
+    <script src="js/layout.js?v=layout-clickout-20260713-1"></script>
+</body>
+
+</html>

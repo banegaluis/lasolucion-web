@@ -1,0 +1,166 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios - La Solución</title>
+    <link rel="icon" type="image/png" href="assets/logo/logo.png">
+    <link rel="stylesheet" href="css/style.css?v=sidebar-hidden-20260713-1">
+    <link rel="stylesheet" href="css/usuarios.css">
+</head>
+<body>
+    <main class="content usuarios-page" aria-labelledby="usuariosTitulo">
+        <header class="usuarios-header">
+            <div>
+                <p class="usuarios-eyebrow">Administración</p>
+                <h1 id="usuariosTitulo">Usuarios</h1>
+            </div>
+            <button id="btnNuevoUsuario" class="btn-nueva-orden" type="button" data-permiso="usuarios.crear">+ NUEVO USUARIO</button>
+        </header>
+
+        <section class="usuarios-summary" aria-label="Resumen de usuarios">
+            <article class="usuarios-summary-card"><span>Total</span><strong id="metricTotalUsuarios">0</strong></article>
+            <article class="usuarios-summary-card"><span>Activos</span><strong id="metricUsuariosActivos">0</strong></article>
+            <article class="usuarios-summary-card"><span>Pendientes</span><strong id="metricUsuariosPendientes">0</strong></article>
+            <article class="usuarios-summary-card"><span>Inactivos</span><strong id="metricUsuariosInactivos">0</strong></article>
+            <article class="usuarios-summary-card"><span>Administradores</span><strong id="metricAdministradores">0</strong></article>
+            <article class="usuarios-summary-card"><span>Colaboradores</span><strong id="metricColaboradores">0</strong></article>
+            <article class="usuarios-summary-card"><span>Técnicos</span><strong id="metricTecnicos">0</strong></article>
+            <article class="usuarios-summary-card"><span>Clientes</span><strong id="metricClientes">0</strong></article>
+        </section>
+
+        <section class="usuarios-toolbar" aria-label="Búsqueda y filtros">
+            <label class="usuarios-search">
+                <span>Buscar</span>
+                <input id="buscarUsuarios" type="search" placeholder="Nombre, usuario, email o teléfono" autocomplete="off">
+            </label>
+            <label>
+                <span>Rol</span>
+                <select id="filtroRolUsuarios">
+                    <option value="todos">Todos</option>
+                    <option value="administrador">Administrador</option>
+                    <option value="colaborador">Colaborador</option>
+                    <option value="tecnico">Técnico</option>
+                    <option value="cliente">Cliente</option>
+                    <option value="cliente_pendiente">Cliente pendiente</option>
+                </select>
+            </label>
+            <label>
+                <span>Estado</span>
+                <select id="filtroEstadoUsuarios">
+                    <option value="todos">Todos</option>
+                    <option value="activo">Activo</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="inactivo">Inactivo</option>
+                    <option value="bloqueado">Bloqueado</option>
+                </select>
+            </label>
+            <button id="btnLimpiarFiltrosUsuarios" class="usuarios-secondary" type="button">Limpiar filtros</button>
+        </section>
+
+        <p id="usuariosMensaje" class="usuarios-message" role="status" aria-live="polite"></p>
+
+        <section class="usuarios-list-card">
+            <div class="usuarios-table-wrap">
+                <table class="usuarios-table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Teléfono</th>
+                            <th>Creación</th>
+                            <th>Vínculo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usuariosListado"></tbody>
+                </table>
+            </div>
+            <div id="usuariosVacio" class="usuarios-empty" hidden>No hay usuarios para mostrar.</div>
+        </section>
+    </main>
+
+    <div id="usuarioModal" class="usuarios-modal" hidden>
+        <div class="usuarios-modal-overlay" data-close-modal="true"></div>
+        <form id="usuarioForm" class="usuarios-dialog" novalidate>
+            <header class="usuarios-dialog-header">
+                <div>
+                    <p class="usuarios-eyebrow">Gestión local</p>
+                    <h2 id="usuarioModalTitulo">Nuevo usuario</h2>
+                </div>
+                <button id="btnCerrarUsuarioModal" type="button" class="usuarios-close" aria-label="Cerrar formulario">×</button>
+            </header>
+
+            <div class="usuarios-dialog-body">
+                <input type="hidden" id="usuarioIdEdicion">
+
+                <section class="usuarios-form-section">
+                    <h3>Datos personales</h3>
+                    <div class="usuarios-form-grid usuarios-form-grid-3">
+                        <label>Nombre<input id="usuarioNombre" autocomplete="given-name" required></label>
+                        <label>Apellido<input id="usuarioApellido" autocomplete="family-name" required></label>
+                        <label>Teléfono<input id="usuarioTelefono" inputmode="tel" autocomplete="tel"></label>
+                    </div>
+                </section>
+
+                <section class="usuarios-form-section">
+                    <h3>Datos de acceso</h3>
+                    <div class="usuarios-form-grid usuarios-form-grid-2">
+                        <label>Username<input id="usuarioUsername" autocomplete="username" required></label>
+                        <label>Email<input id="usuarioEmail" type="email" inputmode="email" autocomplete="email" required></label>
+                    </div>
+                    <div class="usuarios-password-header">
+                        <strong id="passwordSectionTitle">Contraseña temporal</strong>
+                        <button id="btnTogglePasswordUsuario" type="button" class="usuarios-link-button">Mostrar / ocultar</button>
+                    </div>
+                    <div class="usuarios-form-grid usuarios-form-grid-2">
+                        <label>Nueva contraseña<input id="usuarioPassword" type="password" autocomplete="new-password"></label>
+                        <label>Confirmación<input id="usuarioPasswordConfirm" type="password" autocomplete="new-password"></label>
+                    </div>
+                    <p id="usuarioPasswordHelp" class="usuarios-help">Contraseña temporal para desarrollo local. No se muestran contraseñas existentes.</p>
+                </section>
+
+                <section class="usuarios-form-section">
+                    <h3>Configuración</h3>
+                    <div class="usuarios-form-grid usuarios-form-grid-2">
+                        <label>Rol<select id="usuarioRol" required></select></label>
+                        <label>Estado<select id="usuarioEstado" required></select></label>
+                    </div>
+                    <div id="usuarioTecnicoBox" class="usuarios-relation" hidden>
+                        <label>Técnico relacionado<select id="usuarioTecnicoId"></select></label>
+                        <p id="usuarioTecnicoAviso" class="usuarios-warning">Este usuario podrá iniciar sesión, pero no verá órdenes asignadas hasta vincularlo con un técnico.</p>
+                    </div>
+                    <div id="usuarioClienteBox" class="usuarios-relation" hidden>
+                        <label>Cliente relacionado<select id="usuarioClienteId"></select></label>
+                        <p id="usuarioClienteAviso" class="usuarios-warning">Este usuario podrá iniciar sesión, pero todavía no verá órdenes propias asociadas hasta vincularlo con un cliente.</p>
+                    </div>
+                </section>
+            </div>
+
+            <footer class="usuarios-dialog-footer">
+                <button id="btnCancelarUsuario" type="button" class="usuarios-secondary">Cancelar</button>
+                <button id="btnGuardarUsuario" type="submit" class="btn-nueva-orden">Crear usuario</button>
+            </footer>
+        </form>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/permisos.js"></script>
+    <script src="js/login.js"></script>
+    <script src="js/usuarios.js"></script>
+    <script src="js/layout.js?v=layout-clickout-20260713-1"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+

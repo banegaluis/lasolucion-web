@@ -1,0 +1,1445 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0b0b0b;
+    color: white;
+}
+
+/* ================= LOGIN ================= */
+
+#loginView {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-card {
+    width: 320px;
+    padding: 20px;
+    background: #161616;
+    border-radius: 12px;
+    box-sizing: border-box;
+}
+
+.login-card h2 {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+/* ================= TOP BAR ================= */
+
+.logo {
+    background: #F5C518;
+    color: black;
+    font-weight: bold;
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+
+/* ================= CONTENIDO ================= */
+
+.content {
+    padding: 12px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.primary {
+    width: 100%;
+    padding: 12px;
+    background: #F5C518;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* ================= LISTAS ================= */
+
+#listaOrdenes,
+#historialOrdenes {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+/* ================= CARD ================= */
+
+.card {
+    background: #161616;
+    border: 1px solid #242424;
+    padding: 14px;
+    border-radius: 12px;
+    box-sizing: border-box;
+}
+
+.card p {
+    margin: 6px 0;
+    text-align: left;
+}
+
+/* ================= ESTADO ================= */
+
+.card select {
+    width: 180px;
+    padding: 8px;
+    margin-top: 4px;
+    border-radius: 6px;
+    border: 1px solid #333;
+    background: #111;
+    color: white;
+    font-size: 14px;
+}
+
+/* ================= ACCIONES ================= */
+
+.acciones {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.acciones button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.acciones button:first-child {
+    background: #3498db;
+    color: white;
+}
+
+.acciones button:last-child {
+    background: #e74c3c;
+    color: white;
+}
+
+/* ================= INPUTS ================= */
+
+input,
+textarea {
+    width: 100%;
+    margin-top: 8px;
+    padding: 10px;
+    background: #111;
+    border: 1px solid #333;
+    color: white;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+/* Fecha y hora visibles */
+
+input[type="date"],
+input[type="time"] {
+    color-scheme: dark;
+}
+
+/* ================= MODAL ================= */
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-card {
+    width: 340px;
+    background: #161616;
+    padding: 18px;
+    border-radius: 12px;
+    box-sizing: border-box;
+}
+
+.modal-card h3 {
+    margin-top: 0;
+    text-align: center;
+}
+
+/* ================= LINKS TELEFONO ================= */
+
+.card p:nth-child(2) {
+    cursor: pointer;
+    color: #4aa3ff;
+}
+
+.card p:nth-child(2):hover {
+    text-decoration: underline;
+}
+/* ================= LOGIN NUEVO ================= */
+
+#loginView {
+    min-height: 100vh;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-container {
+
+    width: 100%;
+    max-width: 420px;
+
+    padding: 30px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.logo-login {
+
+    width: 280px;
+
+    margin: 0 auto 25px auto;
+
+    display: block;
+}
+
+.titulo-login {
+
+    text-align: center;
+
+    color: white;
+
+    font-size: 42px;
+
+    font-style: italic;
+
+    margin-bottom: 35px;
+}
+
+.login-container label {
+
+    color: white;
+
+    margin-bottom: 8px;
+
+    font-weight: bold;
+}
+
+.login-container input {
+
+    background: #111;
+
+    border: 1px solid #2b2b2b;
+
+    color: white;
+
+    padding: 18px;
+
+    border-radius: 20px;
+
+    font-size: 18px;
+
+    margin-bottom: 22px;
+}
+
+.btn-login {
+
+    background: #f1f1f1;
+
+    color: black;
+
+    border: none;
+
+    border-radius: 20px;
+
+    padding: 18px;
+
+    font-size: 22px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    margin-top: 15px;
+}
+
+.btn-login:hover {
+
+    background: white;
+}
+
+#msg {
+
+    text-align: center;
+
+    color: #ff4d4d;
+
+    margin-top: 20px;
+}
+/* ================= NUEVA ORDEN V2 ================= */
+
+.nova-orden {
+
+    width: 90%;
+    max-width: 650px;
+
+    background: #111;
+
+    border: 1px solid #222;
+
+    border-radius: 24px;
+
+    padding: 30px;
+}
+
+.nova-orden h2 {
+
+    text-align: center;
+
+    color: white;
+
+    font-size: 32px;
+
+    margin-bottom: 25px;
+}
+
+.nova-orden label {
+
+    display: block;
+
+    margin-bottom: 6px;
+
+    margin-top: 12px;
+
+    color: white;
+
+    font-weight: 480;
+}
+
+.nova-orden input,
+.nova-orden textarea {
+
+    width: 100%;
+
+    background: #161616;
+
+    border: 1px solid #2c2c2c;
+
+    border-radius: 14px;
+
+    color: white;
+
+    padding: 14px;
+
+    box-sizing: border-box;
+}
+
+.nova-orden textarea {
+
+    min-height: 120px;
+
+    resize: vertical;
+}
+
+.fila-doble {
+
+    display: flex;
+
+    gap: 15px;
+}
+
+.fila-doble > div {
+
+    flex: 1;
+}
+
+.btn-guardar {
+
+    width: 100%;
+
+    background: #F5C518;
+
+    color: black;
+
+    font-weight: bold;
+
+    margin-top: 20px;
+
+    border-radius: 14px;
+
+    padding: 14px;
+}
+
+.btn-cancelar {
+
+    width: 100%;
+
+    background: #222;
+
+    color: white;
+
+    margin-top: 10px;
+
+    border-radius: 14px;
+
+    padding: 14px;
+}
+/* ================= ESTADOS ================= */
+
+.card.pendiente {
+    background: #241212;
+    border: 1px solid #e74c3c;
+}
+
+.card.en-proceso {
+    background: #241d12;
+    border: 1px solid #f39c12;
+}
+
+.card.terminado {
+    background: #122417;
+    border: 1px solid #2ecc71;
+}
+
+/* SELECT DE ESTADO */
+
+.estado-linha select {
+
+    width: auto;
+
+    min-width: 130px;
+
+    padding: 6px 10px;
+
+    border-radius: 8px;
+
+    border: none;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.estado-linha select option {
+    background: #111;
+    color: white;
+}
+.estado-pendiente {
+    background: #e74c3c;
+    color: white;
+}
+
+.estado-proceso {
+    background: #f39c12;
+    color: black;
+}
+
+.estado-terminado {
+    background: #2ecc71;
+    color: black;
+}
+
+.estado-cancelado {
+    background: #687180;
+    color: white;
+}
+
+/* ================= VOLVER ACCESIBLE ================= */
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 8px 12px;
+    border: 1px solid #2f2f2f;
+    border-radius: 999px;
+    color: white;
+    background: #161616;
+    text-decoration: none;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.back-link:hover,
+.back-link:focus-visible {
+    background: #F5C518;
+    color: black;
+    outline: none;
+}
+
+.back-link-icon {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.placeholder-page {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.placeholder-page h1 {
+    margin-bottom: 0;
+}
+
+.placeholder-page p {
+    color: #bdbdbd;
+    line-height: 1.5;
+}
+
+
+/* =====================================================
+   SISTEMA VISUAL COMPARTIDO - ETAPA 1
+===================================================== */
+
+:root {
+    --color-bg: #070707;
+    --color-surface: #141414;
+    --color-surface-2: #1b1b1b;
+    --color-border: #292929;
+    --color-text: #f5f5f5;
+    --color-muted: #a9a9a9;
+    --color-primary: #f5c518;
+    --color-primary-contrast: #111111;
+    --color-danger: #e74c3c;
+    --color-warning: #f39c12;
+    --color-success: #2ecc71;
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --shadow-soft: 0 18px 50px rgba(0, 0, 0, .28);
+    --sidebar-width: 248px;
+    --topbar-height: 68px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background:
+        radial-gradient(circle at top left, rgba(245, 197, 24, .08), transparent 32rem),
+        var(--color-bg);
+    color: var(--color-text);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+}
+
+button {
+    transition: background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease;
+}
+
+button:hover {
+    transform: translateY(-1px);
+}
+
+.app-brand {
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 800;
+    letter-spacing: .08em;
+}
+
+.app-brand img {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+}
+
+.logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 40px;
+}
+
+.logo {
+    background: var(--color-primary);
+    color: var(--color-primary-contrast);
+    border-radius: var(--radius-sm);
+    font-weight: 900;
+}
+
+.content,
+.agenda {
+    width: min(100%, 1120px);
+    max-width: 1120px;
+    padding: 24px;
+}
+
+.content,
+.agenda,
+.placeholder-page {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.card,
+.kpi,
+.proxima .card,
+.hora-card,
+.modal-card,
+.login-container {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-soft);
+}
+
+.primary,
+.btn-login,
+.btn-guardar,
+.btn-flotante {
+    background: var(--color-primary);
+    color: var(--color-primary-contrast);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.primary:hover,
+.btn-login:hover,
+.btn-guardar:hover,
+.btn-flotante:hover {
+    background: #ffd84f;
+}
+
+input,
+textarea,
+select {
+    background: #101010;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    border-radius: var(--radius-sm);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--color-primary);
+    outline: 3px solid rgba(245, 197, 24, .16);
+}
+
+.back-link {
+    border-color: var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+.placeholder-page {
+    align-items: flex-start;
+    max-width: 900px;
+}
+
+.placeholder-page h1 {
+    font-size: clamp(28px, 4vw, 44px);
+}
+
+@media (max-width: 860px) {
+
+    .app-brand {
+        min-width: 70px;
+        min-height: 52px;
+    }
+
+    .app-brand img {
+        width: 32px;
+        height: 32px;
+    }
+
+    .app-brand span {
+        display: none;
+    }
+
+    .content,
+.agenda {
+        padding: 16px;
+    }
+
+    .fila-doble,
+.acciones {
+        flex-direction: column;
+    }
+}
+
+/* =====================================================
+   NAVEGACIÓN COMPARTIDA - ETAPA 1
+===================================================== */
+
+/* =====================================================
+   CORRECCIÓN NAVEGACIÓN SUPERPUESTA - REFERENCIA MASTER
+===================================================== */
+
+/* Compatibilidad: mantener etiquetas disponibles; el bloque final decide si se muestran en rail o sidebar completa */
+
+/* =====================================================
+   DASHBOARD1 - REFERENCIA VISUAL OFICIAL
+===================================================== */
+
+:root {
+    --ref-bg: #050607;
+    --ref-panel: #0f1115;
+    --ref-card: #15171c;
+    --ref-border: #272a30;
+    --ref-text: #ffffff;
+    --ref-muted: #a1a1a1;
+    --ref-yellow: #ffc107;
+    --ref-green: #22c55e;
+    --ref-blue: #3b82f6;
+    --ref-purple: #a855f7;
+    --ref-red: #ef4444;
+    --ref-radius: 16px;
+    --topbar-height: 64px;
+}
+
+body {
+    background:
+        radial-gradient(circle at 16% 0%, rgba(255, 193, 7, .05), transparent 26rem),
+        var(--ref-bg) !important;
+    color: var(--ref-text) !important;
+}
+
+/* =====================================================
+   AJUSTE EXACTO REFERENCIAS: MENU + DASHBOARD_METRICAS
+===================================================== */
+
+:root {
+    --topbar-height: 64px;
+    --ref-header-bg: #0f1115;
+    --ref-main-bg: #050607;
+    --ref-surface: #15171c;
+    --ref-surface-deep: #0f1115;
+    --ref-border-strong: #2f333a;
+    --ref-border-soft: #272a30;
+    --ref-yellow: #ffc107;
+    --ref-text: #ffffff;
+    --ref-muted: #b5bac1;
+    --ref-radius-panel: 16px;
+}
+
+/* =====================================================
+   CORRECCIÓN MENU.PNG - ALINEACIÓN Y PANEL SIN CABECERA
+===================================================== */
+
+/* =====================================================
+   TOPBAR.PNG - USUARIO REAL Y HAMBURGUESA SIMPLE
+===================================================== */
+
+/* =====================================================
+   TOPBAR.PNG - BÚSQUEDA VISIBLE Y RELOJ REAL
+===================================================== */
+
+/* =====================================================
+   TOPBAR - RELOJ JUNTO AL BUSCADOR
+===================================================== */
+
+/* =====================================================
+   TOPBAR - RELOJ AL EXTREMO DERECHO SIN CORTE
+===================================================== */
+
+
+/* =====================================================
+   ESTÁNDAR GLOBAL - + NUEVA ORDEN Y MODAL SIEMPRE VISIBLE
+===================================================== */
+.btn-nueva-orden {
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    padding: 0 18px !important;
+    border-radius: var(--radius-sm, 8px) !important;
+    background: var(--color-primary, #f5c518) !important;
+    color: var(--color-primary-contrast, #111111) !important;
+    border: 1px solid rgba(255, 193, 7, .72) !important;
+    font-size: 14px !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    text-decoration: none !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+}
+
+.btn-nueva-orden:hover,
+.btn-nueva-orden:focus-visible {
+    background: #ffd84f !important;
+    color: var(--color-primary-contrast, #111111) !important;
+    outline: 3px solid rgba(245, 197, 24, .18) !important;
+}
+
+html.modal-scroll-locked,
+body.modal-scroll-locked {
+    overflow: hidden !important;
+}
+
+
+/* =====================================================
+   BUSCADOR GLOBAL TOPBAR
+===================================================== */
+
+/* Modo de prueba de administrador */
+.admin-test-banner {
+    position: fixed;
+    left: 50%;
+    top: 76px;
+    transform: translateX(-50%);
+    z-index: 4500;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: calc(100% - 24px);
+    padding: 10px 12px;
+    border-radius: 16px;
+    border: 1px solid rgba(245, 197, 24, .28);
+    background: rgba(15, 15, 15, .94);
+    color: #fff;
+    box-shadow: 0 18px 44px rgba(0,0,0,.36);
+}
+
+.admin-test-banner strong { color: var(--color-primary, #f5c518); }
+
+.admin-test-banner button {
+    min-height: 32px;
+    border: 1px solid rgba(255, 255, 255, .1);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .06);
+    color: #f7f7f7;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+    padding: 0 10px;
+}
+
+.admin-test-banner button:hover {
+    border-color: rgba(245, 197, 24, .48);
+    color: var(--color-primary, #f5c518);
+}
+
+@media (max-width: 680px) {
+    .admin-test-banner {
+        top: auto;
+        bottom: 12px;
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+}
+
+/* ================= REGISTRO PÚBLICO ================= */
+.btn-login-secondary {
+    width: 100%;
+    margin-top: 10px;
+    padding: 13px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(245, 197, 24, .45);
+    background: rgba(245, 197, 24, .08);
+    color: #f5c518;
+    font-weight: 800;
+    letter-spacing: .03em;
+    cursor: pointer;
+}
+
+.btn-login-secondary:hover {
+    background: rgba(245, 197, 24, .16);
+}
+
+.login-message,
+.registro-message {
+    min-height: 22px;
+    color: #f5c518;
+    font-size: .92rem;
+    line-height: 1.35;
+}
+
+.registro-message.is-error,
+.login-message.is-error {
+    color: #ff6b6b;
+}
+
+.registro-message.is-success,
+.login-message.is-success {
+    color: #6ee7a8;
+}
+
+.registro-modal[hidden] {
+    display: none !important;
+}
+
+.registro-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.registro-modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, .72);
+    backdrop-filter: blur(8px);
+}
+
+.registro-dialog {
+    position: relative;
+    width: min(720px, 100%);
+    max-height: calc(100dvh - 32px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 24px;
+    border: 1px solid rgba(245, 197, 24, .22);
+    background: rgba(15, 15, 15, .98);
+    box-shadow: 0 28px 70px rgba(0, 0, 0, .6);
+    color: #f6f6f6;
+}
+
+.registro-dialog-header,
+.registro-dialog-footer {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 18px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+
+.registro-dialog-footer {
+    border-top: 1px solid rgba(255, 255, 255, .08);
+    border-bottom: 0;
+}
+
+.registro-dialog-header h2 {
+    margin: 0;
+}
+
+.registro-eyebrow,
+.registro-help {
+    margin: 0;
+    color: rgba(255, 255, 255, .68);
+    font-size: .86rem;
+}
+
+.registro-dialog-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 18px 20px;
+    display: grid;
+    gap: 14px;
+}
+
+.registro-dialog label {
+    display: grid;
+    gap: 7px;
+    color: rgba(255, 255, 255, .84);
+    font-weight: 700;
+}
+
+.registro-dialog input {
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .06);
+    color: #fff;
+    padding: 12px 13px;
+}
+
+.registro-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.registro-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.registro-close {
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .06);
+    color: #fff;
+    cursor: pointer;
+}
+
+.usuario-badges-extra {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.usuario-origin-badge {
+    display: inline-flex;
+    width: fit-content;
+    border: 1px solid rgba(245, 197, 24, .24);
+    border-radius: 999px;
+    padding: 3px 7px;
+    color: rgba(255, 255, 255, .76);
+    font-size: .72rem;
+    font-weight: 700;
+}
+
+@media (max-width: 560px) {
+    .registro-grid-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .registro-dialog-footer {
+        flex-direction: column-reverse;
+    }
+
+    .registro-dialog-footer button {
+        width: 100%;
+    }
+}
+
+/* =====================================================
+   FASE B — Sistema visual base profesional mobile-first
+   Capa compartida para La Solución CRM
+===================================================== */
+:root {
+    --color-bg: #050607;
+    --color-bg-soft: #090b0f;
+    --color-surface: #111318;
+    --color-surface-elevated: #171a21;
+    --color-surface-strong: #1d2129;
+    --color-border: rgba(255, 255, 255, .10);
+    --color-border-strong: rgba(245, 197, 24, .34);
+    --color-text: #f8fafc;
+    --color-text-muted: #b7beca;
+    --color-text-soft: #8d96a5;
+    --color-primary: #f5c518;
+    --color-primary-hover: #ffd84f;
+    --color-primary-contrast: #101010;
+    --color-success: #36d179;
+    --color-warning: #f59e0b;
+    --color-danger: #ef4444;
+    --color-info: #3b82f6;
+    --color-gas: #f5c518;
+    --color-calefaccion: #ef4444;
+    --color-agua: #3b82f6;
+    --color-refrigeracion: #e5e7eb;
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-xl: 26px;
+    --shadow-sm: 0 10px 26px rgba(0, 0, 0, .22);
+    --shadow-md: 0 18px 48px rgba(0, 0, 0, .34);
+    --shadow-lg: 0 30px 90px rgba(0, 0, 0, .52);
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-7: 32px;
+    --control-height: 46px;
+    --touch-target: 44px;
+    --page-max-width: 1180px;
+    --topbar-height: 64px;
+    --z-topbar: 220;
+    --z-sidebar: 240;
+    --z-overlay: 230;
+    --z-modal: 420;
+    --transition-fast: 160ms ease;
+}
+
+html {
+    min-width: 320px;
+    overflow-x: hidden;
+    color-scheme: dark;
+}
+
+body {
+    min-width: 320px;
+    overflow-x: hidden;
+    background:
+        radial-gradient(circle at 14% -8%, rgba(245, 197, 24, .08), transparent 28rem),
+        linear-gradient(180deg, #07080b 0%, var(--color-bg) 100%) !important;
+    color: var(--color-text) !important;
+    font-family: Arial, Helvetica, sans-serif;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+}
+img,
+svg,
+video,
+canvas { max-width: 100%; }
+a { color: inherit; }
+button,
+a,
+input,
+select,
+textarea { -webkit-tap-highlight-color: transparent; }
+button,
+input,
+select,
+textarea { font: inherit; }
+button,
+a,
+input,
+select,
+textarea {
+    transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+:where(button, a, input, select, textarea):focus-visible { outline: 3px solid rgba(245, 197, 24, .28) !important; outline-offset: 2px; }
+
+.content,
+.agenda-profesional,
+.usuarios-page,
+.placeholder-page {
+    width: min(var(--page-max-width), calc(100% - 24px)) !important;
+    margin-inline: auto !important;
+}
+.content,
+.placeholder-page {
+    padding: calc(var(--topbar-height) + var(--space-5)) 0 var(--space-7) !important;
+    max-width: var(--page-max-width) !important;
+}
+.placeholder-page,
+.card,
+.usuarios-header,
+.usuarios-toolbar,
+.usuarios-list-card,
+.usuarios-summary-card,
+.agenda-panel,
+.role-section,
+.role-panel,
+.role-order-card,
+.metric-card {
+    background: linear-gradient(180deg, rgba(23, 26, 33, .98), rgba(16, 18, 23, .98)) !important;
+    border: 1px solid var(--color-border) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+.placeholder-page,
+.card { border-radius: var(--radius-lg) !important; padding: var(--space-5) !important; }
+h1,
+h2,
+h3,
+p { overflow-wrap: anywhere; }
+h1,
+.page-title,
+.agenda-title,
+.usuarios-header h1 { color: var(--color-text) !important; letter-spacing: -.035em; }
+p,
+small,
+.usuario-muted { color: var(--color-text-muted); }
+
+.primary,
+.btn-nueva-orden,
+.btn-login,
+.btn-guardar,
+.role-action-button.primary,
+button[type="submit"] {
+    min-height: var(--touch-target) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: var(--space-2) !important;
+    border-radius: var(--radius-md) !important;
+    border: 1px solid rgba(245, 197, 24, .62) !important;
+    background: linear-gradient(180deg, var(--color-primary-hover), var(--color-primary)) !important;
+    color: var(--color-primary-contrast) !important;
+    font-weight: 900 !important;
+    text-decoration: none !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+    box-shadow: 0 12px 28px rgba(245, 197, 24, .16) !important;
+    cursor: pointer !important;
+}
+.primary:hover,
+.btn-nueva-orden:hover,
+.btn-login:hover,
+.btn-guardar:hover,
+.role-action-button.primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 34px rgba(245, 197, 24, .22) !important;
+}
+.btn-cancelar,
+.btn-login-secondary,
+.usuarios-secondary,
+.usuarios-action,
+.role-action-button,
+.agenda-filter-parent,
+.agenda-filter-submenu button { min-height: var(--touch-target) !important; border-radius: var(--radius-md) !important; }
+.btn-cancelar,
+.btn-login-secondary,
+.usuarios-secondary,
+.role-action-button:not(.primary) { border: 1px solid var(--color-border) !important; background: rgba(255, 255, 255, .055) !important; color: var(--color-text) !important; }
+
+input,
+select,
+textarea {
+    min-height: var(--control-height) !important;
+    border-radius: var(--radius-md) !important;
+    border: 1px solid var(--color-border) !important;
+    background: rgba(7, 9, 12, .92) !important;
+    color: var(--color-text) !important;
+    font-size: 16px;
+}
+textarea { min-height: 92px !important; }
+input::placeholder,
+textarea::placeholder { color: rgba(183, 190, 202, .68); }
+input:focus,
+select:focus,
+textarea:focus { border-color: var(--color-border-strong) !important; box-shadow: 0 0 0 3px rgba(245, 197, 24, .13) !important; }
+
+.modal,
+.registro-modal,
+.usuarios-modal { z-index: var(--z-modal) !important; }
+.modal { padding: var(--space-4) !important; overflow: hidden !important; background: rgba(0, 0, 0, .78) !important; backdrop-filter: blur(8px); }
+.modal-card,
+.registro-dialog,
+.usuarios-dialog {
+    width: min(980px, 100%) !important;
+    max-height: calc(100dvh - 32px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    border-radius: var(--radius-xl) !important;
+    background: rgba(15, 17, 21, .99) !important;
+    border: 1px solid rgba(245, 197, 24, .22) !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+.nova-orden-header,
+.registro-dialog-header,
+.usuarios-dialog-header,
+.nova-orden-actions,
+.registro-dialog-footer,
+.usuarios-dialog-footer { flex-shrink: 0 !important; }
+.nova-orden-body,
+.registro-dialog-body,
+.usuarios-dialog-body { flex: 1 1 auto !important; min-height: 0 !important; overflow-y: auto !important; overscroll-behavior: contain; }
+
+.usuario-badge,
+.role-badge,
+.estado-pendiente,
+.estado-proceso,
+.estado-terminado { font-weight: 900; }
+.estado-pendiente,
+.usuario-badge.estado-bloqueado { background: rgba(239, 68, 68, .16) !important; color: #ff8b8b !important; }
+.estado-proceso,
+.usuario-badge.estado-pendiente { background: rgba(245, 158, 11, .17) !important; color: #ffd27a !important; }
+.estado-terminado,
+.usuario-badge.estado-activo { background: rgba(54, 209, 121, .15) !important; color: #8ff0b3 !important; }
+
+@media (max-width: 760px) {
+    :root { --topbar-height: 60px; --space-5: 16px; --space-6: 20px; --space-7: 24px; }
+    .content,
+.agenda-profesional,
+.usuarios-page,
+.placeholder-page { width: min(100% - 20px, var(--page-max-width)) !important; }
+    .content,
+.placeholder-page { padding-top: calc(var(--topbar-height) + 14px) !important; }
+    .primary,
+.btn-nueva-orden,
+.btn-login,
+.btn-login-secondary,
+.btn-guardar,
+.btn-cancelar,
+.role-action-button { width: 100%; min-height: 46px !important; padding-inline: 14px !important; }
+    .modal { align-items: stretch !important; padding: 8px !important; }
+    .modal-card,
+.registro-dialog,
+.usuarios-dialog { width: 100% !important; max-height: calc(100dvh - 16px) !important; border-radius: 20px !important; }
+    .usuarios-table-wrap { overflow-x: visible !important; }
+}
+
+@media (max-width: 420px) {
+    .content,
+.agenda-profesional,
+.usuarios-page,
+.placeholder-page { width: calc(100% - 16px) !important; }
+    input,
+select,
+textarea { font-size: 16px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+*::before,
+*::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}
+
+/* =====================================================
+   FASE B - LOGIN Y HEADER GLOBAL
+===================================================== */
+#loginView {
+    min-height: 100dvh !important;
+    height: auto !important;
+    padding: clamp(24px, 6vw, 56px) 16px !important;
+    background:
+        radial-gradient(circle at top, rgba(245, 197, 24, .10), transparent 34%),
+        linear-gradient(145deg, #07080a 0%, #111419 48%, #08090b 100%) !important;
+}
+
+.login-container,
+.login-card {
+    width: min(100%, 420px) !important;
+    padding: clamp(24px, 5vw, 36px) !important;
+    border: 1px solid rgba(255, 255, 255, .10) !important;
+    border-radius: 24px !important;
+    background: rgba(17, 20, 25, .96) !important;
+    box-shadow: 0 28px 70px rgba(0, 0, 0, .45) !important;
+}
+
+.logo-login { width: min(230px, 74vw) !important; margin-bottom: 28px !important; }
+.titulo-login { color: #fff !important; font-size: clamp(24px, 7vw, 34px) !important; letter-spacing: -.04em !important; }
+.login-container label { color: rgba(255, 255, 255, .76) !important; font-size: 13px !important; font-weight: 800 !important; }
+.login-container input,
+.login-card input {
+    min-height: 54px !important;
+    border: 1px solid rgba(255, 255, 255, .12) !important;
+    border-radius: 14px !important;
+    background: #0b0d10 !important;
+    color: #fff !important;
+    font-size: 16px !important;
+}
+
+.btn-login {
+    min-height: 50px !important;
+    border-radius: 14px !important;
+    background: #f5c518 !important;
+    color: #111 !important;
+    font-weight: 900 !important;
+    letter-spacing: -.015em !important;
+    box-shadow: none !important;
+}
+
+.btn-login:hover { background: #ffd84f !important; transform: none !important; }
+
+@media (max-width: 560px) {
+    #loginView { padding: 18px 12px !important; align-items: flex-start !important; }
+    .login-container,
+.login-card { border-radius: 20px !important; }
+}
+
+/* =====================================================
+   FASE B - LOGIN Y HEADER PROFESIONAL DEFINITIVO
+===================================================== */
+#loginView {
+    overflow-x: hidden !important;
+}
+
+.login-container,
+.login-card {
+    gap: 14px !important;
+    text-align: left !important;
+}
+
+.login-container form,
+.login-card form {
+    width: 100% !important;
+    display: grid !important;
+    gap: 12px !important;
+}
+
+.login-container input:focus,
+.login-card input:focus {
+    border-color: rgba(245, 197, 24, .42) !important;
+    box-shadow: 0 0 0 3px rgba(245, 197, 24, .12) !important;
+}
+
+.btn-login:active,
+.btn-login-secondary:active {
+    transform: translateY(1px) !important;
+}
+
+/* =====================================================
+   Ejecutivo premium shell - dash_ejecutivo
+===================================================== */
+
+/* Etiqueta de versión visual para la sidebar ejecutiva */
+
+.order-schedule-note {
+    margin: -4px 0 4px;
+    color: var(--text-muted, #9ca3af);
+    font-size: 12px;
+    line-height: 1.4;
+}
+/* =====================================================
+   CORRECCIÓN - DASH EJECUTIVO 2: DESKTOP RAIL / MÓVIL OVERLAY
+===================================================== */
+
+
+/* =====================================================
+   FASE B - Dashboard administrador objetivo dash_ejecutivo2
+===================================================== */
+
+/* =====================================================
+   AJUSTE EJECUTIVO - Topbar logo fijo / sidebar sin marca
+===================================================== */
+
+/* =====================================================
+   TOPBAR EJECUTIVA CANÓNICA - La Solución
+   Referencia: captura 2026-07-12 19:51
+===================================================== */
+
+
+
+
+
+
+/* =====================================================
+   TOPBAR FINAL - buscador fluido, campana proporcionada
+   Mantiene una única regla final para evitar peleas de cascada.
+===================================================== */
+
+/* =====================================================
+   SIDEBAR EJECUTIVA FINAL - referencia 2026-07-13
+   Menú desplegado sin marca, navegación compacta y avatar preparado.
+===================================================== */
+
+/* =====================================================
+   SIDEBAR FOOTER FINAL - avatar y cierre sobrio
+   Referencia: captura 2026-07-13 04:22
+===================================================== */
+
+/* =====================================================
+   SIDEBAR FOOTER PATCH - igualar referencia avatar/nombre/logout
+===================================================== */
+
+/* =====================================================
+   SIDEBAR FOOTER HARD LOCK - avatar CSS, independiente del JS cacheado
+===================================================== */
+
+/* Compatibilidad con DOM anterior cacheado del footer */
+
+/* =====================================================
+   SIDEBAR OCULTA POR DEFECTO - llamada solo por hamburguesa
+   2026-07-13
+===================================================== */
+
+/* =====================================================
+   RELOJ CANÓNICO DE TOPBAR
+   Hora y fecha siempre son elementos visualmente separados.
+===================================================== */

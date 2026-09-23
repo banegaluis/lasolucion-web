@@ -1,0 +1,81 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Solución</title>
+    <link rel="icon" type="image/png" href="assets/logo/logo.png">
+    <link rel="stylesheet" href="css/style.css?v=sidebar-hidden-20260713-1">
+</head>
+<body>
+    <div id="loginView">
+        <div class="login-container">
+            <img src="assets/logo/logo.png" alt="La Solución" class="logo-login">
+            <h1 class="titulo-login">Iniciar sesión</h1>
+
+            <label for="user">Usuario o email</label>
+            <input type="text" id="user" placeholder="Usuario o email" autocomplete="username" inputmode="email">
+
+            <label for="pass">Contraseña</label>
+            <input type="password" id="pass" placeholder="Contraseña" autocomplete="current-password">
+
+            <button class="btn-login" type="button" onclick="login()">INGRESAR</button>
+            <button id="btnAbrirRegistro" class="btn-login-secondary" type="button">CREAR CUENTA</button>
+
+            <p id="msg" class="login-message" aria-live="polite"></p>
+        </div>
+    </div>
+
+    <div id="registroModal" class="registro-modal" hidden>
+        <div class="registro-modal-overlay" data-close-registro="true"></div>
+        <form id="registroForm" class="registro-dialog" novalidate>
+            <header class="registro-dialog-header">
+                <div>
+                    <p class="registro-eyebrow">Acceso público</p>
+                    <h2>Crear cuenta</h2>
+                </div>
+                <button id="btnCerrarRegistro" type="button" class="registro-close" aria-label="Cerrar registro">×</button>
+            </header>
+
+            <div class="registro-dialog-body">
+                <div class="registro-grid registro-grid-2">
+                    <label>Nombre<input id="registroNombre" autocomplete="given-name" required></label>
+                    <label>Apellido<input id="registroApellido" autocomplete="family-name" required></label>
+                </div>
+                <label>Nombre de usuario<input id="registroUsername" autocomplete="username" required></label>
+                <label>Email<input id="registroEmail" type="email" inputmode="email" autocomplete="email" required></label>
+                <label>Teléfono<input id="registroTelefono" inputmode="tel" autocomplete="tel"></label>
+                <div class="registro-grid registro-grid-2">
+                    <label>Contraseña<input id="registroPassword" type="password" autocomplete="new-password" required></label>
+                    <label>Confirmación<input id="registroPasswordConfirm" type="password" autocomplete="new-password" required></label>
+                </div>
+                <p class="registro-help">En esta etapa de desarrollo la confirmación por email todavía no está habilitada.</p>
+                <p id="registroMensaje" class="registro-message" aria-live="polite"></p>
+            </div>
+
+            <footer class="registro-dialog-footer">
+                <button id="btnCancelarRegistro" type="button" class="btn-login-secondary">Cancelar</button>
+                <button type="submit" class="btn-login">CREAR CUENTA</button>
+            </footer>
+        </form>
+    </div>
+<script src="js/storage.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/permisos.js"></script>
+    <script src="js/config/supabase-config.js"></script>
+    <script src="js/services/supabaseClient.js"></script>
+    <script src="js/services/authService.js"></script>
+    <script src="js/login.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+

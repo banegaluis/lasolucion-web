@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Solución | Agenda</title>
+    <link rel="icon" type="image/png" href="assets/logo/logo.png">
+    <link rel="stylesheet" href="css/style.css?v=sidebar-hidden-20260713-1">
+    <link rel="stylesheet" href="css/agenda.css">
+</head>
+
+<body>
+    <main class="agenda agenda-profesional">
+        <section class="agenda-panel">
+            <header class="agenda-primarybar" aria-label="Controles principales de Agenda">
+                <h1 class="agenda-title">Agenda</h1>
+
+                <div class="agenda-range-controls">
+                    <button id="agendaPrev" class="agenda-icon-button" type="button" aria-label="Periodo anterior">‹</button>
+                    <strong id="agendaCurrentRange" class="agenda-current-range">Agenda</strong>
+                    <button id="agendaNext" class="agenda-icon-button" type="button" aria-label="Periodo siguiente">›</button>
+                </div>
+
+                <label class="agenda-view-select-label">
+                    <span class="sr-only-field">Vista de Agenda</span>
+                    <select id="agendaViewSelect" class="agenda-view-select" aria-label="Vista de Agenda">
+                        <option value="multiMonthYear">Año</option>
+                        <option value="dayGridMonth">Mes</option>
+                        <option value="timeGridWeek">Semana</option>
+                        <option value="timeGridDay">Día</option>
+                        <option value="listWeek">Lista</option>
+                    </select>
+                </label>
+                <div class="agenda-header-actions">
+                    <button id="btnNuevaOrdenAgenda" class="agenda-new-order agenda-new-order-button btn-nueva-orden" type="button">+ Nueva orden</button>
+
+                    <div class="agenda-filter-menu-wrap">
+                    <button id="agendaFilterToggle" class="agenda-more-filter" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="agendaFilterMenu">
+                        <span aria-hidden="true">⌯</span>
+                        Filtros
+                        <span id="agendaFilterCount" class="agenda-filter-count" hidden></span>
+                    </button>
+                    <div id="agendaFilterMenu" class="agenda-filter-menu agenda-filter-panel" role="dialog" aria-label="Filtros de agenda">
+                        <label class="agenda-filter-search">
+                            <span>Buscar</span>
+                            <input id="agendaSearch" type="search" placeholder="Cliente, dirección, trabajo o teléfono">
+                        </label>
+                        <label>
+                            <span>Estado</span>
+                            <select id="agendaEstadoFilter">
+                                <option value="todas">Todos</option>
+                                <option value="pendiente">Pendiente</option>
+                                <option value="en proceso">En proceso</option>
+                                <option value="terminado">Terminado</option>
+                                <option value="cancelado">Cancelado</option>
+                            </select>
+                        </label>
+                        <label>
+                            <span>Técnico</span>
+                            <select id="agendaTecnicoFilter">
+                                <option value="todos">Todos los técnicos</option>
+                                <option value="Sin asignar">Sin asignar</option>
+                            </select>
+                        </label>
+                        <label>
+                            <span>Prioridad</span>
+                            <select id="agendaPrioridadFilter">
+                                <option value="todas">Todas</option>
+                                <option value="baja">Baja</option>
+                                <option value="media">Media</option>
+                                <option value="alta">Alta</option>
+                                <option value="urgente">Urgente</option>
+                            </select>
+                        </label>
+                        <label>
+                            <span>Categoría</span>
+                            <select id="agendaCategoriaFilter">
+                                <option value="todas">Todas</option>
+                                <option value="gas">Gas</option>
+                                <option value="agua">Agua</option>
+                                <option value="calefaccion">Calefacción</option>
+                                <option value="refrigeracion">Refrigeración</option>
+                                <option value="electricidad">Electricidad</option>
+                                <option value="otros">Otros</option>
+                            </select>
+                        </label>
+                        <button id="agendaClearFilters" class="agenda-clear-filters" type="button">Limpiar filtros</button>
+                    </div>
+                </div>
+                </div>
+            </header>
+
+            <section class="agenda-metrics" aria-label="Resumen de agenda">
+                <article class="agenda-metric agenda-metric-hoy">
+                    <span class="agenda-metric-icon" aria-hidden="true">◷</span>
+                    <div>
+                        <small>Órdenes hoy</small>
+                        <strong id="agendaMetricHoy">0</strong>
+                        <em id="agendaMetricHoyDetalle">Sin trabajos para hoy</em>
+                    </div>
+                </article>
+                <article class="agenda-metric agenda-metric-tecnicos">
+                    <span class="agenda-metric-icon" aria-hidden="true">♙</span>
+                    <div>
+                        <small>Técnicos asignados</small>
+                        <strong id="agendaMetricTecnicos">0</strong>
+                        <em id="agendaMetricTecnicosDetalle">Sin técnicos activos</em>
+                    </div>
+                </article>
+                <article class="agenda-metric agenda-metric-proceso">
+                    <span class="agenda-metric-icon" aria-hidden="true">⊙</span>
+                    <div>
+                        <small>En proceso</small>
+                        <strong id="agendaMetricProceso">0</strong>
+                        <em id="agendaMetricProcesoDetalle">0% del total</em>
+                    </div>
+                </article>
+                <article class="agenda-metric agenda-metric-completadas">
+                    <span class="agenda-metric-icon" aria-hidden="true">✓</span>
+                    <div>
+                        <small>Completadas hoy</small>
+                        <strong id="agendaMetricCompletadas">0</strong>
+                        <em id="agendaMetricCompletadasDetalle">Sin cierres hoy</em>
+                    </div>
+                </article>
+            </section>
+
+            <p id="agendaDataStatus" class="agenda-data-status" role="status" hidden></p>
+            <nav class="agenda-quick-views" aria-label="Vistas rápidas del calendario">
+                <button id="agendaToday" class="agenda-today-button agenda-quick-view" type="button" data-calendar-view="timeGridDay">Hoy</button>
+                <button class="agenda-quick-view" type="button" data-calendar-view="timeGridWeek">Semana</button>
+                <button class="agenda-quick-view" type="button" data-calendar-view="dayGridMonth">Mes</button>
+            </nav>
+            <div id="calendarioAgenda" class="agenda-calendar" aria-label="Calendario de órdenes"></div>
+
+            <footer class="agenda-legend" aria-label="Leyenda de agenda">
+                <span><i class="legend-dot cat-gas"></i>Gas</span>
+                <span><i class="legend-dot cat-calefaccion"></i>Calefacción</span>
+                <span><i class="legend-dot cat-agua"></i>Agua</span>
+                <span><i class="legend-dot cat-refrigeracion"></i>Refrigeración</span>
+                <span><i class="legend-dot cat-otros"></i>Otros</span>
+                <span><i class="state-dot estado-pendiente-dot"></i>Pendiente</span>
+                <span><i class="state-dot estado-proceso-dot"></i>En proceso</span>
+                <span><i class="state-dot estado-terminado-dot"></i>Terminado</span>
+            </footer>
+        </section>
+
+        <aside id="agendaDetalle" class="agenda-detail" aria-live="polite" aria-label="Detalle de orden">
+            <button id="cerrarDetalleAgenda" class="agenda-detail-close" type="button" aria-label="Cerrar detalle">&times;</button>
+            <div id="agendaDetalleContenido" class="agenda-detail-content">
+                <p class="agenda-detail-empty">Seleccioná una orden para ver el detalle.</p>
+            </div>
+        </aside>
+    </main>
+
+    <div id="agenda" class="modal" style="display:none;">
+        <form class="modal-card nova-orden" onsubmit="event.preventDefault(); guardarOrden();">
+            <header class="nova-orden-header">
+                <div>
+                    <h2>NUEVA ORDEN</h2>
+                </div>
+                <button class="nova-orden-close" type="button" onclick="cerrarAgenda()" aria-label="Cerrar NUEVA ORDEN">&times;</button>
+            </header>
+
+            <div class="nova-orden-body">
+                <div class="form-grid form-grid-primary">
+                    <div class="field-group order-client">
+                        <label for="cliente">Cliente</label>
+                        <input id="cliente" placeholder="Nombre del cliente">
+                        <input id="clienteIdSupabase" class="sr-only-field" aria-label="ID cliente Supabase">
+                        <input id="direccionIdSupabase" class="sr-only-field" aria-label="ID direcci?n Supabase">
+                        <div id="clienteSugerencias" class="cliente-suggestions" hidden></div>
+                    </div>
+                    <div class="field-group order-phone">
+                        <label for="telefono">Tel&eacute;fono</label>
+                        <input id="telefono" inputmode="tel" autocomplete="tel" placeholder="3511234567">
+                    </div>
+                    <div class="field-group order-street">
+                        <label for="calle">Calle</label>
+                        <input id="calle" placeholder="San Mart&iacute;n">
+                    </div>
+                </div>
+
+                <div class="form-grid address-grid address-grid-secondary">
+                    <div class="field-group address-number">
+                        <label for="numero">N&uacute;mero</label>
+                        <input id="numero" inputmode="numeric" placeholder="123">
+                    </div>
+                    <div class="field-group address-floor">
+                        <label for="piso">Piso</label>
+                        <input id="piso" placeholder="-">
+                    </div>
+                    <div class="field-group address-apartment">
+                        <label for="departamento">Dpto.</label>
+                        <input id="departamento" placeholder="-">
+                    </div>
+                    <div class="field-group address-city">
+                        <label for="ciudad">Ciudad</label>
+                        <input id="ciudad" placeholder="C&oacute;rdoba">
+                    </div>
+                    <div class="field-group address-province">
+                        <label for="provincia">Provincia</label>
+                        <input id="provincia" placeholder="C&oacute;rdoba">
+                    </div>
+                    <input id="direccion" class="sr-only-field" aria-label="Direcci&oacute;n completa">
+                </div>
+
+                <div class="form-grid form-grid-two date-time-grid">
+                    <div class="field-group">
+                        <label for="fecha">Fecha</label>
+                        <input id="fecha" type="date">
+                    </div>
+                    <div class="field-group">
+                        <label for="hora">Hora</label>
+                        <input id="hora" type="time">
+                    </div>
+                </div>
+                <p class="order-schedule-note">Duración prevista: 1 hora · Margen operativo posterior: 30 minutos.</p>
+
+                <div class="field-group">
+                    <label for="trabajo">Trabajo</label>
+                    <textarea id="trabajo" placeholder="Describ&iacute; el trabajo a realizar..."></textarea>
+                </div>
+
+                <div class="field-group">
+                    <label for="estadoOrden">Estado</label>
+                    <select id="estadoOrden">
+                        <option value="pendiente">Pendiente</option>
+                        <option value="en proceso">En proceso</option>
+                        <option value="terminado">Terminado</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <label for="descripcion">Descripci&oacute;n</label>
+                    <textarea id="descripcion" placeholder="Detalle interno opcional del trabajo..."></textarea>
+                </div>
+
+                <div class="form-grid form-grid-two">
+                    <div class="field-group">
+                        <label for="prioridad">Prioridad</label>
+                        <select id="prioridad">
+                            <option value="media">Normal</option>
+                            <option value="baja">Baja</option>
+                            <option value="alta">Alta</option>
+                            <option value="urgente">Urgente</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label for="categoria">Categoría</label>
+                        <select id="categoria">
+                            <option value="otros">Otros</option>
+                            <option value="gas">Gas</option>
+                            <option value="calefaccion">Calefacción</option>
+                            <option value="agua">Agua</option>
+                            <option value="refrigeracion">Refrigeración</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="field-group technician-assignment-field" data-permission="assign-technician">
+                    <label for="tecnicoNombre">T&eacute;cnico asignado</label>
+                    <select id="tecnicoId" aria-label="Técnico asignado">
+                        <option value="">Sin asignar</option>
+                    </select>
+                    <input id="tecnicoNombre" class="sr-only-field" aria-label="Nombre del técnico" readonly>
+                </div>
+
+                <section id="ordenHistorialReal" class="order-history-panel" hidden>
+                    <h3>Historial de la orden</h3>
+                    <div id="ordenHistorialRealContenido"></div>
+                </section>
+            </div>
+
+            <footer class="nova-orden-actions">
+                <button class="btn-cancelar" type="button" onclick="cerrarAgenda()">Cancelar</button>
+                <button class="btn-guardar" type="submit">Guardar orden</button>
+            </footer>
+        </form>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/permisos.js"></script>
+<script src="js/login.js"></script>
+    <script src="js/config/supabase-config.js"></script>
+    <script src="js/services/supabaseClient.js"></script>
+    <script src="js/services/authService.js"></script>
+    <script src="js/services/clientesService.js"></script>
+    <script src="js/services/ordenesService.js"></script>
+    <script src="js/ordenes.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.15/locales-all.global.min.js"></script>
+    <script src="js/agenda.js"></script>
+    <script src="js/layout.js?v=layout-clickout-20260713-1"></script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

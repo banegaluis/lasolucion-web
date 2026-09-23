@@ -1,0 +1,218 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Solución | Órdenes</title>
+    <link rel="icon" type="image/png" href="assets/logo/logo.png">
+    <link rel="stylesheet" href="css/style.css?v=sidebar-hidden-20260713-1">
+    <link rel="stylesheet" href="css/ordenes.css">
+    <link rel="stylesheet" href="css/agenda.css">
+</head>
+
+<body>
+    <main class="content ordenes-page" aria-labelledby="ordenesTitulo">
+        <header class="ordenes-header">
+            <div>
+                <p class="ordenes-eyebrow">Operación</p>
+                <h1 id="ordenesTitulo">Órdenes</h1>
+                <span id="ordenesResumen" class="ordenes-resumen">Cargando órdenes...</span>
+            </div>
+            <a class="primary btn-nueva-orden" href="agenda.html#nueva-orden">+ NUEVA ORDEN</a>
+        </header>
+
+        <section class="ordenes-toolbar" aria-label="Búsqueda y filtros de órdenes">
+            <label class="ordenes-search">
+                <span>Buscar</span>
+                <input id="buscarOrdenes" type="search" placeholder="Cliente, teléfono, dirección o trabajo" autocomplete="off">
+            </label>
+            <label>
+                <span>Estado</span>
+                <select id="filtroEstadoOrdenes">
+                    <option value="todas">Todas</option>
+                    <option value="pendiente">Pendientes</option>
+                    <option value="en proceso">En proceso</option>
+                    <option value="terminado">Terminadas</option>
+                    <option value="cancelado">Canceladas</option>
+                </select>
+            </label>
+            <button id="btnLimpiarFiltrosOrdenes" class="ordenes-secondary" type="button">Limpiar</button>
+        </section>
+
+        <section class="ordenes-section" aria-labelledby="ordenesActivasTitulo">
+            <div class="ordenes-section-title">
+                <h2 id="ordenesActivasTitulo">Activas</h2>
+                <span id="contadorOrdenesActivas">0</span>
+            </div>
+            <div id="listaOrdenes" class="ordenes-grid"></div>
+        </section>
+
+        <section class="ordenes-section" aria-labelledby="ordenesHistorialTitulo">
+            <div class="ordenes-section-title">
+                <h2 id="ordenesHistorialTitulo">Historial</h2>
+                <span id="contadorOrdenesHistorial">0</span>
+            </div>
+            <div id="historialOrdenes" class="ordenes-grid"></div>
+        </section>
+    </main>
+
+    <div id="agenda" class="modal" style="display:none;">
+        <form class="modal-card nova-orden" onsubmit="event.preventDefault(); guardarOrden();">
+            <header class="nova-orden-header">
+                <div>
+                    <h2>NUEVA ORDEN</h2>
+                </div>
+                <button class="nova-orden-close" type="button" onclick="cerrarAgenda()" aria-label="Cerrar NUEVA ORDEN">&times;</button>
+            </header>
+
+            <div class="nova-orden-body">
+                <div class="form-grid form-grid-primary">
+                    <div class="field-group order-client">
+                        <label for="cliente">Cliente</label>
+                        <input id="cliente" placeholder="Nombre del cliente">
+                        <input id="clienteIdSupabase" class="sr-only-field" aria-label="ID cliente Supabase">
+                        <input id="direccionIdSupabase" class="sr-only-field" aria-label="ID dirección Supabase">
+                        <div id="clienteSugerencias" class="cliente-suggestions" hidden></div>
+                    </div>
+                    <div class="field-group order-phone">
+                        <label for="telefono">Tel&eacute;fono</label>
+                        <input id="telefono" inputmode="tel" autocomplete="tel" placeholder="3511234567">
+                    </div>
+                    <div class="field-group order-street">
+                        <label for="calle">Calle</label>
+                        <input id="calle" placeholder="San Mart&iacute;n">
+                    </div>
+                </div>
+
+                <div class="form-grid address-grid address-grid-secondary">
+                    <div class="field-group address-number">
+                        <label for="numero">N&uacute;mero</label>
+                        <input id="numero" inputmode="numeric" placeholder="123">
+                    </div>
+                    <div class="field-group address-floor">
+                        <label for="piso">Piso</label>
+                        <input id="piso" placeholder="-">
+                    </div>
+                    <div class="field-group address-apartment">
+                        <label for="departamento">Dpto.</label>
+                        <input id="departamento" placeholder="-">
+                    </div>
+                    <div class="field-group address-city">
+                        <label for="ciudad">Ciudad</label>
+                        <input id="ciudad" placeholder="C&oacute;rdoba">
+                    </div>
+                    <div class="field-group address-province">
+                        <label for="provincia">Provincia</label>
+                        <input id="provincia" placeholder="C&oacute;rdoba">
+                    </div>
+                    <input id="direccion" class="sr-only-field" aria-label="Direcci&oacute;n completa">
+                </div>
+
+                <div class="form-grid form-grid-two date-time-grid">
+                    <div class="field-group">
+                        <label for="fecha">Fecha</label>
+                        <input id="fecha" type="date">
+                    </div>
+                    <div class="field-group">
+                        <label for="hora">Hora</label>
+                        <input id="hora" type="time">
+                    </div>
+                </div>
+                <p class="order-schedule-note">Duración prevista: 1 hora · Margen operativo posterior: 30 minutos.</p>
+
+                <div class="field-group">
+                    <label for="trabajo">Trabajo</label>
+                    <textarea id="trabajo" placeholder="Describ&iacute; el trabajo a realizar..."></textarea>
+                </div>
+
+                <div class="field-group">
+                    <label for="estadoOrden">Estado</label>
+                    <select id="estadoOrden">
+                        <option value="pendiente">Pendiente</option>
+                        <option value="en proceso">En proceso</option>
+                        <option value="terminado">Terminado</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <label for="descripcion">Descripci&oacute;n</label>
+                    <textarea id="descripcion" placeholder="Detalle interno opcional del trabajo..."></textarea>
+                </div>
+
+                <div class="form-grid form-grid-two">
+                    <div class="field-group">
+                        <label for="prioridad">Prioridad</label>
+                        <select id="prioridad">
+                            <option value="media">Normal</option>
+                            <option value="baja">Baja</option>
+                            <option value="alta">Alta</option>
+                            <option value="urgente">Urgente</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label for="categoria">Categoría</label>
+                        <select id="categoria">
+                            <option value="otros">Otros</option>
+                            <option value="gas">Gas</option>
+                            <option value="calefaccion">Calefacción</option>
+                            <option value="agua">Agua</option>
+                            <option value="refrigeracion">Refrigeración</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="field-group technician-assignment-field" data-permission="assign-technician">
+                    <label for="tecnicoNombre">T&eacute;cnico asignado</label>
+                    <select id="tecnicoId" aria-label="Técnico asignado">
+                        <option value="">Sin asignar</option>
+                    </select>
+                    <input id="tecnicoNombre" class="sr-only-field" aria-label="Nombre del técnico" readonly>
+                </div>
+
+                <section id="ordenHistorialReal" class="order-history-panel" hidden>
+                    <h3>Historial de la orden</h3>
+                    <div id="ordenHistorialRealContenido"></div>
+                </section>
+            </div>
+
+            <footer class="nova-orden-actions">
+                <button class="btn-cancelar" type="button" onclick="cerrarAgenda()">Cancelar</button>
+                <button class="btn-guardar" type="submit">Guardar orden</button>
+            </footer>
+        </form>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/permisos.js"></script>
+    <script src="js/login.js"></script>
+    <script src="js/config/supabase-config.js"></script>
+    <script src="js/services/supabaseClient.js"></script>
+    <script src="js/services/authService.js"></script>
+    <script src="js/services/clientesService.js"></script>
+    <script src="js/services/ordenesService.js"></script>
+    <script src="js/ordenes.js"></script>
+    <script src="js/layout.js?v=layout-clickout-20260713-1"></script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

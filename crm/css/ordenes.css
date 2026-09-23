@@ -1,0 +1,634 @@
+/* =====================================================
+   MÓDULO ÓRDENES
+   La Solución CRM
+===================================================== */
+
+/* CONTENIDO */
+
+.content {
+    padding: 12px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* BOTÓN PRINCIPAL */
+
+.primary {
+    width: 100%;
+    padding: 12px;
+    background: #F5C518;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+/* LISTAS */
+
+#listaOrdenes,
+#historialOrdenes {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+/* CARD */
+
+.card {
+    background: #161616;
+    border: 1px solid #242424;
+    padding: 14px;
+    border-radius: 12px;
+    box-sizing: border-box;
+}
+
+.card p {
+    margin: 6px 0;
+    text-align: left;
+}
+
+/* COLORES POR ESTADO */
+
+.card.pendiente {
+    background: #241212;
+    border: 1px solid #e74c3c;
+}
+
+.card.en-proceso {
+    background: #241d12;
+    border: 1px solid #f39c12;
+}
+
+.card.terminado {
+    background: #122417;
+    border: 1px solid #2ecc71;
+}
+
+/* SELECT ESTADO */
+
+.card select {
+    width: 180px;
+    padding: 8px;
+    margin-top: 4px;
+    border-radius: 6px;
+    border: 1px solid #333;
+    background: #111;
+    color: white;
+    font-size: 14px;
+}
+
+.estado-linha select {
+
+    width: auto;
+
+    min-width: 130px;
+
+    padding: 6px 10px;
+
+    border-radius: 8px;
+
+    border: none;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.estado-linha select option {
+    background: #111;
+    color: white;
+}
+
+.estado-pendiente {
+    background: #e74c3c;
+    color: white;
+}
+
+.estado-proceso {
+    background: #f39c12;
+    color: black;
+}
+
+.estado-terminado {
+    background: #2ecc71;
+    color: black;
+}
+
+.estado-cancelado {
+    background: #687180;
+    color: white;
+}
+
+/* BOTONES */
+
+.acciones {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.acciones button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.acciones button:first-child {
+    background: #3498db;
+    color: white;
+}
+
+.acciones button:last-child {
+    background: #e74c3c;
+    color: white;
+}
+
+/* MODAL */
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-card {
+    width: 340px;
+    background: #161616;
+    padding: 18px;
+    border-radius: 12px;
+    box-sizing: border-box;
+}
+
+.nova-orden {
+
+    width: 90%;
+    max-width: 650px;
+
+    background: #111;
+
+    border: 1px solid #222;
+
+    border-radius: 24px;
+
+    padding: 30px;
+}
+
+.nova-orden h2 {
+
+    text-align: center;
+
+    color: white;
+
+    font-size: 32px;
+
+    margin-bottom: 25px;
+}
+
+.nova-orden label {
+
+    display: block;
+
+    margin-top: 12px;
+    margin-bottom: 6px;
+
+    color: white;
+
+    font-weight: 500;
+}
+
+.nova-orden input,
+.nova-orden textarea {
+
+    width: 100%;
+
+    background: #161616;
+
+    border: 1px solid #2c2c2c;
+
+    border-radius: 14px;
+
+    color: white;
+
+    padding: 14px;
+
+    box-sizing: border-box;
+}
+
+.nova-orden textarea {
+
+    min-height: 120px;
+
+    resize: vertical;
+}
+
+.fila-doble {
+
+    display: flex;
+
+    gap: 15px;
+}
+
+.fila-doble > div {
+
+    flex: 1;
+}
+
+.btn-guardar {
+
+    width: 100%;
+
+    background: #F5C518;
+
+    color: black;
+
+    font-weight: bold;
+
+    margin-top: 20px;
+
+    border-radius: 14px;
+
+    padding: 14px;
+
+    border: none;
+
+    cursor: pointer;
+}
+
+.btn-cancelar {
+
+    width: 100%;
+
+    background: #222;
+
+    color: white;
+
+    margin-top: 10px;
+
+    border-radius: 14px;
+
+    padding: 14px;
+
+    border: none;
+
+    cursor: pointer;
+}
+
+/* INPUTS */
+
+input,
+textarea {
+
+    width: 100%;
+
+    margin-top: 8px;
+
+    padding: 10px;
+
+    background: #111;
+
+    border: 1px solid #333;
+
+    color: white;
+
+    border-radius: 6px;
+
+    box-sizing: border-box;
+}
+
+input[type="date"],
+input[type="time"] {
+
+    color-scheme: dark;
+}
+/* =====================================================
+   FASE B - Órdenes profesional mobile-first
+===================================================== */
+.ordenes-page {
+    display: grid !important;
+    gap: 16px !important;
+}
+
+.ordenes-header,
+.ordenes-toolbar,
+.ordenes-section {
+    background: linear-gradient(180deg, rgba(23, 26, 33, .98), rgba(16, 18, 23, .98)) !important;
+    border: 1px solid var(--color-border, rgba(255,255,255,.1)) !important;
+    border-radius: var(--radius-xl, 26px) !important;
+    box-shadow: var(--shadow-sm, 0 10px 26px rgba(0,0,0,.22)) !important;
+}
+
+.ordenes-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 16px !important;
+    padding: clamp(18px, 3vw, 26px) !important;
+}
+
+.ordenes-eyebrow {
+    margin: 0 0 4px !important;
+    color: var(--color-primary, #f5c518) !important;
+    font-size: 12px !important;
+    font-weight: 900 !important;
+    letter-spacing: .14em !important;
+    text-transform: uppercase !important;
+}
+
+.ordenes-header h1 {
+    margin: 0 !important;
+    font-size: clamp(28px, 4vw, 40px) !important;
+    line-height: 1 !important;
+    letter-spacing: -.05em !important;
+}
+
+.ordenes-resumen {
+    display: block !important;
+    margin-top: 8px !important;
+    color: var(--color-text-muted, #b7beca) !important;
+    font-size: 14px !important;
+}
+
+.ordenes-toolbar {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(150px, 220px) auto !important;
+    gap: 12px !important;
+    align-items: end !important;
+    padding: 14px !important;
+}
+
+.ordenes-toolbar label {
+    display: grid !important;
+    gap: 7px !important;
+    color: var(--color-text-muted, #b7beca) !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+}
+
+.ordenes-toolbar input,
+.ordenes-toolbar select {
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+.cliente-suggestions {
+    position: relative;
+    z-index: 20;
+    display: grid;
+    gap: 6px;
+    margin-top: 6px;
+    border: 1px solid #d9e1e8;
+    border-radius: 8px;
+    background: #fff;
+    color: #17202a;
+    padding: 6px;
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.22);
+}
+
+.cliente-suggestions[hidden] {
+    display: none;
+}
+
+.cliente-suggestion {
+    display: grid;
+    gap: 2px;
+    width: 100%;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    padding: 8px;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.cliente-suggestion.is-active,
+.cliente-suggestion:hover {
+    background: #edf3f7;
+}
+
+.cliente-suggestion span,
+.cliente-suggestion small {
+    color: #586575;
+}
+
+.cliente-suggestion-message,
+.cliente-suggestion-duplicates {
+    padding: 8px;
+    color: #17202a;
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.cliente-suggestion-message.is-error {
+    color: #a61b1b;
+}
+
+.cliente-suggestion-duplicates {
+    display: grid;
+    gap: 8px;
+}
+
+.cliente-suggestion-duplicates button {
+    min-height: 34px;
+    border: 1px solid #d5dde5;
+    border-radius: 6px;
+    background: #fff;
+    padding: 0 10px;
+    color: #17202a;
+    text-align: left;
+    cursor: pointer;
+}
+
+.ordenes-secondary {
+    min-height: 46px !important;
+    padding: 0 16px !important;
+    border: 1px solid var(--color-border, rgba(255,255,255,.1)) !important;
+    border-radius: var(--radius-md, 14px) !important;
+    background: rgba(255,255,255,.055) !important;
+    color: var(--color-text, #fff) !important;
+    font-weight: 900 !important;
+    cursor: pointer !important;
+}
+
+.ordenes-section {
+    padding: 16px !important;
+}
+
+.ordenes-section-title {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    margin-bottom: 12px !important;
+}
+
+.ordenes-section-title h2 {
+    margin: 0 !important;
+    font-size: clamp(20px, 2.4vw, 26px) !important;
+    letter-spacing: -.03em !important;
+}
+
+.ordenes-section-title span {
+    min-width: 34px !important;
+    min-height: 30px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 999px !important;
+    background: rgba(245, 197, 24, .14) !important;
+    color: var(--color-primary, #f5c518) !important;
+    font-weight: 900 !important;
+}
+
+.ordenes-grid,
+#listaOrdenes,
+#historialOrdenes {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)) !important;
+    gap: 12px !important;
+    margin-top: 0 !important;
+}
+
+.orden-card.card {
+    position: relative !important;
+    display: grid !important;
+    gap: 12px !important;
+    min-width: 0 !important;
+    padding: 16px !important;
+    border-radius: var(--radius-lg, 20px) !important;
+    background: linear-gradient(180deg, rgba(23, 26, 33, .98), rgba(13, 15, 19, .98)) !important;
+    overflow: hidden !important;
+}
+
+.orden-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: var(--color-primary, #f5c518);
+}
+
+.orden-card.pendiente::before { background: var(--color-danger, #ef4444); }
+.orden-card.en-proceso::before { background: var(--color-warning, #f59e0b); }
+.orden-card.terminado::before { background: var(--color-success, #36d179); }
+.orden-card.cancelado::before { background: var(--color-muted, #7b8493); }
+
+.orden-card-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 12px !important;
+    align-items: start !important;
+}
+
+.orden-card-title {
+    display: grid !important;
+    gap: 4px !important;
+    min-width: 0 !important;
+}
+
+.orden-card-title strong {
+    font-size: 18px !important;
+    line-height: 1.16 !important;
+    color: var(--color-text, #fff) !important;
+}
+
+.orden-card-title span,
+.orden-meta,
+.orden-detail span {
+    color: var(--color-text-muted, #b7beca) !important;
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+}
+
+.orden-status-badge {
+    min-height: 30px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    border-radius: 999px !important;
+    padding: 0 10px !important;
+    font-size: 12px !important;
+    font-weight: 900 !important;
+    white-space: nowrap !important;
+}
+
+.orden-status-badge.pendiente { background: rgba(239,68,68,.15) !important; color: #ff8b8b !important; }
+.orden-status-badge.en-proceso { background: rgba(245,158,11,.16) !important; color: #ffd27a !important; }
+.orden-status-badge.terminado { background: rgba(54,209,121,.15) !important; color: #8ff0b3 !important; }
+.orden-status-badge.cancelado { background: rgba(123,132,147,.18) !important; color: #c4cad3 !important; }
+
+.orden-card-body {
+    display: grid !important;
+    gap: 8px !important;
+}
+
+.orden-detail {
+    display: grid !important;
+    grid-template-columns: 22px minmax(0, 1fr) !important;
+    gap: 8px !important;
+    align-items: start !important;
+}
+
+.orden-link-action {
+    color: var(--color-primary, #f5c518) !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    font-weight: 800 !important;
+}
+
+.orden-link-action:hover { text-decoration: underline !important; }
+
+.orden-card select {
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+.acciones.orden-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin-top: 0 !important;
+}
+
+.acciones.orden-actions button {
+    min-height: 42px !important;
+    border-radius: var(--radius-md, 14px) !important;
+    font-weight: 900 !important;
+}
+
+.orden-empty {
+    padding: 18px !important;
+    border: 1px dashed rgba(255,255,255,.14) !important;
+    border-radius: var(--radius-lg, 20px) !important;
+    color: var(--color-text-muted, #b7beca) !important;
+    text-align: center !important;
+}
+
+@media (max-width: 760px) {
+    .ordenes-page { gap: 12px !important; }
+    .ordenes-header {
+        grid-template-columns: 1fr !important;
+        padding: 18px !important;
+    }
+    .ordenes-toolbar {
+        grid-template-columns: 1fr !important;
+    }
+    .ordenes-grid,
+    #listaOrdenes,
+    #historialOrdenes {
+        grid-template-columns: 1fr !important;
+    }
+    .orden-card-header {
+        grid-template-columns: 1fr !important;
+    }
+    .orden-status-badge {
+        justify-self: start !important;
+    }
+}
