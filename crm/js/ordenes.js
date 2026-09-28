@@ -546,6 +546,8 @@ async function guardarOrden() {
         return;
     }
 
+    if (!ordenEditando && await recuperarEnvioPendienteOrden()) return;
+
     const puedeAsignar = puedeAsignarTecnico();
     const tecnicoId = puedeAsignar ? obtenerValorCampo("tecnicoId").trim() : (ordenActual?.tecnicoId || "");
     const tecnicoNombre = puedeAsignar
@@ -717,6 +719,37 @@ async function guardarOrden() {
         ? `Orden N.º ${ordenCreada.numero_orden} creada correctamente.`
         : "Orden creada correctamente.";
     await completarGuardadoConfirmadoOrden(ordenCreada, mensaje);
+}
+
+async function recuperarEnvioPendienteOrden() {
+    const servicio = window.OrdenesSupabaseService;
+    if (!servicio?.obtenerCreacionPendiente) return false;
+    clientesOrdenState.guardando = true;
+    actualizarGuardadoVisualOrden(true);
+    try {
+        const pendiente = await servicio.obtenerCreacionPendiente();
+        if (!pendiente.ok) {
+            mostrarErrorClienteOrden(textoErrorOrden(pendiente.error));
+            return true;
+        }
+        if (!pendiente.data) return false;
+        const datos = pendiente.data;
+        const resumen = `${datos.titulo || "Orden"} — ${datos.fecha_programada || "Sin fecha"} ${datos.hora_inicio || ""}`;
+        if (!confirm(`Hay un envío sin confirmar: ${resumen}.\n\n¿Querés recuperar o completar ese envío con sus datos originales? Los cambios posteriores del formulario no se enviarán.`)) return true;
+        const resultado = await servicio.crearOrden(datos);
+        if (!resultado.ok || !resultado.data) {
+            mostrarErrorClienteOrden(textoErrorOrden(resultado.error));
+            return true;
+        }
+        await completarGuardadoConfirmadoOrden(resultado.data,
+            `Envío recuperado: orden N.º ${resultado.data.numero_orden}. Se conservaron los datos originales del envío.`);
+        return true;
+    } catch (error) {
+        mostrarErrorClienteOrden(textoErrorOrden(error));
+        return true;
+    } finally {
+        finalizarGuardadoOrden();
+    }
 }
 
 // La escritura ya fue confirmada: una lectura posterior no debe permitir repetirla.

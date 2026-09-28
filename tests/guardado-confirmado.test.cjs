@@ -74,3 +74,23 @@ test('Un segundo envío durante la lectura posterior no repite la escritura',asy
     assert.equal(env.avisos[0],'Orden N.º 42 creada correctamente.');
     assert.equal(env.boton.disabled,false);
 });
+
+test('Recuperar un pendiente omite el alta de cliente y las validaciones de un formulario vacío',async()=>{
+    const env=entorno();
+    env.campos.cliente.value='';
+    env.ctx.window.OrdenesSupabaseService.obtenerCreacionPendiente=async()=>({ok:true,data:{titulo:'Original',fecha_programada:'2099-10-01'}});
+    env.ctx.resolverClienteSupabaseParaOrden=()=>{throw new Error('No volver a crear cliente');};
+    await env.ctx.guardarOrden();
+    assert.equal(env.conteos().escrituras,1);
+    assert.match(env.avisos[0],/Envío recuperado/);
+    assert.equal(env.boton.disabled,false);
+});
+test('Rechazar la recuperación conserva el formulario y no genera un nuevo envío',async()=>{
+    const env=entorno();
+    env.ctx.window.OrdenesSupabaseService.obtenerCreacionPendiente=async()=>({ok:true,data:{titulo:'Original'}});
+    env.ctx.confirm=()=>false;
+    await env.ctx.guardarOrden();
+    assert.equal(env.conteos().escrituras,0);
+    assert.equal(env.campos.cliente.value,'Prueba');
+    assert.equal(env.boton.disabled,false);
+});

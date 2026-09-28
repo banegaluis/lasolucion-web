@@ -39,3 +39,14 @@ Actualizado: 28/09/2026. Base de esta etapa: `5d49df9`.
 - Si falla la escritura, se conservan los campos para corregir o reintentar y no se informa éxito.
 - Validación: `node --test tests/*.test.cjs`, 13 pruebas aprobadas (7 existentes + 6 de regresión). Servicios simulados, sin escrituras en producción. Sintaxis y diff verificados.
 - Límite: esto no implementa idempotencia de servidor ni atomicidad cliente/dirección/orden; una respuesta de escritura perdida sigue requiriendo conciliación. Pendientes la sesión real en móvil y la publicación aprobada.
+
+## Reintento de alta en la misma pestaña — 28/09/2026
+
+- Antes de insertar una orden, se conserva en `sessionStorage` un UUID v4 y el payload original, separados por proyecto y usuario de Auth. No se guardan claves ni tokens. La clave primaria existente impide insertar dos filas con ese UUID.
+- Si se pierde la respuesta, el siguiente Guardar ofrece recuperar el envío original antes de validar el formulario o volver a resolver/crear el cliente. Funciona también después de recargar la misma pestaña.
+- Primero consulta por UUID y creador; si ya existe, devuelve esa orden. Si no existe, inserta el mismo UUID y payload. Ante conflicto de unicidad, consulta de nuevo; no hace upsert ni modifica una orden existente.
+- Un envío incierto no admite otros datos hasta resolverlo. La recuperación pide confirmación con trabajo, fecha y hora; los cambios posteriores del formulario no se envían. Rechazar conserva los campos sin crear nada.
+- Se elimina el registro al confirmar el guardado. Contiene temporalmente datos de contacto/domicilio del envío en esa pestaña. Si el almacenamiento falla o está corrupto, se bloquea un nuevo envío sin descartar el registro previo.
+- Auth y RLS siguen vigentes; el creador se toma de la sesión. Se comprobó con consultas de metadatos que `ordenes.id` es UUID con clave primaria y que sus triggers no reemplazan ese ID. No se cambió el esquema ni se escribieron datos de producción.
+- Validación: 27 pruebas automatizadas aprobadas. Nuevos casos: respuesta perdida, recarga, corte antes de llegada, conflicto concurrente, datos cambiados, cuentas distintas, sesión ausente, almacenamiento bloqueado/corrupto, rechazo SQL, lectura fallida, identidad suministrada por llamador y recuperación desde formulario vacío.
+- Alcance: protección por envío en la misma pestaña mientras se conserve `sessionStorage`. No deduplica cargas independientes en otros dispositivos/pestañas; cerrar la pestaña o borrar sus datos puede perder la recuperación. No resuelve atomicidad ni respuesta perdida durante el alta previa de cliente/dirección. Sigue pendiente la prueba real con sesión en iPhone y la publicación aprobada.

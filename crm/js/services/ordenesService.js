@@ -199,7 +199,7 @@ function mapearOrden(orden) {
         if (error || !data?.session?.user?.id) {
             return { ok: false, client: null, error: error || new Error("No hay una sesión Supabase Auth activa.") };
         }
-        return { ok: true, client, error: null };
+        return { ok: true, client, usuarioId: data.session.user.id, error: null };
     }
 
     async function listarOrdenes() {
@@ -405,27 +405,94 @@ function mapearOrden(orden) {
         return Number(coincidencia[1]) * 60 + Number(coincidencia[2]);
     }
 
-    async function crearOrden(orden) {
-        const conexion = await obtenerClienteAutenticado();
-        if (!conexion.ok) return { ok: false, data: null, error: conexion.error };
-        const client = conexion.client;
+    function claveEnvio(conexion) {
+        const proyecto = conexion.client.supabaseUrl || window.LA_SOLUCION_SUPABASE_CONFIG?.url || "crm";
+        return `lasolucion:orden-pendiente:v1:${proyecto}:${conexion.usuarioId}`;
+    }
+
+    function leerEnvio(conexion) {
+        const texto = window.sessionStorage.getItem(claveEnvio(conexion));
+        if (!texto) return null;
+        const envio = JSON.parse(texto);
+        if (envio.version !== 1 || envio.usuarioId !== conexion.usuarioId ||
+            !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(envio.id) ||
+            !envio.payload || typeof envio.payload !== "object" || Array.isArray(envio.payload)) {
+            throw new Error("El registro del envío pendiente no es válido. No se enviará otra orden; revisá el listado antes de continuar.");
+        }
+        return envio;
+    }
+
+    async function obtenerCreacionPendiente() {
         try {
-            const payload = prepararPayloadCreacion(orden);
-            const { data, error } = await client
-                .from("ordenes")
-                .insert(payload)
-                .select("id, numero_orden, cliente_id, direccion_cliente_id, tecnico_id, categoria_id, titulo, descripcion_solicitud, descripcion_trabajo_realizado, telefono_contacto, direccion_snapshot, fecha_programada, hora_inicio, hora_fin, estado, prioridad, notas_internas, created_by, created_at, updated_at")
-                .single();
-
-            if (!error && data) {
-                window.dispatchEvent(new CustomEvent("ordenes:supabase-actualizadas", {
-                    detail: { id: data.id, operation: "insert" }
-                }));
-            }
-
-            return { ok: !error, data: data || null, error: error || null };
+            const conexion = await obtenerClienteAutenticado();
+            if (!conexion.ok) return { ok: false, data: null, error: conexion.error };
+            const envio = leerEnvio(conexion);
+            return { ok: true, data: envio?.payload || null, error: null };
         } catch (error) {
             return { ok: false, data: null, error };
+        }
+    }
+
+    async function consultarEnvio(conexion, envio) {
+        return conexion.client.from("ordenes").select(SELECT_ORDEN_COMPLETA)
+            .eq("id", envio.id).eq("created_by", conexion.usuarioId).maybeSingle();
+    }
+
+    function confirmarEnvio(conexion, envio, data, recuperada) {
+        // El UUID se conserva si falla la limpieza; el próximo intento solo recuperará esta orden.
+        try { window.sessionStorage.removeItem(claveEnvio(conexion)); } catch (_) { /* Reconciliar al reintentar. */ }
+        window.dispatchEvent(new CustomEvent("ordenes:supabase-actualizadas", {
+            detail: { id: data.id, operation: recuperada ? "recover" : "insert" }
+        }));
+        return { ok: true, data, error: null, recuperada };
+    }
+
+    async function crearOrden(orden) {
+        let envio, conexion, eraPendiente = false, persistido = false;
+        try {
+            conexion = await obtenerClienteAutenticado();
+            if (!conexion.ok) return { ok: false, data: null, error: conexion.error };
+            envio = leerEnvio(conexion);
+            eraPendiente = Boolean(envio);
+            persistido = eraPendiente;
+            const payload = prepararPayloadCreacion(orden);
+            // La identidad se toma de Auth; el servidor sigue aplicando RLS.
+            payload.created_by = conexion.usuarioId;
+            if (envio) {
+                if (JSON.stringify(payload) !== JSON.stringify(envio.payload)) {
+                    return { ok: false, data: null, pendiente: true, error: new Error("Hay una orden pendiente de confirmar. Recuperá ese envío antes de iniciar otro.") };
+                }
+                const existente = await consultarEnvio(conexion, envio);
+                if (existente.error) throw existente.error;
+                if (existente.data) return confirmarEnvio(conexion, envio, existente.data, true);
+            } else {
+                envio = { version: 1, usuarioId: conexion.usuarioId, id: window.crypto.randomUUID(), payload };
+                // Persistir antes de escribir: si el navegador no puede conservarlo, no enviar.
+                window.sessionStorage.setItem(claveEnvio(conexion), JSON.stringify(envio));
+                persistido = true;
+            }
+            const { data, error } = await conexion.client.from("ordenes")
+                .insert({ ...envio.payload, id: envio.id })
+                .select(SELECT_ORDEN_COMPLETA).single();
+            if (!error && data) return confirmarEnvio(conexion, envio, data, eraPendiente);
+            // Otro intento puede haber confirmado el mismo UUID mientras consultábamos.
+            if (error?.code === "23505") {
+                const existente = await consultarEnvio(conexion, envio);
+                if (!existente.error && existente.data) return confirmarEnvio(conexion, envio, existente.data, true);
+            }
+            // Solo una primera respuesta SQL inequívoca permite corregir el formulario.
+            // Un reintento jamás descarta la incertidumbre de un envío anterior.
+            if (!eraPendiente && /^(22[0-9A-Z]{3}|23502|23503|23514|42501)$/.test(error?.code || "")) {
+                window.sessionStorage.removeItem(claveEnvio(conexion));
+                return { ok: false, data: null, error };
+            }
+            throw error || new Error("No llegó la confirmación del guardado.");
+        } catch (error) {
+            return { ok: false, data: null, pendiente: persistido, error: new Error(
+                persistido
+                    ? "No pudimos confirmar el envío. Volvé a pulsar Guardar para recuperar la misma orden; mantené esta pestaña abierta."
+                    : (error?.message || "No se pudo preparar un envío seguro.")
+            ) };
         }
     }
 
@@ -444,6 +511,7 @@ function mapearOrden(orden) {
         listarCategorias,
         actualizarOrden,
         cambiarEstado,
-        crearOrden
+        crearOrden,
+        obtenerCreacionPendiente
     });
 })();
