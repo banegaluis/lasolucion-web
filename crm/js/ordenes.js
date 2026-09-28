@@ -678,17 +678,7 @@ async function guardarOrden() {
             alert("No se pudieron guardar los cambios en Supabase.");
             return;
         }
-        guardarOrdenEnEstado(actualizacion.data);
-        const verificacion = await window.OrdenesSupabaseService.obtenerOrdenConHistorial(idOrden);
-        if (verificacion?.ok && verificacion.data) guardarOrdenEnEstado(verificacion.data);
-        ordenEditando = null;
-        finalizarGuardadoOrden();
-        resetearClienteFormularioOrden();
-        limpiarFormularioOrden();
-        renderizarHistorialRealOrden([]);
-        cerrarAgenda();
-        await cargarOrdenes();
-        alert("Orden actualizada correctamente.");
+        await completarGuardadoConfirmadoOrden(actualizacion.data, "Orden actualizada correctamente.");
         return;
     }
 
@@ -723,16 +713,31 @@ async function guardarOrden() {
     }
 
     const ordenCreada = resultado.data;
-    if (ordenCreada?.id) {
-        const creadaCompleta = await window.OrdenesSupabaseService.obtenerOrden(ordenCreada.id);
-        if (creadaCompleta?.ok && creadaCompleta.data) guardarOrdenEnEstado(creadaCompleta.data);
+    const mensaje = ordenCreada.numero_orden != null
+        ? `Orden N.º ${ordenCreada.numero_orden} creada correctamente.`
+        : "Orden creada correctamente.";
+    await completarGuardadoConfirmadoOrden(ordenCreada, mensaje);
+}
+
+// La escritura ya fue confirmada: una lectura posterior no debe permitir repetirla.
+async function completarGuardadoConfirmadoOrden(orden, mensaje) {
+    let listadoActualizado = false;
+    try {
+        guardarOrdenEnEstado(orden);
+        ordenEditando = null;
+        resetearClienteFormularioOrden();
+        limpiarFormularioOrden();
+        renderizarHistorialRealOrden([]);
+        cerrarAgenda();
+        listadoActualizado = await cargarOrdenes();
+    } catch (error) {
+        console.error("[Órdenes] Guardado confirmado; no se pudo actualizar la vista", {
+            message: textoErrorOrden(error)
+        });
+    } finally {
+        finalizarGuardadoOrden();
     }
-    finalizarGuardadoOrden();
-    resetearClienteFormularioOrden();
-    limpiarFormularioOrden();
-    cerrarAgenda();
-    await cargarOrdenes();
-    alert(`Orden N.º ${ordenCreada.numero_orden} creada correctamente`);
+    alert(listadoActualizado ? mensaje : `${mensaje} No se pudo actualizar el listado. Recargá la página para verlo; no vuelvas a crear la misma orden.`);
 }
 
 function inicializarAutocompleteClientesOrden() {
@@ -1258,18 +1263,24 @@ function renderizarOrdenes() {
 async function cargarOrdenes() {
     const lista = document.getElementById("listaOrdenes");
     const hist = document.getElementById("historialOrdenes");
-    if (!lista || !hist || ordenesSupabaseState.cargando) return;
+    if (!lista || !hist || ordenesSupabaseState.cargando) return false;
     if (!window.OrdenesSupabaseService?.listarOrdenes) {
         actualizarResumenOrdenes(0, 0, 0);
         lista.replaceChildren();
         hist.replaceChildren();
         renderizarVacioOrdenes(lista, "El servicio de órdenes Supabase no está disponible.");
-        return;
+        return false;
     }
 
     ordenesSupabaseState.cargando = true;
-    const resultado = await window.OrdenesSupabaseService.listarOrdenes();
-    ordenesSupabaseState.cargando = false;
+    let resultado;
+    try {
+        resultado = await window.OrdenesSupabaseService.listarOrdenes();
+    } catch (error) {
+        resultado = { ok: false, error };
+    } finally {
+        ordenesSupabaseState.cargando = false;
+    }
     if (!resultado?.ok) {
         console.error("[Órdenes] Error al cargar listado", {
             code: resultado?.error?.code || null,
@@ -1279,7 +1290,7 @@ async function cargarOrdenes() {
         hist.replaceChildren();
         renderizarVacioOrdenes(lista, "No se pudieron cargar las órdenes. Verificá tu sesión y volvé a intentar.");
         actualizarResumenOrdenes(0, 0, 0);
-        return;
+        return false;
     }
 
     const unicas = new Map();
@@ -1289,6 +1300,7 @@ async function cargarOrdenes() {
     ordenesSupabaseState.ordenes = Array.from(unicas.values());
     ordenesSupabaseState.porId = new Map(ordenesSupabaseState.ordenes.map(orden => [String(orden.id), orden]));
     renderizarOrdenes();
+    return true;
 }
 
 function reiniciarEdicionOrden() {
