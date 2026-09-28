@@ -127,6 +127,71 @@
         return payload;
     }
 
+    const relacionUnica = valor => Array.isArray(valor) ? valor[0] : valor;
+    const horaCorta = valor => String(valor || "").slice(0, 5);
+
+function mapearOrden(orden) {
+    const cliente = relacionUnica(orden.clientes);
+    const direccion = relacionUnica(orden.direcciones_clientes);
+    const tecnico = relacionUnica(orden.tecnicos);
+    const perfilTecnico = relacionUnica(tecnico?.perfiles);
+    const categoria = relacionUnica(orden.categorias_trabajo);
+    const tecnicoNombre = [perfilTecnico?.nombre, perfilTecnico?.apellido].filter(Boolean).join(" ").trim();
+    const snapshot = orden.direccion_snapshot || {};
+    const domicilio = { ...snapshot, ...(direccion || {}) };
+    const direccionCompleta = domicilio.direccion_completa || domicilio.direccion || [
+        [domicilio.calle, domicilio.numero].filter(Boolean).join(" "),
+        domicilio.piso && domicilio.piso !== "-" ? `Piso ${domicilio.piso}` : "",
+        domicilio.departamento && domicilio.departamento !== "-" ? `Dpto. ${domicilio.departamento}` : "",
+        domicilio.ciudad, domicilio.provincia
+    ].filter(Boolean).join(", ");
+    const estado = String(orden.estado || "pendiente").replace("en_proceso", "en proceso");
+
+    return {
+        id: orden.id,
+        numeroOrden: orden.numero_orden,
+        clienteId: orden.cliente_id,
+        clienteIdSupabase: orden.cliente_id,
+        direccionIdSupabase: orden.direccion_cliente_id || "",
+        cliente: cliente?.nombre_completo || "Cliente sin nombre",
+        telefono: orden.telefono_contacto || cliente?.telefono_principal || "",
+        calle: direccion?.calle || snapshot.calle || "",
+        numero: direccion?.numero || snapshot.numero || "",
+        piso: direccion?.piso || snapshot.piso || "-",
+        departamento: direccion?.departamento || snapshot.departamento || "-",
+        ciudad: direccion?.ciudad || snapshot.ciudad || "Córdoba",
+        provincia: direccion?.provincia || snapshot.provincia || "Córdoba",
+        direccion: direccionCompleta || "Sin dirección",
+        fecha: orden.fecha_programada || "",
+        hora: horaCorta(orden.hora_inicio),
+        horaFin: horaCorta(orden.hora_fin),
+        trabajo: orden.titulo || orden.descripcion_solicitud || "Sin descripción",
+        descripcion: orden.descripcion_solicitud || orden.titulo || "",
+        estado,
+        prioridad: orden.prioridad || "media",
+        tecnicoId: orden.tecnico_id || "",
+        tecnicoNombre: tecnicoNombre || tecnico?.especialidad || "Sin asignar",
+        categoriaId: orden.categoria_id || "",
+        categoria: categoria?.nombre || categoria?.slug || "Sin categoría",
+        createdAt: orden.created_at,
+        updatedAt: orden.updated_at,
+        historial: ["terminado", "cancelado"].includes(estado),
+        raw: orden
+    };
+}
+
+    async function resumenAdministrativo() {
+        const conexion = await obtenerClienteAutenticado();
+        if (!conexion.ok) return { ok: false, error: conexion.error };
+        const [pendientes, tecnicos] = await Promise.all([
+            conexion.client.from("perfiles").select("id", { count: "exact", head: true })
+                .or("estado.eq.pendiente,rol.eq.cliente_pendiente"),
+            conexion.client.from("tecnicos").select("id", { count: "exact", head: true }).eq("activo", true)
+        ]);
+        const error = pendientes.error || tecnicos.error;
+        return { ok: !error, error, pendientes: pendientes.count, tecnicos: tecnicos.count };
+    }
+
     async function obtenerClienteAutenticado() {
         const client = await window.LaSolucionSupabase?.getClient();
         if (!client) return { ok: false, client: null, error: "Supabase no configurado." };
@@ -288,13 +353,13 @@
     }
 
     async function cambiarEstado(id, estado) {
-        if (!ESTADOS_DB_VALIDOS.includes(estadoLocalADB(estado))) {
+        if (!Object.hasOwn(ESTADOS_LOCAL_A_DB, String(estado || "").trim().toLowerCase())) {
             return { ok: false, data: null, error: new Error("Estado de orden inválido.") };
         }
         return actualizarOrden(id, { estado });
     }
 
-    async function consultarConflictosHorario(fecha, horaInicio, duracionMinutos = 60, margenMinutos = 30) {
+    async function consultarConflictosHorario(fecha, horaInicio, duracionMinutos = 60, margenMinutos = 30, { tecnicoId = "", excluirId = null } = {}) {
         const client = await window.LaSolucionSupabase?.getClient();
         if (!client) return { ok: false, data: [], error: "Supabase no configurado." };
 
@@ -306,7 +371,7 @@
 
             const { data, error } = await client
                 .from("ordenes")
-                .select("id, numero_orden, fecha_programada, hora_inicio, hora_fin, estado, titulo")
+                .select("id, numero_orden, tecnico_id, fecha_programada, hora_inicio, hora_fin, estado, titulo")
                 .eq("fecha_programada", fecha)
                 .neq("estado", "cancelado")
                 .not("hora_inicio", "is", null)
@@ -317,6 +382,8 @@
             const inicioNuevo = horaAMinutos(horaInicio);
             const finBloqueNuevo = inicioNuevo + duracionMinutos + margenMinutos;
             const conflictos = (data || []).filter(orden => {
+                if (excluirId && String(orden.id) === String(excluirId)) return false;
+                if (tecnicoId && orden.tecnico_id && String(orden.tecnico_id) !== String(tecnicoId)) return false;
                 const inicioExistente = horaAMinutos(orden.hora_inicio);
                 if (!Number.isFinite(inicioExistente)) return false;
                 const finTrabajoExistente = Number.isFinite(horaAMinutos(orden.hora_fin))
@@ -339,9 +406,9 @@
     }
 
     async function crearOrden(orden) {
-        const client = await window.LaSolucionSupabase?.getClient();
-        if (!client) return { ok: false, data: null, error: "Supabase no configurado." };
-
+        const conexion = await obtenerClienteAutenticado();
+        if (!conexion.ok) return { ok: false, data: null, error: conexion.error };
+        const client = conexion.client;
         try {
             const payload = prepararPayloadCreacion(orden);
             const { data, error } = await client
@@ -363,6 +430,8 @@
     }
 
     window.OrdenesSupabaseService = Object.freeze({
+        mapearOrden,
+        resumenAdministrativo,
         estadoLocalADB,
         prioridadLocalADB,
         consultarAgenda,

@@ -86,7 +86,8 @@
             ...direcciones.map(direccion => direccion.direccion_normalizada)
         ].join(" ");
 
-        return normalizarTexto(valores).includes(texto) || normalizarTelefono(valores).includes(normalizarTelefono(texto));
+        const telefonoBuscado = normalizarTelefono(texto);
+        return normalizarTexto(valores).includes(texto) || (telefonoBuscado.length > 0 && normalizarTelefono(valores).includes(telefonoBuscado));
     }
 
     function ordenarDireccionesClientes(clientes) {

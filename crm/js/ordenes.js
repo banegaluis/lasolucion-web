@@ -141,55 +141,7 @@ function normalizarRelacionOrden(relacion) {
 }
 
 function mapearOrdenSupabase(orden) {
-    const cliente = normalizarRelacionOrden(orden.clientes);
-    const direccion = normalizarRelacionOrden(orden.direcciones_clientes);
-    const tecnico = normalizarRelacionOrden(orden.tecnicos);
-    const perfilTecnico = normalizarRelacionOrden(tecnico?.perfiles);
-    const categoria = normalizarRelacionOrden(orden.categorias_trabajo);
-    const tecnicoNombre = [perfilTecnico?.nombre, perfilTecnico?.apellido].filter(Boolean).join(" ").trim();
-    const snapshot = orden.direccion_snapshot || {};
-    const direccionCompleta = direccion?.direccion_completa || construirDireccion(
-        direccion?.calle || snapshot.calle || "",
-        direccion?.numero || snapshot.numero || "",
-        direccion?.piso || snapshot.piso || "-",
-        direccion?.departamento || snapshot.departamento || "-",
-        direccion?.ciudad || snapshot.ciudad || "Córdoba",
-        direccion?.provincia || snapshot.provincia || "Córdoba",
-        snapshot.direccion || ""
-    );
-    const estado = estadoDBALocalOrden(orden.estado);
-
-    return {
-        id: orden.id,
-        numeroOrden: orden.numero_orden,
-        clienteId: orden.cliente_id,
-        clienteIdSupabase: orden.cliente_id,
-        direccionIdSupabase: orden.direccion_cliente_id || "",
-        cliente: cliente?.nombre_completo || "Cliente sin nombre",
-        telefono: orden.telefono_contacto || cliente?.telefono_principal || "",
-        calle: direccion?.calle || snapshot.calle || "",
-        numero: direccion?.numero || snapshot.numero || "",
-        piso: direccion?.piso || snapshot.piso || "-",
-        departamento: direccion?.departamento || snapshot.departamento || "-",
-        ciudad: direccion?.ciudad || snapshot.ciudad || "Córdoba",
-        provincia: direccion?.provincia || snapshot.provincia || "Córdoba",
-        direccion: direccionCompleta || "Sin dirección",
-        fecha: orden.fecha_programada || "",
-        hora: normalizarHoraOrdenDB(orden.hora_inicio),
-        horaFin: normalizarHoraOrdenDB(orden.hora_fin),
-        trabajo: orden.titulo || orden.descripcion_solicitud || "Sin descripción",
-        descripcion: orden.descripcion_solicitud || orden.titulo || "",
-        estado,
-        prioridad: orden.prioridad || "media",
-        tecnicoId: orden.tecnico_id || "",
-        tecnicoNombre: tecnicoNombre || tecnico?.especialidad || "Sin asignar",
-        categoriaId: orden.categoria_id || "",
-        categoria: categoria?.nombre || categoria?.slug || "Sin categoría",
-        createdAt: orden.created_at,
-        updatedAt: orden.updated_at,
-        historial: ["terminado", "cancelado"].includes(estado),
-        raw: orden
-    };
+    return window.OrdenesSupabaseService.mapearOrden(orden);
 }
 
 function guardarOrdenEnEstado(orden) {
@@ -627,7 +579,7 @@ async function guardarOrden() {
         return;
     }
 
-    if (!ordenEditando) {
+    if (!ordenEditando || datosOrden.fecha !== ordenActual.fecha || datosOrden.hora !== ordenActual.hora || datosOrden.tecnicoId !== ordenActual.tecnicoId) {
         const horario = validarHorarioFuturoOrden(datosOrden.fecha, datosOrden.hora);
         if (!horario.ok) {
             alert(horario.error);
@@ -648,8 +600,11 @@ async function guardarOrden() {
                 datosOrden.fecha,
                 datosOrden.hora,
                 DURACION_ORDEN_MINUTOS,
-                MARGEN_ENTRE_ORDENES_MINUTOS
+                MARGEN_ENTRE_ORDENES_MINUTOS,
+                { tecnicoId: datosOrden.tecnicoId, excluirId: ordenEditando }
             );
+        } catch (error) {
+            disponibilidad = { ok: false, error };
         } finally {
             clientesOrdenState.validandoHorario = false;
             actualizarGuardadoVisualOrden(false);
@@ -1037,8 +992,14 @@ async function cambiarEstadoManual(id, nuevoEstado) {
     if (ordenesSupabaseState.mutando || !window.OrdenesSupabaseService?.cambiarEstado) return;
 
     ordenesSupabaseState.mutando = true;
-    const resultado = await window.OrdenesSupabaseService.cambiarEstado(id, nuevoEstado);
-    ordenesSupabaseState.mutando = false;
+    let resultado;
+    try {
+        resultado = await window.OrdenesSupabaseService.cambiarEstado(id, nuevoEstado);
+    } catch (error) {
+        resultado = { ok: false, error };
+    } finally {
+        ordenesSupabaseState.mutando = false;
+    }
     if (!resultado?.ok || !resultado.data) {
         console.error("[Órdenes] Error al cambiar estado", {
             code: resultado?.error?.code || null,

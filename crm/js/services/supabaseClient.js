@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    const CDN_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+    const CDN_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2";
     let clientPromise = null;
 
     function getConfig() {
@@ -50,6 +50,10 @@
                         detectSessionInUrl: true
                     }
                 });
+            }).catch(error => {
+                clientPromise = null;
+                document.querySelector(`script[src="${CDN_URL}"]`)?.remove();
+                throw error;
             });
         }
         return clientPromise;
