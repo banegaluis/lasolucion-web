@@ -128,25 +128,59 @@ function registrarCuentaPublicaDesdeFormulario(evento) {
 }
 let recuperacionEnProceso = false;
 
-async function solicitarRecuperacionClave() {
+function mostrarMensajeRecuperacion(texto, tipo = "") {
+    const mensaje = document.getElementById("recuperarMensaje");
+    if (!mensaje) return;
+    mensaje.textContent = texto || "";
+    mensaje.className = `registro-message ${tipo ? `is-${tipo}` : ""}`.trim();
+}
+
+function abrirRecuperacionClave() {
+    const modal = document.getElementById("recuperarClaveModal");
+    const campoEmail = document.getElementById("recuperarEmail");
+    if (!modal || !campoEmail) return;
+
+    const emailLogin = obtenerValorCampo("user").toLowerCase();
+    if (/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(emailLogin)) {
+        campoEmail.value = emailLogin;
+    }
+
+    mostrarMensajeRecuperacion("");
+    modal.hidden = false;
+    document.body.classList.add("modal-scroll-locked");
+    document.documentElement.classList.add("modal-scroll-locked");
+
+    setTimeout(() => campoEmail.focus({ preventScroll: true }), 0);
+}
+
+function cerrarRecuperacionClave() {
+    const modal = document.getElementById("recuperarClaveModal");
+    if (modal) modal.hidden = true;
+    document.body.classList.remove("modal-scroll-locked");
+    document.documentElement.classList.remove("modal-scroll-locked");
+    mostrarMensajeRecuperacion("");
+}
+
+async function solicitarRecuperacionClave(evento) {
+    evento?.preventDefault?.();
     if (recuperacionEnProceso) return;
 
-    const email = obtenerValorCampo("user").toLowerCase();
+    const email = String(document.getElementById("recuperarEmail")?.value || "").trim().toLowerCase();
     if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
-        mostrarMensajeLogin("Escribí tu email arriba para enviarte el enlace de recuperación.");
-        document.getElementById("user")?.focus();
+        mostrarMensajeRecuperacion("Ingresá un email válido.", "error");
+        document.getElementById("recuperarEmail")?.focus();
         return;
     }
 
     if (!window.LaSolucionSupabase?.isConfigured() || !window.AuthSupabaseService?.enviarRecuperacionClave) {
-        mostrarMensajeLogin("La recuperación online no está disponible en este momento.");
+        mostrarMensajeRecuperacion("La recuperación online no está disponible en este momento.", "error");
         return;
     }
 
-    const boton = document.getElementById("btnRecuperarClave");
+    const boton = document.getElementById("btnEnviarRecuperacion");
     recuperacionEnProceso = true;
     if (boton) boton.disabled = true;
-    mostrarMensajeLogin("Enviando enlace de recuperación…");
+    mostrarMensajeRecuperacion("Enviando enlace de recuperación…");
 
     try {
         const redirectUrl = new URL("recuperar-clave.html", window.location.href);
@@ -155,13 +189,16 @@ async function solicitarRecuperacionClave() {
 
         const resultado = await window.AuthSupabaseService.enviarRecuperacionClave(email, redirectUrl.href);
         if (!resultado.ok) {
-            mostrarMensajeLogin("No pudimos enviar el enlace ahora. Intentá nuevamente en unos minutos.");
+            mostrarMensajeRecuperacion("No pudimos enviar el enlace ahora. Intentá nuevamente en unos minutos.", "error");
             return;
         }
 
-        mostrarMensajeLogin("Si ese email está registrado, te enviamos un enlace para crear una nueva contraseña. Revisá también spam.");
+        mostrarMensajeRecuperacion(
+            "Si ese email está registrado, te enviamos un enlace para crear una nueva contraseña. Revisá también spam.",
+            "success"
+        );
     } catch (error) {
-        mostrarMensajeLogin("No pudimos enviar el enlace ahora. Intentá nuevamente en unos minutos.");
+        mostrarMensajeRecuperacion("No pudimos enviar el enlace ahora. Intentá nuevamente en unos minutos.", "error");
     } finally {
         recuperacionEnProceso = false;
         if (boton) boton.disabled = false;
@@ -267,18 +304,32 @@ function registrarEventosLogin() {
     const user = document.getElementById("user");
     const pass = document.getElementById("pass");
     const btnRecuperarClave = document.getElementById("btnRecuperarClave");
+    const btnCerrarRecuperacion = document.getElementById("btnCerrarRecuperacion");
+    const btnCancelarRecuperacion = document.getElementById("btnCancelarRecuperacion");
+    const recuperarClaveForm = document.getElementById("recuperarClaveForm");
+    const recuperarOverlay = document.querySelector("[data-close-recuperacion]");
     const btnAbrirRegistro = document.getElementById("btnAbrirRegistro");
     const btnCerrarRegistro = document.getElementById("btnCerrarRegistro");
     const btnCancelarRegistro = document.getElementById("btnCancelarRegistro");
     const registroForm = document.getElementById("registroForm");
     const registroOverlay = document.querySelector("[data-close-registro]");
 
-    btnRecuperarClave?.addEventListener("click", solicitarRecuperacionClave);
+    btnRecuperarClave?.addEventListener("click", abrirRecuperacionClave);
+    btnCerrarRecuperacion?.addEventListener("click", cerrarRecuperacionClave);
+    btnCancelarRecuperacion?.addEventListener("click", cerrarRecuperacionClave);
+    recuperarOverlay?.addEventListener("click", cerrarRecuperacionClave);
+    recuperarClaveForm?.addEventListener("submit", solicitarRecuperacionClave);
     btnAbrirRegistro?.addEventListener("click", abrirRegistro);
     btnCerrarRegistro?.addEventListener("click", cerrarRegistro);
     btnCancelarRegistro?.addEventListener("click", cerrarRegistro);
     registroOverlay?.addEventListener("click", cerrarRegistro);
     registroForm?.addEventListener("submit", registrarCuentaPublicaDesdeFormulario);
+
+    document.addEventListener("keydown", (evento) => {
+        if (evento.key === "Escape" && !document.getElementById("recuperarClaveModal")?.hidden) {
+            cerrarRecuperacionClave();
+        }
+    });
 
     [user, pass].forEach((campo) => {
         if (!campo || campo.dataset.loginListener === "true") return;
@@ -322,6 +373,8 @@ function iniciarLogin() {
     }
 }
 
+window.abrirRecuperacionClave = abrirRecuperacionClave;
+window.cerrarRecuperacionClave = cerrarRecuperacionClave;
 window.solicitarRecuperacionClave = solicitarRecuperacionClave;
 window.login = login;
 window.iniciarLogin = iniciarLogin;
