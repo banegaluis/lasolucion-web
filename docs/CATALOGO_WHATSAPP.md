@@ -86,3 +86,13 @@ Argentina
 WhatsApp Business → Catálogo → ficha del servicio → Enlace al sitio web → sección exacta de la vidriera → botón “Consultar” → WhatsApp con mensaje específico.
 
 La web pública no enlaza ni muestra el acceso interno al CRM.
+
+## Entrega visual del 28/09/2026
+
+- Catálogo público dedicado: https://banegaluis.github.io/lasolucion-web/catalogo.html
+- Estilos unificados en `css/public.css`, logo oficial compartido con CRM y diseño contrastado con `dash_ejecutivo2_menuplegado.png`. Se retiraron las hojas inline superpuestas de la portada.
+- Seis imágenes PNG de 1080 × 1080 en `assets/catalogo/`, con nombres y datos comerciales existentes. No representan fotos de trabajos realizados.
+- Paquete para carga manual: `assets/catalogo/LaSolucion_Catalogo_WhatsApp.zip`, con imágenes y `FICHAS.txt`. Los precios no confirmados quedan vacíos en WhatsApp, con consulta de presupuesto.
+- No se cargaron fichas en una cuenta de WhatsApp Business: no hay integración disponible para hacerlo directamente en esta sesión. En iPhone: Herramientas → Catálogo → Añadir un artículo nuevo → Añadir fotos y videos; completar nombre y descripción. Fuente oficial: https://faq.whatsapp.com/833697274483076/?cms_platform=iphone
+- El enlace de cada ficha a la web es opcional: se puede mantener toda la consulta en el catálogo nativo. Ninguna ficha muestra un acceso al CRM.
+- Validación Chromium local: portada y catálogo en 1440 y 390 px, sin errores JS ni desbordamiento horizontal; seis fichas y cero enlaces a rutas internas. Pendiente aceptación visual de Luis y carga real en su cuenta.

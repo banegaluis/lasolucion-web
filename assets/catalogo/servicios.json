@@ -1,0 +1,50 @@
+[
+  {
+    "id": "recambio-calefon-tb",
+    "title": "Recambio de calefón tiro balanceado posterior",
+    "description": "Mano de obra de recambio / instalación. Materiales, flexibles, llaves, cañerías, adaptaciones y modificaciones de salida se cotizan aparte.",
+    "category": "Gas · Calefones",
+    "price": "$220.000",
+    "note": "Mano de obra · referencia septiembre 2026"
+  },
+  {
+    "id": "reparacion-calefon",
+    "title": "Reparación de calefón",
+    "description": "Diagnóstico, limpieza, repuestos y reparación según modelo y falla.",
+    "category": "Gas · Reparación",
+    "price": "Consultar",
+    "note": "Según diagnóstico y repuestos"
+  },
+  {
+    "id": "termotanque",
+    "title": "Instalación o recambio de termotanque",
+    "description": "Evaluamos conexiones, ventilación, ubicación y las adaptaciones necesarias.",
+    "category": "Gas · Agua caliente",
+    "price": "Consultar",
+    "note": "Según instalación"
+  },
+  {
+    "id": "instalaciones-gas",
+    "title": "Instalaciones y modificaciones de gas",
+    "description": "Cañerías, artefactos, pruebas, adecuaciones y trabajos residenciales.",
+    "category": "Gas · Instalaciones",
+    "price": "Presupuesto",
+    "note": "Según recorrido y alcance"
+  },
+  {
+    "id": "gas-comercial",
+    "title": "Gas comercial y gastronómico",
+    "description": "Cocinas, hornos, planchas, freidoras, termotanques, ramales y adecuaciones.",
+    "category": "Comercial",
+    "price": "Presupuesto",
+    "note": "Locales y gastronomía"
+  },
+  {
+    "id": "otros-servicios",
+    "title": "Plomería, refrigeración, electricidad y terminaciones",
+    "description": "Contanos qué necesitás y te orientamos según el trabajo.",
+    "category": "Otros rubros",
+    "price": "Consultar",
+    "note": "Presupuesto según trabajo"
+  }
+]

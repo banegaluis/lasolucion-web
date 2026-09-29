@@ -69,3 +69,11 @@ Actualizado: 28/09/2026. Base de esta etapa: `5d49df9`.
 - Se reutilizan los estilos y servicios de Auth existentes; no se guarda ninguna contraseña en localStorage ni en el repositorio.
 - Para producción, la URL `https://banegaluis.github.io/lasolucion-web/crm/recuperar-clave.html` debe estar admitida en la configuración de Redirect URLs de Supabase Auth; si el proveedor ignora un redirect no autorizado, hay que agregar esa URL en Auth > URL Configuration.
 
+## Agenda compartida: refresco y permisos — 28/09/2026
+
+- Refresco de datos cada 30 segundos con la agenda visible y conexión, al volver a la pestaña y al recuperar internet. Se consulta nuevamente Supabase con la sesión actual; no se comparten datos locales entre equipos.
+- Antes del refresco se vuelve a verificar el perfil operativo. Si se revoca el acceso, se vacían los eventos. Un error de carga elimina datos anteriores de memoria. Las respuestas atrasadas no reemplazan el estado más reciente.
+- 43 pruebas automatizadas aprobadas, incluidas tres sobre refresco, pestaña oculta/sin conexión y acceso revocado.
+- Se verificó que la política de UPDATE de perfiles permite modificar rol/estado/activo propios. Se preparó `docs/sql/proteger_perfiles.sql` y se probó en transacción revertida: nombre editable, rol/estado/activo rechazados para un no administrador.
+- La revisión automática de aprobación rechazó aplicar esa corrección en producción porque requiere autorización específica de cambios de permisos. NO está aplicada. No se habilitó el login de técnicos ni se crearon usuarios nuevos. Los roles operativos actuales siguen admin/colaborador.
+- Pendientes: autorización para aplicar la corrección, pruebas reales con cuentas por rol y equipos separados, habilitación controlada de técnicos, actualización de roles locales y protección frente a dos ediciones simultáneas. No presentar esta entrega como multiusuario completamente terminado.

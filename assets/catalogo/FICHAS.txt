@@ -1,0 +1,46 @@
+LA SOLUCIÓN — FICHAS PARA WHATSAPP BUSINESS
+
+En WhatsApp Business (iPhone): Herramientas > Catálogo > Añadir un artículo nuevo. Agregá la imagen, nombre y descripción de cada ficha. El precio es opcional: dejalo vacío en los servicios a consultar.
+No se cargaron automáticamente estos artículos en WhatsApp.
+
+
+Recambio de calefón tiro balanceado posterior
+Imagen: recambio-calefon-tb.png
+Descripción: Mano de obra de recambio / instalación. Materiales, flexibles, llaves, cañerías, adaptaciones y modificaciones de salida se cotizan aparte. Mano de obra · referencia septiembre 2026.
+Precio: 220000 ARS
+Enlace opcional: https://banegaluis.github.io/lasolucion-web/catalogo.html#recambio-calefon-tb
+
+
+Reparación de calefón
+Imagen: reparacion-calefon.png
+Descripción: Diagnóstico, limpieza, repuestos y reparación según modelo y falla. Según diagnóstico y repuestos.
+Precio: Dejar vacío; consultar presupuesto
+Enlace opcional: https://banegaluis.github.io/lasolucion-web/catalogo.html#reparacion-calefon
+
+
+Instalación o recambio de termotanque
+Imagen: termotanque.png
+Descripción: Evaluamos conexiones, ventilación, ubicación y las adaptaciones necesarias. Según instalación.
+Precio: Dejar vacío; consultar presupuesto
+Enlace opcional: https://banegaluis.github.io/lasolucion-web/catalogo.html#termotanque
+
+
+Instalaciones y modificaciones de gas
+Imagen: instalaciones-gas.png
+Descripción: Cañerías, artefactos, pruebas, adecuaciones y trabajos residenciales. Según recorrido y alcance.
+Precio: Dejar vacío; consultar presupuesto
+Enlace opcional: https://banegaluis.github.io/lasolucion-web/catalogo.html#instalaciones-gas
+
+
+Gas comercial y gastronómico
+Imagen: gas-comercial.png
+Descripción: Cocinas, hornos, planchas, freidoras, termotanques, ramales y adecuaciones. Locales y gastronomía.
+Precio: Dejar vacío; consultar presupuesto
+Enlace opcional: https://banegaluis.github.io/lasolucion-web/catalogo.html#gas-comercial
+
+
+Plomería, refrigeración, electricidad y terminaciones
+Imagen: otros-servicios.png
+Descripción: Contanos qué necesitás y te orientamos según el trabajo. Presupuesto según trabajo.
+Precio: Dejar vacío; consultar presupuesto
+Enlace opcional: https://banegaluis.github.io/lasolucion-web/catalogo.html#otros-servicios

@@ -17,6 +17,8 @@
     let categoriaFiltro = "todas";
     let prioridadFiltro = "todas";
     const DURACION_VISUAL_MINUTOS = 60;
+    let sincronizandoAgenda = false;
+    let secuenciaCarga = 0;
 
     function permisoAgenda(nombre) {
         return window.PERMISOS?.[nombre] || "";
@@ -65,6 +67,32 @@
 
     document.addEventListener("DOMContentLoaded", iniciarAgendaProfesional);
     window.addEventListener("ordenes:supabase-actualizadas", () => refrescarAgendaProfesional({ actualizarFiltros: true }));
+
+    // Refresco entre dispositivos sin requerir una publicación Realtime adicional.
+    async function sincronizarAgendaCompartida() {
+        if (!calendario || document.hidden || sincronizandoAgenda || navigator.onLine === false) return;
+        sincronizandoAgenda = true;
+        try {
+            const acceso = await window.AuthSupabaseService.verificarSesionOperativa();
+            if (!acceso.ok) {
+                secuenciaCarga++;
+                ordenesAgenda = [];
+                ordenesAgendaPorId.clear();
+                calendario.removeAllEvents();
+                actualizarResumenAgenda();
+                mostrarEstadoCargaAgenda("Tu acceso no está disponible. Volvé a iniciar sesión.", true);
+                return;
+            }
+            refrescarAgendaProfesional({ actualizarFiltros: true });
+        } finally {
+            sincronizandoAgenda = false;
+        }
+    }
+
+    window.addEventListener("focus", () => sincronizarAgendaCompartida().catch(() => {}));
+    window.addEventListener("online", () => sincronizarAgendaCompartida().catch(() => {}));
+    document.addEventListener("visibilitychange", () => sincronizarAgendaCompartida().catch(() => {}));
+    window.setInterval(() => sincronizarAgendaCompartida().catch(() => {}), 30000);
 
     function iniciarAgendaProfesional() {
         if (agendaInicializada) return;
@@ -238,6 +266,7 @@
     }
 
     async function cargarEventosSupabase(info, successCallback, failureCallback) {
+        const cargaActual = ++secuenciaCarga;
         try {
             const service = window.OrdenesSupabaseService;
             if (!service?.consultarAgenda) throw new Error("El servicio Supabase de órdenes no está disponible.");
@@ -252,6 +281,7 @@
                     : new Error(resultado?.error?.message || resultado?.error || "No se pudieron cargar las órdenes de Supabase.");
             }
 
+            if (cargaActual !== secuenciaCarga) { successCallback([]); return; }
             errorCargaAgenda = null;
             ordenesAgenda = (resultado.data || []).map(normalizarOrdenSupabase);
             ordenesAgendaPorId = new Map(ordenesAgenda.map(orden => [String(orden.id), orden]));
@@ -266,6 +296,11 @@
             successCallback(eventos);
             window.requestAnimationFrame(() => enfocarHorarioRelevante(ordenesFiltradas));
         } catch (error) {
+            if (cargaActual !== secuenciaCarga) { failureCallback(error); return; }
+            ordenesAgenda = [];
+            ordenesAgendaPorId.clear();
+            calendario?.removeAllEvents();
+            actualizarResumenAgenda();
             errorCargaAgenda = error;
             console.error("[Agenda] Error al cargar eventos", {
                 message: error?.message || String(error),
