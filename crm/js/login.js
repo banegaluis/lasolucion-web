@@ -141,7 +141,7 @@ function abrirRecuperacionClave() {
     if (!modal || !campoEmail) return;
 
     const emailLogin = obtenerValorCampo("user").toLowerCase();
-    if (/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(emailLogin)) {
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailLogin)) {
         campoEmail.value = emailLogin;
     }
 
@@ -166,7 +166,7 @@ async function solicitarRecuperacionClave(evento) {
     if (recuperacionEnProceso) return;
 
     const email = String(document.getElementById("recuperarEmail")?.value || "").trim().toLowerCase();
-    if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         mostrarMensajeRecuperacion("Ingresá un email válido.", "error");
         document.getElementById("recuperarEmail")?.focus();
         return;
