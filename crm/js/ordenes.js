@@ -980,8 +980,20 @@ async function resolverClienteSupabaseParaOrden(datosOrden, datosDireccion) {
         telefono_principal: datosOrden.telefono
     };
     const direccion = direccionParaSupabase(datosDireccion);
-    const resultado = await window.ClientesSupabaseService.crearCliente(cliente, direccion, { omitirDuplicados: clientesOrdenState.crearForzado });
+    let resultado = await window.ClientesSupabaseService.crearCliente(cliente, direccion, { omitirDuplicados: clientesOrdenState.crearForzado });
     clientesOrdenState.crearForzado = false;
+
+    if (resultado.altaPendiente) {
+        const pendiente = resultado.altaPendiente;
+        if (!confirm(`Hay un alta anterior pendiente: ${pendiente.nombre}, ${pendiente.direccion}. ¿Querés recuperarla con sus datos originales? Después podrás revisar el cliente de esta orden.`)) {
+            return { ok: false, error: "El alta anterior sigue pendiente. No se creó otro cliente." };
+        }
+        resultado = await window.ClientesSupabaseService.crearCliente({}, null, { recuperarPendiente: true });
+        if (!resultado.ok) return { ok: false, error: textoErrorOrden(resultado.error) };
+        const principal = window.ClientesSupabaseService.obtenerDireccionPrincipalCliente(resultado.data);
+        seleccionarClienteOrden(resultado.data, principal);
+        return { ok: false, error: "Cliente anterior recuperado. Revisá el cliente y la dirección antes de volver a guardar la orden." };
+    }
 
     if (resultado.duplicados?.length) {
         mostrarDuplicadosOrden(resultado.duplicados);

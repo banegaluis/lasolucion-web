@@ -223,43 +223,103 @@
 
     function emailValido(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim()); }
 
+    let altaClienteEnCurso = false;
+
+    function claveAltaCliente(conexion) {
+        const proyecto = conexion.client.supabaseUrl || window.LA_SOLUCION_SUPABASE_CONFIG?.url || "crm";
+        return `lasolucion:cliente-pendiente:v1:${proyecto}:${conexion.session.user.id}`;
+    }
+
+    function leerAltaCliente(conexion) {
+        const texto = window.sessionStorage.getItem(claveAltaCliente(conexion));
+        if (!texto) return null;
+        const alta = JSON.parse(texto);
+        const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        if (alta.version !== 1 || alta.usuarioId !== conexion.session.user.id ||
+            !uuid.test(alta.clienteId) || !uuid.test(alta.direccionId) ||
+            !alta.cliente || !alta.direccion || alta.cliente.created_by !== alta.usuarioId) {
+            throw new Error("El registro del alta pendiente no es válido. Revisá el cliente antes de iniciar otra alta.");
+        }
+        return alta;
+    }
+
+    // SELECT e INSERT respetan RLS. La PK resuelve carreras sin actualizar registros existentes.
+    async function insertarORecuperarAlta(client, tabla, payload, filtro, valorFiltro) {
+        const consultar = () => client.from(tabla).select().eq("id", payload.id).eq(filtro, valorFiltro).maybeSingle();
+        const previa = await consultar();
+        if (previa.error) throw previa.error;
+        if (previa.data) return previa.data;
+        const insertada = await client.from(tabla).insert(payload).select().single();
+        if (!insertada.error && insertada.data) return insertada.data;
+        if (insertada.error?.code === "23505") {
+            const confirmada = await consultar();
+            if (!confirmada.error && confirmada.data) return confirmada.data;
+        }
+        throw insertada.error || new Error("No llegó la confirmación del alta.");
+    }
+
     async function crearCliente(cliente, direccion = null, opciones = {}) {
-        const conexion = await obtenerClienteSupabase();
-        if (!conexion.ok) return { ok: false, data: null, error: conexion.error };
+        if (altaClienteEnCurso) return { ok: false, data: null, error: "Ya se está guardando un cliente. Esperá a que termine." };
+        altaClienteEnCurso = true;
+        let conexion, alta, persistida = false, eraPendiente = false, etapa = "preparacion";
+        try {
+            conexion = await obtenerClienteSupabase();
+            if (!conexion.ok) return { ok: false, data: null, error: conexion.error };
+            const userId = conexion.session?.user?.id;
+            if (!userId) return { ok: false, data: null, error: "No hay usuario Supabase activo para crear el cliente." };
+            alta = leerAltaCliente(conexion);
+            eraPendiente = persistida = Boolean(alta);
+            const payload = prepararCliente(cliente);
+            payload.created_by = userId;
+            const direccionPreparada = prepararDireccion(direccion || {}, true);
+            if (alta) {
+                if (!opciones.recuperarPendiente &&
+                    (JSON.stringify(payload) !== JSON.stringify(alta.cliente) || JSON.stringify(direccionPreparada) !== JSON.stringify(alta.direccion))) {
+                    return { ok: false, data: null, altaPendiente: {
+                        nombre: [alta.cliente.nombre, alta.cliente.apellido].filter(Boolean).join(" "),
+                        direccion: alta.direccion.direccion_completa
+                    }, error: "Hay un alta pendiente con otros datos. Recuperala antes de crear otro cliente." };
+                }
+            } else {
+                if (opciones.recuperarPendiente) return { ok: false, data: null, error: "Ya no hay un alta pendiente para recuperar." };
+                if (!payload.nombre || !payload.telefono_principal) return { ok: false, data: null, error: "Nombre o razón social y teléfono principal son obligatorios." };
+                if (payload.email && !emailValido(payload.email)) return { ok: false, data: null, error: "Email inválido." };
+                if (!direccionPreparada.calle || !direccionPreparada.numero) return { ok: false, data: null, error: "Calle y número son obligatorios." };
+                if (!opciones.omitirDuplicados) {
+                    const duplicados = await detectarDuplicados({ cliente: payload, direccion: direccionPreparada });
+                    if (!duplicados.ok) return duplicados;
+                    if (duplicados.data.length) return { ok: false, data: null, duplicados: duplicados.data, error: "Encontramos un cliente que podría ser el mismo." };
+                }
+                alta = { version: 1, usuarioId: userId, clienteId: window.crypto.randomUUID(),
+                    direccionId: window.crypto.randomUUID(), cliente: payload, direccion: direccionPreparada };
+                window.sessionStorage.setItem(claveAltaCliente(conexion), JSON.stringify(alta));
+                persistida = true;
+            }
 
-        const payload = prepararCliente(cliente);
-        const userId = conexion.session?.user?.id;
-        if (!userId) return { ok: false, data: null, error: "No hay usuario Supabase activo para crear el cliente." };
-        if (!payload.nombre || !payload.telefono_principal) {
-            return { ok: false, data: null, error: "Nombre o razón social y teléfono principal son obligatorios." };
+            etapa = "cliente";
+            await insertarORecuperarAlta(conexion.client, "clientes",
+                { ...alta.cliente, id: alta.clienteId }, "created_by", userId);
+            etapa = "direccion";
+            // Es la dirección inicial de esta alta: no desmarcar otras direcciones al reintentar.
+            await insertarORecuperarAlta(conexion.client, "direcciones_clientes",
+                { ...alta.direccion, id: alta.direccionId, cliente_id: alta.clienteId }, "cliente_id", alta.clienteId);
+            etapa = "lectura";
+            const resultado = await obtenerCliente(alta.clienteId);
+            if (!resultado.ok || !resultado.data?.direcciones_clientes?.some(d => d.id === alta.direccionId)) {
+                throw resultado.error || new Error("No se pudo confirmar el cliente con su dirección.");
+            }
+            try { window.sessionStorage.removeItem(claveAltaCliente(conexion)); } catch (_) { /* Recuperar nuevamente sin duplicar. */ }
+            return { ...resultado, recuperada: eraPendiente };
+        } catch (error) {
+            if (persistida && !eraPendiente && etapa === "cliente" && /^(22[0-9A-Z]{3}|23502|23503|23514|42501)$/.test(error?.code || "")) {
+                try { window.sessionStorage.removeItem(claveAltaCliente(conexion)); persistida = false; } catch (_) { /* Conservar el envío. */ }
+            }
+            return { ok: false, data: null, pendiente: persistida, error: persistida
+                ? "No se pudo confirmar el alta completa. Volvé a guardar con los mismos datos para recuperar el cliente y su dirección, sin repetirlos. Mantené esta pestaña abierta."
+                : (error?.message || "No se pudo preparar el alta segura.") };
+        } finally {
+            altaClienteEnCurso = false;
         }
-        if (payload.email && !emailValido(payload.email)) {
-            return { ok: false, data: null, error: "Email inválido." };
-        }
-        const direccionPreparada = prepararDireccion(direccion || {}, true);
-        if (!direccionPreparada.calle || !direccionPreparada.numero) {
-            return { ok: false, data: null, error: "Calle y número son obligatorios." };
-        }
-        payload.created_by = userId;
-
-        if (!opciones.omitirDuplicados) {
-            const duplicados = await detectarDuplicados({ cliente: payload, direccion: direccionPreparada });
-            if (!duplicados.ok) return duplicados;
-            if (duplicados.data.length) return { ok: false, data: null, duplicados: duplicados.data, error: "Encontramos un cliente que podría ser el mismo." };
-        }
-
-        const respuestaCliente = await conexion.client.from("clientes").insert(payload).select().single();
-        const { data, error } = respuestaCliente;
-        if (error) {
-            console.error("[Clientes] Error al crear cliente", { code: error.code, message: error.message, table: "public.clientes", operation: "insert" });
-            return { ok: false, data: null, error };
-        }
-        console.log("[Clientes] cliente creado:", data.id);
-
-        const creada = await crearDireccion(data.id, direccionPreparada, true);
-        if (!creada.ok) return { ok: false, data, error: creada.error };
-
-        return obtenerCliente(data.id);
     }
 
     async function actualizarCliente(id, cliente, opciones = {}) {

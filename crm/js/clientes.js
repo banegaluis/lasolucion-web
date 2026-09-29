@@ -186,6 +186,15 @@
                 r = await window.ClientesSupabaseService.crearCliente(datosCliente(), dir, { omitirDuplicados: forzar });
             }
 
+            if (r.altaPendiente) {
+                const pendiente = r.altaPendiente;
+                if (!confirm(`Hay un alta anterior pendiente: ${pendiente.nombre}, ${pendiente.direccion}. ¿Querés recuperar ese cliente con sus datos originales? Los datos nuevos del formulario no se enviarán.`)) {
+                    mensajeModal("clienteModalMensaje", "El alta anterior sigue pendiente. No se creó otro cliente.", "error");
+                    return;
+                }
+                r = await window.ClientesSupabaseService.crearCliente({}, null, { recuperarPendiente: true });
+            }
+
             if (r.duplicados?.length) {
                 mostrarDuplicados(r.duplicados);
                 mensajeModal("clienteModalMensaje", "Revisá posibles duplicados antes de continuar.", "error");
@@ -199,7 +208,7 @@
             cerrarModalCliente();
             estado.seleccionado = r.data?.id || id || estado.seleccionado;
             await cargarClientes();
-            mensaje("Cliente guardado correctamente.", "success");
+            mensaje(r.recuperada ? "Cliente y dirección originales recuperados correctamente." : "Cliente guardado correctamente.", "success");
         } finally {
             guardandoCliente = false;
             estado.guardando = false;
