@@ -59,3 +59,13 @@ Actualizado: 28/09/2026. Base de esta etapa: `5d49df9`.
 - Si cambiaron los datos, Clientes y Nueva Orden ofrecen recuperar el alta anterior mediante confirmación. En Nueva Orden, la recuperación de otros datos selecciona el cliente original y detiene el guardado para que se revise antes de continuar.
 - Validación: 40 pruebas automatizadas aprobadas. Trece nuevas cubren cortes antes/después de ambas inserciones y lectura final, recuperación tras recarga del servicio, cambios de datos, permisos, almacenamiento, sesión/cuenta, concurrencia y duplicados nuevos. Consultas reales de metadatos confirmaron UUID/PK y políticas; ninguna escritura en producción.
 - Límites: sigue siendo una secuencia de dos escrituras, no una transacción atómica. Un cliente puede quedar temporalmente sin dirección hasta recuperar el envío. Se necesita conservar los datos de la pestaña. Tras recargar, se reingresan datos válidos para llegar a Guardar; no hay restauración automática del formulario vacío. Edición de clientes y agregado de direcciones adicionales no están cubiertos por esta recuperación. Pendientes prueba real en iPhone y publicación.
+
+## Recuperación de contraseña — 28/09/2026
+
+- El login conectado incorpora “¿Olvidaste tu contraseña?” y solicita el email antes de enviar el enlace.
+- El envío usa Supabase Auth `resetPasswordForEmail` con retorno a `crm/recuperar-clave.html`; el mensaje no revela si el email existe.
+- La pantalla de recuperación valida la sesión creada por el enlace, exige confirmación de la nueva clave y actualiza la contraseña con `updateUser`.
+- Después del cambio se cierra la sesión de recuperación y se vuelve al login con confirmación visible.
+- Se reutilizan los estilos y servicios de Auth existentes; no se guarda ninguna contraseña en localStorage ni en el repositorio.
+- Para producción, la URL `https://banegaluis.github.io/lasolucion-web/crm/recuperar-clave.html` debe estar admitida en la configuración de Redirect URLs de Supabase Auth; si el proveedor ignora un redirect no autorizado, hay que agregar esa URL en Auth > URL Configuration.
+
