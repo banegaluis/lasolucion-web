@@ -490,6 +490,10 @@ function obtenerSesionActual() {
     inicializarUsuarios();
     const sesion = leerJSONLocalStorage(AUTH_STORAGE_KEYS.sesionActual, null);
 
+    if (window.LaSolucionSupabase?.isConfigured() && sesion?.origen !== "supabase") {
+        limpiarSesionLocal();
+        return null;
+    }
     if (!sesion || !sesion.usuarioId) {
         return migrarSesionLegacySiEsSegura();
     }

@@ -97,6 +97,10 @@ function cerrarRegistro() {
 
 function registrarCuentaPublicaDesdeFormulario(evento) {
     evento.preventDefault();
+    if (window.LaSolucionSupabase?.isConfigured()) {
+        mostrarMensajeRegistro("El acceso interno lo habilita el administrador.", "error");
+        return;
+    }
 
     if (typeof crearCuentaPublica !== "function" || typeof iniciarSesion !== "function") {
         mostrarMensajeRegistro("No se pudo crear la cuenta. Recargá la página.", "error");
@@ -126,7 +130,7 @@ async function login() {
     if (loginEnProceso) return;
 
     const usuario = obtenerValorCampo("user");
-    const password = obtenerValorCampo("pass");
+    const password = document.getElementById("pass")?.value || "";
 
     if (!usuario || !password) {
         mostrarMensajeLogin("Completá usuario o email y contraseña.");
@@ -175,6 +179,10 @@ async function login() {
             return;
         }
 
+        if (window.LaSolucionSupabase?.isConfigured()) {
+            mostrarMensajeLogin("Ingresá con el email y la contraseña de tu cuenta. El acceso local no guarda trabajos online.");
+            return;
+        }
         const resultado = autenticarUsuario(usuario, password);
 
         if (!resultado.ok) {
@@ -238,6 +246,10 @@ function iniciarLogin() {
             redireccionarSiLogueado();
         }
 
+        if (window.LaSolucionSupabase?.isConfigured()) {
+            const registro = document.getElementById("btnAbrirRegistro");
+            if (registro) registro.hidden = true;
+        }
         registrarEventosLogin();
         limpiarMensajeLogin();
         return;

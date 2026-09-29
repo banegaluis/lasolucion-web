@@ -143,6 +143,11 @@ const navIcons = {
     }
 
     function getStoredOrdersForSearch() {
+        if (window.LaSolucionSupabase?.isConfigured()) {
+            if (typeof window.obtenerOrdenesDashboard === "function") return window.obtenerOrdenesDashboard();
+            if (typeof window.obtenerOrdenesAutorizadas === "function") return window.obtenerOrdenesAutorizadas();
+            return [];
+        }
         if (typeof window.obtenerOrdenesVisibles === "function") return window.obtenerOrdenesVisibles();
         if (typeof window.obtenerOrdenes === "function") return window.obtenerOrdenes();
 
@@ -177,7 +182,7 @@ const navIcons = {
             type: "Orden",
             title: order.cliente || "Cliente sin nombre",
             description: [order.trabajo, order.direccion, order.telefono].filter(Boolean).join(" ? "),
-            href: "agenda.html?orden=" + encodeURIComponent(order.id || ""),
+            href: "ordenes.html?orden=" + encodeURIComponent(order.id || ""),
             keywords: [order.cliente, order.telefono, order.direccion, order.trabajo, order.descripcion, order.tecnicoNombre, order.categoria, order.estado].join(" ")
         }));
 

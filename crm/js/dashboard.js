@@ -6,9 +6,18 @@
 (function () {
     const ESTADOS_FINALIZADOS = ["terminado", "terminada", "cancelado", "cancelada", "cerrada", "cerrado", "historial"];
 
+    let ordenesActuales = [];
+    let resumenAdmin = null;
+    let cargaActual = 0;
     document.addEventListener("DOMContentLoaded", cargarDashboard);
+    window.addEventListener("ordenes:supabase-actualizadas", cargarDashboard);
+    window.addEventListener("pageshow", evento => { if (evento.persisted) cargarDashboard(); });
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") cargarDashboard();
+    });
 
-    function cargarDashboard() {
+    async function cargarDashboard() {
+        const carga = ++cargaActual;
         const root = document.getElementById("dashboardRoot");
 
         try {
@@ -25,12 +34,27 @@
                 return;
             }
 
+            root.innerHTML = crearEstadoVacio("Cargando tus trabajos…", "Consultando los datos guardados.");
+            ordenesActuales = [];
+            const servicio = window.OrdenesSupabaseService;
+            if (!servicio) throw new Error("Servicio de órdenes no disponible.");
+            const resultado = await servicio.listarOrdenes();
+            if (carga !== cargaActual) return;
+            if (!resultado.ok) throw new Error(typeof resultado.error === "string" ? resultado.error : resultado.error?.message);
+            ordenesActuales = resultado.data.map(servicio.mapearOrden);
+            resumenAdmin = normalizarRol(usuario.rol) === "administrador" ? await servicio.resumenAdministrativo() : null;
+            if (carga !== cargaActual) return;
             root.dataset.rol = normalizarRol(usuario.rol) || "sin-rol";
             renderizarDashboardPorRol(root, usuario);
         } catch (error) {
             console.error("[Dashboard] Error al renderizar:", error);
             if (root) {
-                root.innerHTML = crearErrorDashboard();
+                if (carga !== cargaActual) return;
+                ordenesActuales = [];
+                root.innerHTML = crearEstadoVacio("No se pudieron cargar tus trabajos", "Comprobá tu conexión. Volvé a intentarlo o iniciá sesión nuevamente.") +
+                    '<button type="button" class="role-action-button" id="reintentarDashboard">Reintentar</button> <a class="role-action-button" href="index.html" id="accederDashboard">Iniciar sesión</a>';
+                root.querySelector("#reintentarDashboard")?.addEventListener("click", cargarDashboard);
+                root.querySelector("#accederDashboard")?.addEventListener("click", () => window.limpiarSesionLocal?.());
             }
         }
     }
@@ -59,7 +83,7 @@
 
     function renderizarDashboardAdministrador(root, usuario, ordenes) {
         const resumen = obtenerResumenAdministrador(ordenes);
-        const usuariosPendientes = obtenerUsuariosLocales().filter(u => u.estado === "pendiente" || u.rol === "cliente_pendiente").length;
+        const usuariosPendientes = resumenAdmin?.ok ? resumenAdmin.pendientes : "—";
         root.innerHTML = crearDashboardEjecutivoAdministrador(usuario, ordenes, resumen, usuariosPendientes);
     }
 
@@ -82,14 +106,12 @@
     }
 
     function crearPanelAdministrativoEjecutivo(resumen, usuariosPendientes) {
-        const usuarios = obtenerUsuariosLocales();
-        const tecnicosActivos = usuarios.filter(usuario => normalizarRol(usuario.rol) === "tecnico" && normalizar(usuario.estado) === "activo").length;
-        const tecnicosSinVinculo = usuarios.filter(usuario => normalizarRol(usuario.rol) === "tecnico" && normalizar(usuario.estado) === "activo" && !usuario.tecnicoId).length;
+        const tecnicosActivos = resumenAdmin?.ok ? resumenAdmin.tecnicos : "—";
         const alertas = [
-            { label: "Usuarios pendientes", value: usuariosPendientes, detail: "Cuentas por revisar", href: "usuarios.html", tone: "is-amber" },
+            { label: "Usuarios pendientes", value: usuariosPendientes, detail: resumenAdmin?.ok ? "Cuentas por revisar" : "Consulta no disponible", href: "usuarios.html", tone: "is-amber" },
             { label: "\u00d3rdenes sin t\u00e9cnico", value: resumen.sinTecnico, detail: "Requieren asignaci\u00f3n", href: "ordenes.html", tone: "is-red" },
             { label: "\u00d3rdenes demoradas", value: resumen.atrasadas, detail: "Seg\u00fan fecha cargada", href: "ordenes.html", tone: "is-red" },
-            { label: "T\u00e9cnicos activos", value: tecnicosActivos, detail: tecnicosSinVinculo ? String(tecnicosSinVinculo) + " sin v\u00ednculo" : "Vinculaci\u00f3n correcta", href: "usuarios.html", tone: "is-green" }
+            { label: "T\u00e9cnicos activos", value: tecnicosActivos, detail: resumenAdmin?.ok ? "Registrados en el sistema" : "Consulta no disponible", href: "usuarios.html", tone: "is-green" }
         ];
         return `
             <article class="executive-panel executive-admin-panel">
@@ -157,6 +179,7 @@
                         ${crearLeyendaEjecutiva("Pendientes", pendientes, pendientePct, "is-red")}
                         ${crearLeyendaEjecutiva("En proceso", enProceso, procesoPct, "is-amber")}
                         ${crearLeyendaEjecutiva("Terminadas", terminadas, terminadoPct, "is-green")}
+                        ${crearLeyendaEjecutiva("Canceladas", resumen.canceladas, Math.round(resumen.canceladas / totalBase * 100), "")}
                     </dl>
                 </div>
                 <div class="executive-situation-status">
@@ -185,7 +208,7 @@
             <article class="executive-panel executive-quick">
                 <div class="executive-panel-heading">
                     <h2>Accesos rápidos</h2>
-                    ${usuariosPendientes ? `<span>${escapar(usuariosPendientes)} usuario(s) pendiente(s)</span>` : ""}
+                    ${typeof usuariosPendientes === "number" && usuariosPendientes > 0 ? `<span>${escapar(usuariosPendientes)} usuario(s) pendiente(s)</span>` : ""}
                 </div>
                 <div>${accesos.map(item => `
                     <a href="${escaparAttr(item.href)}" class="executive-quick-link"><span aria-hidden="true">${escapar(item.icono)}</span>${escapar(item.texto)}</a>
@@ -441,14 +464,9 @@
         return crearEstadoVacio("No se pudo cargar el Dashboard.", "Revisá la consola para obtener más información.");
     }
     function obtenerOrdenesSeguras() {
-        if (typeof obtenerOrdenes === "function") return obtenerOrdenes();
-        try {
-            const data = JSON.parse(localStorage.getItem("ordenes") || "[]");
-            return Array.isArray(data) ? data : [];
-        } catch (error) {
-            return [];
-        }
+        return ordenesActuales;
     }
+    window.obtenerOrdenesDashboard = obtenerOrdenesSeguras;
 
     function obtenerUsuariosLocales() {
         return typeof obtenerUsuarios === "function" ? obtenerUsuarios() : [];
@@ -489,15 +507,16 @@
             pendientes: ordenes.filter(o => normalizar(o.estado || "pendiente").includes("pendiente")).length,
             enProceso: ordenes.filter(o => normalizar(o.estado).includes("proceso")).length,
             realizados: ordenes.filter(o => normalizar(o.estado).includes("realizado")).length,
-            terminadas: ordenes.filter(ordenFinalizada).length,
-            sinTecnico: ordenes.filter(o => !o.tecnicoId && !o.tecnicoNombre).length,
+            terminadas: ordenes.filter(o => ["terminado", "terminada"].includes(normalizar(o.estado))).length,
+            canceladas: ordenes.filter(o => ["cancelado", "cancelada"].includes(normalizar(o.estado))).length,
+            sinTecnico: ordenes.filter(o => !ordenFinalizada(o) && !o.tecnicoId).length,
             atrasadas: obtenerOrdenesAtrasadas(ordenes).length
         };
     }
 
     function obtenerOrdenesAtrasadas(ordenes) {
         const hoy = inicioDelDia(new Date());
-        return ordenes.filter(orden => !ordenFinalizada(orden) && fechaHoraOrden(orden) < hoy);
+        return ordenes.filter(orden => !ordenFinalizada(orden) && Boolean(orden.fecha) && fechaHoraOrden(orden) < hoy);
     }
 
     function ordenFinalizada(orden) {

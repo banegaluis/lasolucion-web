@@ -141,55 +141,7 @@ function normalizarRelacionOrden(relacion) {
 }
 
 function mapearOrdenSupabase(orden) {
-    const cliente = normalizarRelacionOrden(orden.clientes);
-    const direccion = normalizarRelacionOrden(orden.direcciones_clientes);
-    const tecnico = normalizarRelacionOrden(orden.tecnicos);
-    const perfilTecnico = normalizarRelacionOrden(tecnico?.perfiles);
-    const categoria = normalizarRelacionOrden(orden.categorias_trabajo);
-    const tecnicoNombre = [perfilTecnico?.nombre, perfilTecnico?.apellido].filter(Boolean).join(" ").trim();
-    const snapshot = orden.direccion_snapshot || {};
-    const direccionCompleta = direccion?.direccion_completa || construirDireccion(
-        direccion?.calle || snapshot.calle || "",
-        direccion?.numero || snapshot.numero || "",
-        direccion?.piso || snapshot.piso || "-",
-        direccion?.departamento || snapshot.departamento || "-",
-        direccion?.ciudad || snapshot.ciudad || "Córdoba",
-        direccion?.provincia || snapshot.provincia || "Córdoba",
-        snapshot.direccion || ""
-    );
-    const estado = estadoDBALocalOrden(orden.estado);
-
-    return {
-        id: orden.id,
-        numeroOrden: orden.numero_orden,
-        clienteId: orden.cliente_id,
-        clienteIdSupabase: orden.cliente_id,
-        direccionIdSupabase: orden.direccion_cliente_id || "",
-        cliente: cliente?.nombre_completo || "Cliente sin nombre",
-        telefono: orden.telefono_contacto || cliente?.telefono_principal || "",
-        calle: direccion?.calle || snapshot.calle || "",
-        numero: direccion?.numero || snapshot.numero || "",
-        piso: direccion?.piso || snapshot.piso || "-",
-        departamento: direccion?.departamento || snapshot.departamento || "-",
-        ciudad: direccion?.ciudad || snapshot.ciudad || "Córdoba",
-        provincia: direccion?.provincia || snapshot.provincia || "Córdoba",
-        direccion: direccionCompleta || "Sin dirección",
-        fecha: orden.fecha_programada || "",
-        hora: normalizarHoraOrdenDB(orden.hora_inicio),
-        horaFin: normalizarHoraOrdenDB(orden.hora_fin),
-        trabajo: orden.titulo || orden.descripcion_solicitud || "Sin descripción",
-        descripcion: orden.descripcion_solicitud || orden.titulo || "",
-        estado,
-        prioridad: orden.prioridad || "media",
-        tecnicoId: orden.tecnico_id || "",
-        tecnicoNombre: tecnicoNombre || tecnico?.especialidad || "Sin asignar",
-        categoriaId: orden.categoria_id || "",
-        categoria: categoria?.nombre || categoria?.slug || "Sin categoría",
-        createdAt: orden.created_at,
-        updatedAt: orden.updated_at,
-        historial: ["terminado", "cancelado"].includes(estado),
-        raw: orden
-    };
+    return window.OrdenesSupabaseService.mapearOrden(orden);
 }
 
 function guardarOrdenEnEstado(orden) {
@@ -594,6 +546,8 @@ async function guardarOrden() {
         return;
     }
 
+    if (!ordenEditando && await recuperarEnvioPendienteOrden()) return;
+
     const puedeAsignar = puedeAsignarTecnico();
     const tecnicoId = puedeAsignar ? obtenerValorCampo("tecnicoId").trim() : (ordenActual?.tecnicoId || "");
     const tecnicoNombre = puedeAsignar
@@ -627,7 +581,7 @@ async function guardarOrden() {
         return;
     }
 
-    if (!ordenEditando) {
+    if (!ordenEditando || datosOrden.fecha !== ordenActual.fecha || datosOrden.hora !== ordenActual.hora || datosOrden.tecnicoId !== ordenActual.tecnicoId) {
         const horario = validarHorarioFuturoOrden(datosOrden.fecha, datosOrden.hora);
         if (!horario.ok) {
             alert(horario.error);
@@ -648,8 +602,11 @@ async function guardarOrden() {
                 datosOrden.fecha,
                 datosOrden.hora,
                 DURACION_ORDEN_MINUTOS,
-                MARGEN_ENTRE_ORDENES_MINUTOS
+                MARGEN_ENTRE_ORDENES_MINUTOS,
+                { tecnicoId: datosOrden.tecnicoId, excluirId: ordenEditando }
             );
+        } catch (error) {
+            disponibilidad = { ok: false, error };
         } finally {
             clientesOrdenState.validandoHorario = false;
             actualizarGuardadoVisualOrden(false);
@@ -723,17 +680,7 @@ async function guardarOrden() {
             alert("No se pudieron guardar los cambios en Supabase.");
             return;
         }
-        guardarOrdenEnEstado(actualizacion.data);
-        const verificacion = await window.OrdenesSupabaseService.obtenerOrdenConHistorial(idOrden);
-        if (verificacion?.ok && verificacion.data) guardarOrdenEnEstado(verificacion.data);
-        ordenEditando = null;
-        finalizarGuardadoOrden();
-        resetearClienteFormularioOrden();
-        limpiarFormularioOrden();
-        renderizarHistorialRealOrden([]);
-        cerrarAgenda();
-        await cargarOrdenes();
-        alert("Orden actualizada correctamente.");
+        await completarGuardadoConfirmadoOrden(actualizacion.data, "Orden actualizada correctamente.");
         return;
     }
 
@@ -768,16 +715,62 @@ async function guardarOrden() {
     }
 
     const ordenCreada = resultado.data;
-    if (ordenCreada?.id) {
-        const creadaCompleta = await window.OrdenesSupabaseService.obtenerOrden(ordenCreada.id);
-        if (creadaCompleta?.ok && creadaCompleta.data) guardarOrdenEnEstado(creadaCompleta.data);
+    const mensaje = ordenCreada.numero_orden != null
+        ? `Orden N.º ${ordenCreada.numero_orden} creada correctamente.`
+        : "Orden creada correctamente.";
+    await completarGuardadoConfirmadoOrden(ordenCreada, mensaje);
+}
+
+async function recuperarEnvioPendienteOrden() {
+    const servicio = window.OrdenesSupabaseService;
+    if (!servicio?.obtenerCreacionPendiente) return false;
+    clientesOrdenState.guardando = true;
+    actualizarGuardadoVisualOrden(true);
+    try {
+        const pendiente = await servicio.obtenerCreacionPendiente();
+        if (!pendiente.ok) {
+            mostrarErrorClienteOrden(textoErrorOrden(pendiente.error));
+            return true;
+        }
+        if (!pendiente.data) return false;
+        const datos = pendiente.data;
+        const resumen = `${datos.titulo || "Orden"} — ${datos.fecha_programada || "Sin fecha"} ${datos.hora_inicio || ""}`;
+        if (!confirm(`Hay un envío sin confirmar: ${resumen}.\n\n¿Querés recuperar o completar ese envío con sus datos originales? Los cambios posteriores del formulario no se enviarán.`)) return true;
+        const resultado = await servicio.crearOrden(datos);
+        if (!resultado.ok || !resultado.data) {
+            mostrarErrorClienteOrden(textoErrorOrden(resultado.error));
+            return true;
+        }
+        await completarGuardadoConfirmadoOrden(resultado.data,
+            `Envío recuperado: orden N.º ${resultado.data.numero_orden}. Se conservaron los datos originales del envío.`);
+        return true;
+    } catch (error) {
+        mostrarErrorClienteOrden(textoErrorOrden(error));
+        return true;
+    } finally {
+        finalizarGuardadoOrden();
     }
-    finalizarGuardadoOrden();
-    resetearClienteFormularioOrden();
-    limpiarFormularioOrden();
-    cerrarAgenda();
-    await cargarOrdenes();
-    alert(`Orden N.º ${ordenCreada.numero_orden} creada correctamente`);
+}
+
+// La escritura ya fue confirmada: una lectura posterior no debe permitir repetirla.
+async function completarGuardadoConfirmadoOrden(orden, mensaje) {
+    let listadoActualizado = false;
+    try {
+        guardarOrdenEnEstado(orden);
+        ordenEditando = null;
+        resetearClienteFormularioOrden();
+        limpiarFormularioOrden();
+        renderizarHistorialRealOrden([]);
+        cerrarAgenda();
+        listadoActualizado = await cargarOrdenes();
+    } catch (error) {
+        console.error("[Órdenes] Guardado confirmado; no se pudo actualizar la vista", {
+            message: textoErrorOrden(error)
+        });
+    } finally {
+        finalizarGuardadoOrden();
+    }
+    alert(listadoActualizado ? mensaje : `${mensaje} No se pudo actualizar el listado. Recargá la página para verlo; no vuelvas a crear la misma orden.`);
 }
 
 function inicializarAutocompleteClientesOrden() {
@@ -987,8 +980,20 @@ async function resolverClienteSupabaseParaOrden(datosOrden, datosDireccion) {
         telefono_principal: datosOrden.telefono
     };
     const direccion = direccionParaSupabase(datosDireccion);
-    const resultado = await window.ClientesSupabaseService.crearCliente(cliente, direccion, { omitirDuplicados: clientesOrdenState.crearForzado });
+    let resultado = await window.ClientesSupabaseService.crearCliente(cliente, direccion, { omitirDuplicados: clientesOrdenState.crearForzado });
     clientesOrdenState.crearForzado = false;
+
+    if (resultado.altaPendiente) {
+        const pendiente = resultado.altaPendiente;
+        if (!confirm(`Hay un alta anterior pendiente: ${pendiente.nombre}, ${pendiente.direccion}. ¿Querés recuperarla con sus datos originales? Después podrás revisar el cliente de esta orden.`)) {
+            return { ok: false, error: "El alta anterior sigue pendiente. No se creó otro cliente." };
+        }
+        resultado = await window.ClientesSupabaseService.crearCliente({}, null, { recuperarPendiente: true });
+        if (!resultado.ok) return { ok: false, error: textoErrorOrden(resultado.error) };
+        const principal = window.ClientesSupabaseService.obtenerDireccionPrincipalCliente(resultado.data);
+        seleccionarClienteOrden(resultado.data, principal);
+        return { ok: false, error: "Cliente anterior recuperado. Revisá el cliente y la dirección antes de volver a guardar la orden." };
+    }
 
     if (resultado.duplicados?.length) {
         mostrarDuplicadosOrden(resultado.duplicados);
@@ -1037,8 +1042,14 @@ async function cambiarEstadoManual(id, nuevoEstado) {
     if (ordenesSupabaseState.mutando || !window.OrdenesSupabaseService?.cambiarEstado) return;
 
     ordenesSupabaseState.mutando = true;
-    const resultado = await window.OrdenesSupabaseService.cambiarEstado(id, nuevoEstado);
-    ordenesSupabaseState.mutando = false;
+    let resultado;
+    try {
+        resultado = await window.OrdenesSupabaseService.cambiarEstado(id, nuevoEstado);
+    } catch (error) {
+        resultado = { ok: false, error };
+    } finally {
+        ordenesSupabaseState.mutando = false;
+    }
     if (!resultado?.ok || !resultado.data) {
         console.error("[Órdenes] Error al cambiar estado", {
             code: resultado?.error?.code || null,
@@ -1297,18 +1308,24 @@ function renderizarOrdenes() {
 async function cargarOrdenes() {
     const lista = document.getElementById("listaOrdenes");
     const hist = document.getElementById("historialOrdenes");
-    if (!lista || !hist || ordenesSupabaseState.cargando) return;
+    if (!lista || !hist || ordenesSupabaseState.cargando) return false;
     if (!window.OrdenesSupabaseService?.listarOrdenes) {
         actualizarResumenOrdenes(0, 0, 0);
         lista.replaceChildren();
         hist.replaceChildren();
         renderizarVacioOrdenes(lista, "El servicio de órdenes Supabase no está disponible.");
-        return;
+        return false;
     }
 
     ordenesSupabaseState.cargando = true;
-    const resultado = await window.OrdenesSupabaseService.listarOrdenes();
-    ordenesSupabaseState.cargando = false;
+    let resultado;
+    try {
+        resultado = await window.OrdenesSupabaseService.listarOrdenes();
+    } catch (error) {
+        resultado = { ok: false, error };
+    } finally {
+        ordenesSupabaseState.cargando = false;
+    }
     if (!resultado?.ok) {
         console.error("[Órdenes] Error al cargar listado", {
             code: resultado?.error?.code || null,
@@ -1318,7 +1335,7 @@ async function cargarOrdenes() {
         hist.replaceChildren();
         renderizarVacioOrdenes(lista, "No se pudieron cargar las órdenes. Verificá tu sesión y volvé a intentar.");
         actualizarResumenOrdenes(0, 0, 0);
-        return;
+        return false;
     }
 
     const unicas = new Map();
@@ -1328,6 +1345,7 @@ async function cargarOrdenes() {
     ordenesSupabaseState.ordenes = Array.from(unicas.values());
     ordenesSupabaseState.porId = new Map(ordenesSupabaseState.ordenes.map(orden => [String(orden.id), orden]));
     renderizarOrdenes();
+    return true;
 }
 
 function reiniciarEdicionOrden() {
