@@ -62,7 +62,7 @@ Actualizado: 28/09/2026. Base de esta etapa: `5d49df9`.
 
 ## Recuperación de contraseña — 28/09/2026
 
-- El login conectado incorpora “¿Olvidaste tu contraseña?” y solicita el email antes de enviar el enlace.
+- El login conectado incorpora “¿Olvidaste tu contraseña?” y abre una ventana propia para ingresar el email y enviar el enlace, sin depender del campo de usuario del login.
 - El envío usa Supabase Auth `resetPasswordForEmail` con retorno a `crm/recuperar-clave.html`; el mensaje no revela si el email existe.
 - La pantalla de recuperación valida la sesión creada por el enlace, exige confirmación de la nueva clave y actualiza la contraseña con `updateUser`.
 - Después del cambio se cierra la sesión de recuperación y se vuelve al login con confirmación visible.
