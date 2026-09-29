@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva contraseña | La Solución</title>
+    <link rel="icon" type="image/png" href="assets/logo/logo.png">
+    <link rel="stylesheet" href="css/style.css?v=auth-recovery-20260928-1">
+</head>
+<body>
+    <div id="loginView">
+        <form id="recoveryForm" class="login-container" novalidate>
+            <img src="assets/logo/logo.png" alt="La Solución" class="logo-login">
+            <h1 class="titulo-login">Nueva contraseña</h1>
+
+            <p id="recoveryIntro" class="login-message">Validando el enlace de recuperación…</p>
+
+            <label for="newPass">Nueva contraseña</label>
+            <input type="password" id="newPass" placeholder="Mínimo 8 caracteres" autocomplete="new-password" disabled>
+
+            <label for="newPassConfirm">Repetir contraseña</label>
+            <input type="password" id="newPassConfirm" placeholder="Repetí la contraseña" autocomplete="new-password" disabled>
+
+            <button id="btnGuardarNuevaClave" class="btn-login" type="submit" disabled>GUARDAR NUEVA CONTRASEÑA</button>
+            <a class="btn-login-secondary" href="index.html">VOLVER AL LOGIN</a>
+
+            <p id="recoveryMsg" class="login-message" aria-live="polite"></p>
+        </form>
+    </div>
+
+    <script src="js/config/supabase-config.js"></script>
+    <script src="js/services/supabaseClient.js"></script>
+    <script src="js/services/authService.js"></script>
+    <script src="js/recuperar-clave.js"></script>
+</body>
+</html>
