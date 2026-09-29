@@ -17,3 +17,7 @@ Agenda con consulta periódica cada 30 segundos mientras está visible, al recup
 La revisión automática rechazó `apply_migration`: consideró que los cambios de permisos en producción requieren autorización específica. No se reintentó ni se aplicó indirectamente. Solicitar autorización explícita antes de aplicar este SQL; conservar la restricción de login actual mientras tanto.
 
 Después: verificar admin/colaborador/técnico activo e inactivo con cuentas de prueba autorizadas; comprobar que un técnico solo vea sus trabajos; probar dos dispositivos; resolver edición concurrente. Para dar altas reales harán falta las identidades y roles, sin compartir contraseñas.
+
+## Continuación — 29/09/2026
+
+Se conserva la posición horaria al refrescar el mismo período de la agenda. El enfoque inicial no vuelve a ejecutarse cada 30 segundos ni al cambiar filtros. Se vuelve a aplicar al cambiar el período o tipo de vista. Los callbacks de render de consultas superadas se descartan. Prueba manual pendiente: abrir vista semanal, desplazarse a otra hora y esperar el refresco; cambiar de semana y regresar. La corrección SQL de permisos continúa sin aplicar y pendiente de autorización.

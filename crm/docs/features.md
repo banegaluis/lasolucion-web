@@ -77,3 +77,9 @@ Actualizado: 28/09/2026. Base de esta etapa: `5d49df9`.
 - Se verificó que la política de UPDATE de perfiles permite modificar rol/estado/activo propios. Se preparó `docs/sql/proteger_perfiles.sql` y se probó en transacción revertida: nombre editable, rol/estado/activo rechazados para un no administrador.
 - La revisión automática de aprobación rechazó aplicar esa corrección en producción porque requiere autorización específica de cambios de permisos. NO está aplicada. No se habilitó el login de técnicos ni se crearon usuarios nuevos. Los roles operativos actuales siguen admin/colaborador.
 - Pendientes: autorización para aplicar la corrección, pruebas reales con cuentas por rol y equipos separados, habilitación controlada de técnicos, actualización de roles locales y protección frente a dos ediciones simultáneas. No presentar esta entrega como multiusuario completamente terminado.
+
+## Agenda: conservar el horario consultado — 29/09/2026
+
+- Las actualizaciones automáticas y los filtros del mismo período conservan el desplazamiento horario del usuario. El enfoque inicial se realiza una sola vez por vista/período, y vuelve a habilitarse al cambiar de día, semana o tipo de vista.
+- Un desplazamiento pendiente se descarta si llegó una consulta posterior, para evitar saltos por respuestas atrasadas.
+- Validación automatizada: refrescos repetidos, cambio de período/vista, respuesta superada antes del render y recuperación después de una consulta fallida. No se modificaron permisos ni datos de producción. Pendiente comprobación en iPhone con sesión real.
