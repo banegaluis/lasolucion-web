@@ -1,5 +1,13 @@
 [
   {
+    "id": "visita-tecnica",
+    "title": "Visita técnica",
+    "description": "La visita técnica para evaluar el trabajo y elaborar el presupuesto tiene un costo de $50.000. Si aprobás el presupuesto y nos encargás el trabajo, descontamos esos $50.000 del total.",
+    "category": "Visita y presupuesto",
+    "price": "$50.000",
+    "note": "Se descuenta del trabajo contratado"
+  },
+  {
     "id": "recambio-calefon-tb",
     "title": "Recambio de calefón tiro balanceado posterior",
     "description": "Mano de obra de recambio / instalación. Materiales, flexibles, llaves, cañerías, adaptaciones y modificaciones de salida se cotizan aparte.",

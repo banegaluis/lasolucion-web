@@ -44,3 +44,10 @@ Imagen: otros-servicios.png
 Descripción: Contanos qué necesitás y te orientamos según el trabajo. Presupuesto según trabajo.
 Precio: Dejar vacío; consultar presupuesto
 Enlace opcional: https://banegaluis.github.io/lasolucion-web/catalogo.html#otros-servicios
+
+VISITA TÉCNICA
+Nombre: Visita técnica
+Imagen: Podés usar el logo de La Solución; este paquete no incluye una portada específica para la visita.
+Descripción: La visita técnica para evaluar el trabajo y elaborar el presupuesto tiene un costo de $50.000. Si aprobás el presupuesto y nos encargás el trabajo, descontamos esos $50.000 del total.
+Precio: 50000 ARS
+Enlace: https://banegaluis.github.io/lasolucion-web/catalogo.html#visita-tecnica

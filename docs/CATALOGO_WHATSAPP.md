@@ -96,3 +96,11 @@ La web pública no enlaza ni muestra el acceso interno al CRM.
 - No se cargaron fichas en una cuenta de WhatsApp Business: no hay integración disponible para hacerlo directamente en esta sesión. En iPhone: Herramientas → Catálogo → Añadir un artículo nuevo → Añadir fotos y videos; completar nombre y descripción. Fuente oficial: https://faq.whatsapp.com/833697274483076/?cms_platform=iphone
 - El enlace de cada ficha a la web es opcional: se puede mantener toda la consulta en el catálogo nativo. Ninguna ficha muestra un acceso al CRM.
 - Validación Chromium local: portada y catálogo en 1440 y 390 px, sin errores JS ni desbordamiento horizontal; seis fichas y cero enlaces a rutas internas. Pendiente aceptación visual de Luis y carga real en su cuenta.
+
+## Visita técnica y edición de precios — 29/09/2026
+
+Visita para evaluar y presupuestar: $50.000, descontables del total cuando el cliente aprueba el presupuesto y encarga el trabajo. Se muestra en portada, catálogo y fichas descargables.
+
+Actualmente no hay editor de precios en el CRM. Para actualizar la web, editar la tarjeta correspondiente en `index.html` y `catalogo.html`, incluidos sus mensajes de WhatsApp (`data-message` y URL `href`); actualizar también `assets/catalogo/servicios.json`, `FICHAS.txt` y regenerar el ZIP. Si una portada PNG lleva precio, actualizarla antes de distribuirla. Publicar mediante GitHub Pages y verificar el valor servido.
+
+El catálogo nativo de WhatsApp Business se edita por separado en la aplicación; estos archivos no sincronizan precios con Meta.
