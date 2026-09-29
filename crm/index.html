@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Solución</title>
     <link rel="icon" type="image/png" href="assets/logo/logo.png">
-    <link rel="stylesheet" href="css/style.css?v=sidebar-hidden-20260713-1">
+    <link rel="stylesheet" href="css/style.css?v=recovery-modal-20260928-1">
 </head>
 <body>
     <div id="loginView">
@@ -25,6 +25,34 @@
 
             <p id="msg" class="login-message" aria-live="polite"></p>
         </div>
+    </div>
+
+    <div id="recuperarClaveModal" class="registro-modal" hidden>
+        <div class="registro-modal-overlay" data-close-recuperacion="true"></div>
+        <form id="recuperarClaveForm" class="registro-dialog recuperar-clave-dialog" novalidate>
+            <header class="registro-dialog-header">
+                <div>
+                    <p class="registro-eyebrow">Recuperación de acceso</p>
+                    <h2>Recuperar contraseña</h2>
+                </div>
+                <button id="btnCerrarRecuperacion" type="button" class="registro-close" aria-label="Cerrar recuperación">×</button>
+            </header>
+
+            <div class="registro-dialog-body">
+                <p class="registro-help">Ingresá el email de tu cuenta. Te enviaremos un enlace seguro para crear una nueva contraseña.</p>
+
+                <label for="recuperarEmail">Email
+                    <input id="recuperarEmail" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com" required>
+                </label>
+
+                <p id="recuperarMensaje" class="registro-message" aria-live="polite"></p>
+            </div>
+
+            <footer class="registro-dialog-footer">
+                <button id="btnCancelarRecuperacion" type="button" class="btn-login-secondary">Cancelar</button>
+                <button id="btnEnviarRecuperacion" type="submit" class="btn-login">ENVIAR ENLACE</button>
+            </footer>
+        </form>
     </div>
 
     <div id="registroModal" class="registro-modal" hidden>
@@ -67,7 +95,7 @@
     <script src="js/config/supabase-config.js"></script>
     <script src="js/services/supabaseClient.js"></script>
     <script src="js/services/authService.js?v=recovery-20260928-2"></script>
-    <script src="js/login.js?v=recovery-20260928-2"></script>
+    <script src="js/login.js?v=recovery-modal-20260928-1"></script>
 </body>
 </html>
 
