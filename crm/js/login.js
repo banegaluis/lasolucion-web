@@ -126,6 +126,48 @@ function registrarCuentaPublicaDesdeFormulario(evento) {
     iniciarSesion(resultado.usuario);
     setTimeout(() => ingresarSistema(), 450);
 }
+let recuperacionEnProceso = false;
+
+async function solicitarRecuperacionClave() {
+    if (recuperacionEnProceso) return;
+
+    const email = obtenerValorCampo("user").toLowerCase();
+    if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+        mostrarMensajeLogin("Escribí tu email arriba para enviarte el enlace de recuperación.");
+        document.getElementById("user")?.focus();
+        return;
+    }
+
+    if (!window.LaSolucionSupabase?.isConfigured() || !window.AuthSupabaseService?.enviarRecuperacionClave) {
+        mostrarMensajeLogin("La recuperación online no está disponible en este momento.");
+        return;
+    }
+
+    const boton = document.getElementById("btnRecuperarClave");
+    recuperacionEnProceso = true;
+    if (boton) boton.disabled = true;
+    mostrarMensajeLogin("Enviando enlace de recuperación…");
+
+    try {
+        const redirectUrl = new URL("recuperar-clave.html", window.location.href);
+        redirectUrl.search = "";
+        redirectUrl.hash = "";
+
+        const resultado = await window.AuthSupabaseService.enviarRecuperacionClave(email, redirectUrl.href);
+        if (!resultado.ok) {
+            mostrarMensajeLogin("No pudimos enviar el enlace ahora. Intentá nuevamente en unos minutos.");
+            return;
+        }
+
+        mostrarMensajeLogin("Si ese email está registrado, te enviamos un enlace para crear una nueva contraseña. Revisá también spam.");
+    } catch (error) {
+        mostrarMensajeLogin("No pudimos enviar el enlace ahora. Intentá nuevamente en unos minutos.");
+    } finally {
+        recuperacionEnProceso = false;
+        if (boton) boton.disabled = false;
+    }
+}
+
 async function login() {
     if (loginEnProceso) return;
 
@@ -208,15 +250,30 @@ function limpiarMensajeLogin() {
     mostrarMensajeLogin("");
 }
 
+function mostrarEstadoInicialLogin() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("clave") === "actualizada") {
+        mostrarMensajeLogin("Contraseña actualizada. Ingresá con tu email y tu nueva clave.");
+        params.delete("clave");
+        const query = params.toString();
+        window.history.replaceState({}, document.title, window.location.pathname + (query ? `?${query}` : "") + window.location.hash);
+        return;
+    }
+
+    limpiarMensajeLogin();
+}
+
 function registrarEventosLogin() {
     const user = document.getElementById("user");
     const pass = document.getElementById("pass");
+    const btnRecuperarClave = document.getElementById("btnRecuperarClave");
     const btnAbrirRegistro = document.getElementById("btnAbrirRegistro");
     const btnCerrarRegistro = document.getElementById("btnCerrarRegistro");
     const btnCancelarRegistro = document.getElementById("btnCancelarRegistro");
     const registroForm = document.getElementById("registroForm");
     const registroOverlay = document.querySelector("[data-close-registro]");
 
+    btnRecuperarClave?.addEventListener("click", solicitarRecuperacionClave);
     btnAbrirRegistro?.addEventListener("click", abrirRegistro);
     btnCerrarRegistro?.addEventListener("click", cerrarRegistro);
     btnCancelarRegistro?.addEventListener("click", cerrarRegistro);
@@ -251,7 +308,7 @@ function iniciarLogin() {
             if (registro) registro.hidden = true;
         }
         registrarEventosLogin();
-        limpiarMensajeLogin();
+        mostrarEstadoInicialLogin();
         return;
     }
 
@@ -265,6 +322,7 @@ function iniciarLogin() {
     }
 }
 
+window.solicitarRecuperacionClave = solicitarRecuperacionClave;
 window.login = login;
 window.iniciarLogin = iniciarLogin;
 window.ingresarSistema = ingresarSistema;
