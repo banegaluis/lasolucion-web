@@ -1443,3 +1443,31 @@ textarea { font-size: 16px !important; }
    RELOJ CANÓNICO DE TOPBAR
    Hora y fecha siempre son elementos visualmente separados.
 ===================================================== */
+
+/* ================= RECUPERACIÓN DE CONTRASEÑA ================= */
+.recuperar-clave-dialog {
+    width: min(500px, 100%) !important;
+}
+
+.recuperar-clave-dialog .registro-dialog-body {
+    gap: 16px;
+}
+
+.recuperar-clave-dialog .registro-help {
+    line-height: 1.5;
+}
+
+.recuperar-clave-dialog #recuperarMensaje {
+    margin: 0;
+}
+
+@media (max-width: 560px) {
+    .recuperar-clave-dialog .registro-dialog-footer {
+        flex-direction: column-reverse;
+    }
+
+    .recuperar-clave-dialog .registro-dialog-footer button {
+        width: 100%;
+    }
+}
+
