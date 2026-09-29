@@ -51,6 +51,23 @@
         return { ok: !error, data, error };
     }
 
+    async function enviarRecuperacionClave(email, redirectTo) {
+        const client = await window.LaSolucionSupabase?.getClient();
+        if (!client) return respuestaSinConfig();
+
+        const options = redirectTo ? { redirectTo } : {};
+        const { data, error } = await client.auth.resetPasswordForEmail(email, options);
+        return { ok: !error, data, error };
+    }
+
+    async function actualizarClave(password) {
+        const client = await window.LaSolucionSupabase?.getClient();
+        if (!client) return respuestaSinConfig();
+
+        const { data, error } = await client.auth.updateUser({ password });
+        return { ok: !error, data, error };
+    }
+
     async function cerrarSesion() {
         const client = await window.LaSolucionSupabase?.getClient();
         if (!client) return { ok: false, error: "Supabase no configurado." };
@@ -127,6 +144,8 @@
         obtenerSesion,
         refrescarSesion,
         iniciarSesion,
+        enviarRecuperacionClave,
+        actualizarClave,
         cerrarSesion,
         obtenerPerfilActual,
         verificarSesionOperativa,
