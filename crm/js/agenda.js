@@ -19,6 +19,7 @@
     const DURACION_VISUAL_MINUTOS = 60;
     let sincronizandoAgenda = false;
     let secuenciaCarga = 0;
+    let ultimoPeriodoEnfocado = null;
 
     function permisoAgenda(nombre) {
         return window.PERMISOS?.[nombre] || "";
@@ -294,7 +295,15 @@
             mostrarEstadoCargaAgenda(ordenesAgenda.length ? "" : "No hay órdenes programadas en este período.", false);
             abrirOrdenDesdeUrl();
             successCallback(eventos);
-            window.requestAnimationFrame(() => enfocarHorarioRelevante(ordenesFiltradas));
+            const periodoVisible = `${calendario?.view?.type || ""}:${desde}:${hastaExclusivo}`;
+            if (periodoVisible !== ultimoPeriodoEnfocado) {
+                window.requestAnimationFrame(() => {
+                    // Una respuesta o navegación posterior invalida este desplazamiento.
+                    if (cargaActual !== secuenciaCarga) return;
+                    ultimoPeriodoEnfocado = periodoVisible;
+                    enfocarHorarioRelevante(ordenesFiltradas);
+                });
+            }
         } catch (error) {
             if (cargaActual !== secuenciaCarga) { failureCallback(error); return; }
             ordenesAgenda = [];
