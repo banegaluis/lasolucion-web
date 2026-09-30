@@ -127,6 +127,19 @@ function registrarCuentaPublicaDesdeFormulario(evento) {
     setTimeout(() => ingresarSistema(), 450);
 }
 let recuperacionEnProceso = false;
+const URL_RECUPERACION_PUBLICA = "https://banegaluis.github.io/lasolucion-web/crm/recuperar-clave.html";
+
+function obtenerUrlRecuperacionClave(ubicacion = window.location) {
+    const actual = new URL(ubicacion.href);
+    const esEntornoLocal = actual.protocol === "file:" || ["localhost", "127.0.0.1", "::1"].includes(actual.hostname);
+
+    if (esEntornoLocal) return URL_RECUPERACION_PUBLICA;
+
+    const redirectUrl = new URL("recuperar-clave.html", actual.href);
+    redirectUrl.search = "";
+    redirectUrl.hash = "";
+    return redirectUrl.href;
+}
 
 function mostrarMensajeRecuperacion(texto, tipo = "") {
     const mensaje = document.getElementById("recuperarMensaje");
@@ -183,18 +196,16 @@ async function solicitarRecuperacionClave(evento) {
     mostrarMensajeRecuperacion("Enviando enlace de recuperación…");
 
     try {
-        const redirectUrl = new URL("recuperar-clave.html", window.location.href);
-        redirectUrl.search = "";
-        redirectUrl.hash = "";
+        const redirectUrl = obtenerUrlRecuperacionClave();
 
-        const resultado = await window.AuthSupabaseService.enviarRecuperacionClave(email, redirectUrl.href);
+        const resultado = await window.AuthSupabaseService.enviarRecuperacionClave(email, redirectUrl);
         if (!resultado.ok) {
             mostrarMensajeRecuperacion("No pudimos enviar el enlace ahora. Intentá nuevamente en unos minutos.", "error");
             return;
         }
 
         mostrarMensajeRecuperacion(
-            "Si ese email está registrado, te enviamos un enlace para crear una nueva contraseña. Revisá también spam.",
+            "Si ese email está registrado, te enviamos un enlace para crear una nueva contraseña. Debe abrir la web de La Solución; revisá también spam.",
             "success"
         );
     } catch (error) {
