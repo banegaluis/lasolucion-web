@@ -83,3 +83,12 @@ Actualizado: 28/09/2026. Base de esta etapa: `5d49df9`.
 - Las actualizaciones automáticas y los filtros del mismo período conservan el desplazamiento horario del usuario. El enfoque inicial se realiza una sola vez por vista/período, y vuelve a habilitarse al cambiar de día, semana o tipo de vista.
 - Un desplazamiento pendiente se descarta si llegó una consulta posterior, para evitar saltos por respuestas atrasadas.
 - Validación automatizada: refrescos repetidos, cambio de período/vista, respuesta superada antes del render y recuperación después de una consulta fallida. No se modificaron permisos ni datos de producción. Pendiente comprobación en iPhone con sesión real.
+
+
+## Recuperación de contraseña: destino público — 30/09/2026
+
+- Las solicitudes iniciadas desde `localhost`, `127.0.0.1`, IPv6 local o un archivo de la computadora usan como retorno la pantalla pública `https://banegaluis.github.io/lasolucion-web/crm/recuperar-clave.html`.
+- En la web publicada y en un futuro dominio propio se conserva el mismo origen válido, eliminando parámetros y fragmentos anteriores.
+- El mensaje de confirmación aclara que el enlace recibido debe abrir la web de La Solución.
+- Esto prepara el destino correcto, pero Supabase Auth todavía debe admitir la URL pública en **Redirect URLs**. Si no está admitida, Supabase puede reemplazarla por su **Site URL**, que anteriormente apuntaba a localhost.
+- No se modificaron usuarios, contraseñas ni configuración de producción. Pendiente: comprobar un email real desde el iPhone y confirmar el cambio de clave completo.
