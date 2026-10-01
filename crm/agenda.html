@@ -33,6 +33,7 @@
                     </select>
                 </label>
                 <div class="agenda-header-actions">
+                    <button id="btnVozAgenda" class="agenda-voice-button" type="button">🎙 Dictar</button>
                     <button id="btnNuevaOrdenAgenda" class="agenda-new-order agenda-new-order-button btn-nueva-orden" type="button">+ Nueva orden</button>
 
                     <div class="agenda-filter-menu-wrap">
@@ -153,6 +154,32 @@
             </div>
         </aside>
     </main>
+
+    <div id="agendaVozModal" class="agenda-voice-modal" hidden>
+        <div class="agenda-voice-overlay" data-close-agenda-voz></div>
+        <section class="agenda-voice-dialog" role="dialog" aria-modal="true" aria-labelledby="agendaVozTitulo">
+            <header>
+                <div><small>Borrador seguro</small><h2 id="agendaVozTitulo">Nueva orden por voz</h2></div>
+                <button id="btnCerrarAgendaVoz" type="button" aria-label="Cerrar">&times;</button>
+            </header>
+            <p>Dictá, por ejemplo: “Reparar calefón para Juan Pérez mañana a las 15:30”. Nada se guarda hasta que revises la orden.</p>
+            <div class="agenda-voice-capture">
+                <textarea id="agendaVozTexto" rows="3" placeholder="Escribí o dictá la tarea, cliente, fecha y hora"></textarea>
+                <button id="btnEscucharAgendaVoz" type="button">🎙 Empezar a escuchar</button>
+            </div>
+            <div class="agenda-voice-fields">
+                <label><span>Tarea</span><input id="agendaVozTarea" autocomplete="off"></label>
+                <label><span>Cliente</span><input id="agendaVozCliente" autocomplete="off"></label>
+                <label><span>Fecha</span><input id="agendaVozFecha" type="date"></label>
+                <label><span>Hora</span><input id="agendaVozHora" type="time"></label>
+            </div>
+            <p id="agendaVozEstado" class="agenda-voice-status" role="status"></p>
+            <footer>
+                <button id="btnCancelarAgendaVoz" type="button">Cancelar</button>
+                <button id="btnRevisarAgendaVoz" type="button">Revisar en Nueva Orden</button>
+            </footer>
+        </section>
+    </div>
 
     <div id="agenda" class="modal" style="display:none;">
         <form class="modal-card nova-orden" onsubmit="event.preventDefault(); guardarOrden();">
@@ -294,7 +321,8 @@
     <script src="js/ordenes.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.15/locales-all.global.min.js"></script>
-    <script src="js/agenda.js?v=20260929-horario"></script>
+    <script src="js/agendaVoz.js?v=20261001-borrador"></script>
+    <script src="js/agenda.js?v=20261001-voz"></script>
     <script src="js/layout.js?v=layout-clickout-20260713-1"></script>
 </body>
 

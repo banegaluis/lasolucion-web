@@ -160,6 +160,7 @@
 
     function configurarControles() {
         const btnNueva = document.getElementById("btnNuevaOrdenAgenda");
+        const btnVoz = document.getElementById("btnVozAgenda");
         const buscador = document.getElementById("agendaSearch");
         const vistaSelector = document.getElementById("agendaViewSelect");
         const estadoSelector = document.getElementById("agendaEstadoFilter");
@@ -179,6 +180,7 @@
             btnNueva.disabled = !puedeCrearOrdenAgenda();
             btnNueva.addEventListener("click", () => prepararNuevaOrden(obtenerHorarioFuturoAgenda()));
         }
+        if (btnVoz) btnVoz.disabled = !puedeCrearOrdenAgenda();
         if (buscador) buscador.addEventListener("input", e => { textoBusqueda = e.target.value.trim().toLowerCase(); refrescarAgendaProfesional(); });
         if (vistaSelector) vistaSelector.addEventListener("change", () => {
             calendario?.changeView(vistaSelector.value);
@@ -583,6 +585,41 @@
         abrirAgenda(valores);
     }
 
+    function normalizarComparacionVoz(valor) {
+        return String(valor || "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ");
+    }
+
+    function abrirBorradorOrdenVoz(datos) {
+        if (!puedeCrearOrdenAgenda()) {
+            denegarAccionAgenda();
+            return { ok: false, mensaje: "Tu usuario no tiene permiso para crear órdenes." };
+        }
+        const campos = ["tarea", "cliente", "fecha", "hora"];
+        const faltantes = campos.filter(campo => !String(datos?.[campo] || "").trim());
+        if (faltantes.length) return { ok: false, mensaje: `Falta completar: ${faltantes.join(", ")}.` };
+
+        const cliente = normalizarComparacionVoz(datos.cliente);
+        const tarea = normalizarComparacionVoz(datos.tarea);
+        const duplicada = ordenesAgenda.find(orden =>
+            normalizarComparacionVoz(orden.cliente) === cliente &&
+            normalizarComparacionVoz(orden.trabajo || orden.descripcion) === tarea &&
+            orden.fecha === datos.fecha && normalizarHoraAgenda(orden.hora) === normalizarHoraAgenda(datos.hora)
+        );
+        if (duplicada) {
+            return { ok: false, mensaje: `Ya existe la orden ${duplicada.numeroOrden || duplicada.id} para ese cliente, tarea, fecha y hora.` };
+        }
+
+        prepararNuevaOrden({ fecha: datos.fecha, hora: datos.hora });
+        const campoCliente = document.getElementById("cliente");
+        const campoTrabajo = document.getElementById("trabajo");
+        if (campoCliente) {
+            campoCliente.value = datos.cliente;
+            campoCliente.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+        if (campoTrabajo) campoTrabajo.value = datos.tarea;
+        return { ok: true };
+    }
+
     function obtenerScrollInicialAgenda() {
         const ahora = new Date();
         const minutos = Math.max(7 * 60, Math.min(20 * 60, ahora.getHours() * 60 + ahora.getMinutes() - 90));
@@ -850,6 +887,8 @@
     function esHoraValida(hora) { return /^\d{2}:\d{2}$/.test(hora || ""); }
     function normalizarClase(valor) { return String(valor || "otros").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-"); }
     function escaparHtml(valor) { return String(valor ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+    window.puedeCrearOrdenDesdeAgenda = puedeCrearOrdenAgenda;
+    window.abrirBorradorOrdenVoz = abrirBorradorOrdenVoz;
 })();
 
 
