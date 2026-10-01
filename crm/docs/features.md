@@ -92,3 +92,11 @@ Actualizado: 28/09/2026. Base de esta etapa: `5d49df9`.
 - El mensaje de confirmación aclara que el enlace recibido debe abrir la web de La Solución.
 - Esto prepara el destino correcto, pero Supabase Auth todavía debe admitir la URL pública en **Redirect URLs**. Si no está admitida, Supabase puede reemplazarla por su **Site URL**, que anteriormente apuntaba a localhost.
 - No se modificaron usuarios, contraseñas ni configuración de producción. Pendiente: comprobar un email real desde el iPhone y confirmar el cambio de clave completo.
+
+## Agenda: borrador de orden por voz — 01/10/2026
+
+- La agenda incorpora “Dictar” para capturar o escribir tarea, cliente, fecha y hora. Reconoce expresiones como hoy, mañana, pasado mañana, días de la semana, fechas numéricas y horas; los cuatro datos se muestran para revisión.
+- Los datos faltantes se solicitan en el mismo cuadro. Si el navegador no ofrece reconocimiento de voz, se puede usar el micrófono del teclado o escribir sin perder el flujo.
+- Confirmar solo abre Nueva Orden y completa el borrador; no guarda automáticamente. El usuario debe seleccionar/verificar el cliente sugerido y usar “Guardar orden”.
+- El acceso reutiliza el permiso de creación de órdenes. Antes de abrir el formulario se bloquea una coincidencia exacta de cliente, tarea, fecha y hora con las órdenes cargadas.
+- Validación automatizada del intérprete y del conjunto existente. Pendientes: prueba de dictado real en iPhone, variaciones de lenguaje y duplicados existentes con sesión real. No existe todavía integración con audios de WhatsApp ni procesamiento en servidor.
