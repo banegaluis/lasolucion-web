@@ -1,5 +1,17 @@
 # Funcionalidades y estado
 
+## Usuarios internos online — 02/10/2026
+
+- Usuarios lista y crea cuentas reales mediante una función de servidor. Permite
+  administrador, colaborador y técnico; clientes sin login por decisión de Luis.
+- Alta de técnico con vínculo automático; sesión con técnico real y órdenes bajo RLS.
+- Edición online de perfil, rol y estado; email inmutable y recuperación de clave
+  mediante el login. Se elimina la prueba de acceso por suplantación local del módulo conectado.
+- Aplicadas protección contra autoascenso de rol y restricción de vínculos técnicos;
+  un técnico desactivado pierde el acceso a sus órdenes aunque conserve el token.
+- Verificación automatizada y pruebas SQL revertidas. Falta el recorrido con sesión
+  real en iPhone. Detalles y límites: `docs/USUARIOS_INTERNOS.md` en la raíz del repositorio.
+
 Actualizado: 28/09/2026. Base de esta etapa: `5d49df9`.
 
 ## Circuito operativo

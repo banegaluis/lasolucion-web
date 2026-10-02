@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    const ROLES_OPERATIVOS = Object.freeze(["admin", "colaborador"]);
+    const ROLES_OPERATIVOS = Object.freeze(["admin", "colaborador", "tecnico"]);
 
     function respuestaSinConfig(data = null) {
         return { ok: false, data, error: "Supabase no configurado." };
@@ -109,34 +109,26 @@
             return { ok: false, sesion: sesion.data, perfil: null, puedeOperar: false, error: perfil.error };
         }
 
+        let tecnicoId = null;
+        if (perfil.data.rol === "tecnico") {
+            const client = await window.LaSolucionSupabase.getClient();
+            const tecnico = await client.from("tecnicos").select("id").eq("perfil_id", perfil.data.id).eq("activo", true).maybeSingle();
+            if (tecnico.error || !tecnico.data) return { ok: false, puedeOperar: false, error: "Falta vincular tu cuenta a un técnico activo." };
+            tecnicoId = tecnico.data.id;
+        }
         const puedeOperar = perfilPuedeOperar(perfil.data);
         return {
             ok: puedeOperar,
             sesion: sesion.data,
             perfil: perfil.data,
             puedeOperar,
-            error: puedeOperar ? null : "El perfil Supabase existe, pero no está activo o no tiene rol admin/colaborador."
+            tecnicoId,
+            error: puedeOperar ? null : "El perfil Supabase existe, pero no está activo o no tiene un rol interno habilitado."
         };
     }
 
-    async function registrarClientePendiente({ email, password, nombre, apellido, telefono }) {
-        const client = await window.LaSolucionSupabase?.getClient();
-        if (!client) return respuestaSinConfig();
-
-        const { data, error } = await client.auth.signUp({
-            email,
-            password,
-            options: {
-                data: {
-                    nombre,
-                    apellido,
-                    telefono,
-                    rol_solicitado: "cliente_pendiente"
-                }
-            }
-        });
-
-        return { ok: !error, data, error };
+    async function registrarClientePendiente() {
+        return { ok: false, error: "Los clientes no tienen acceso al CRM." };
     }
 
     window.AuthSupabaseService = Object.freeze({
