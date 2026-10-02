@@ -847,7 +847,7 @@
 
     window.aplicarFiltroTecnicoParaUsuario = function (ordenes, usuarioActual) {
         if (!usuarioActual || usuarioActual.rol !== "tecnico" || !usuarioActual.id) return ordenes;
-        return ordenes.filter(orden => String(orden.tecnicoId) === String(usuarioActual.id));
+        return ordenes.filter(orden => String(orden.tecnicoId) === String(usuarioActual.tecnicoId || usuarioActual.id));
     };
 
     function limpiarFiltrosAgenda() {

@@ -5,18 +5,35 @@
 
 (function () {
     const ESTADOS_USUARIO = ["activo", "pendiente", "inactivo", "bloqueado"];
-    const ROLES_USUARIO = ["administrador", "colaborador", "tecnico", "cliente", "cliente_pendiente"];
+    const ROLES_USUARIO = ["administrador", "colaborador", "tecnico"];
     const STORAGE_ADMIN_ORIGINAL = "sesionAdministradorOriginal";
 
     const estado = { busqueda: "", rol: "todos", estado: "todos", editandoId: null };
 
     document.addEventListener("DOMContentLoaded", iniciarModuloUsuarios);
 
-    function iniciarModuloUsuarios() {
+    let usuariosRemotos = [];
+    let guardandoRemoto = false;
+    const online = () => Boolean(window.LaSolucionSupabase?.isConfigured());
+
+    async function cargarUsuariosRemotos() {
+        const resultado = await window.UsuariosSupabaseService.ejecutar("list");
+        usuariosRemotos = resultado.usuarios.map(p => normalizarUsuarioAdmin({ ...p, rol: p.rol === "admin" ? "administrador" : p.rol, username: p.email, origen: "supabase", fechaCreacion: p.created_at }));
+    }
+
+    async function iniciarModuloUsuarios() {
         if (typeof protegerPaginaPorPermisos === "function") protegerPaginaPorPermisos(PERMISOS.USUARIOS_VER);
         if (typeof tienePermiso === "function" && !tienePermiso(PERMISOS.USUARIOS_VER)) return;
         registrarEventosUsuarios();
-        if (usuariosStorageInvalido()) mostrarMensaje("No se pudo leer la colección local de usuarios. No se guardarán cambios hasta revisar localStorage.", "error");
+        if (!online()) {
+            document.getElementById("btnNuevoUsuario").disabled = true;
+            mostrarMensaje("Usuarios requiere conexión online. Recargá la página.", "error");
+            return;
+        }
+        if (online()) {
+            try { await cargarUsuariosRemotos(); }
+            catch (error) { mostrarMensaje(error.message, "error"); return; }
+        }
         cargarSelectoresFormulario();
         renderizarUsuarios();
     }
@@ -43,6 +60,7 @@
     }
 
     function leerUsuarios() {
+        if (online()) return usuariosRemotos;
         if (typeof obtenerUsuarios !== "function") return [];
         return obtenerUsuarios().map(normalizarUsuarioAdmin);
     }
@@ -179,6 +197,7 @@
     }
 
     function crearUsuario(datos) {
+        if (online()) return { ok: false, errores: ["Usá el formulario de alta online."] };
         if (!requerirPermiso(PERMISOS.USUARIOS_CREAR)) return { ok: false };
         const sesion = obtenerSesionAdminActual();
         const usuario = normalizarUsuarioAdmin({
@@ -194,6 +213,7 @@
     }
 
     function actualizarUsuario(id, cambios) {
+        if (online()) return { ok: false, errores: ["Usá el formulario de edición online."] };
         if (!requerirPermiso(PERMISOS.USUARIOS_EDITAR)) return { ok: false };
         const usuarios = leerUsuarios();
         const actual = usuarios.find(usuario => String(usuario.id) === String(id));
@@ -261,7 +281,7 @@
     }
 
     function cargarSelectoresFormulario() {
-        cargarOpciones("usuarioRol", [["administrador", "Administrador"], ["colaborador", "Colaborador"], ["tecnico", "Técnico"], ["cliente", "Cliente"], ["cliente_pendiente", "Cliente pendiente"]]);
+        cargarOpciones("usuarioRol", [["administrador", "Administrador"], ["colaborador", "Colaborador"], ["tecnico", "Técnico"]]);
         cargarOpciones("usuarioEstado", [["activo", "Activo"], ["pendiente", "Pendiente"], ["inactivo", "Inactivo"], ["bloqueado", "Bloqueado"]]);
         cargarOpciones("usuarioTecnicoId", [["", "Sin vínculo"]].concat(obtenerTecnicosDisponibles().map(item => [item.id, item.nombre])));
         cargarOpciones("usuarioClienteId", [["", "Sin vínculo"]].concat(obtenerClientesDisponibles().map(item => [item.id, item.nombre])));
@@ -325,10 +345,10 @@
     }
 
     function accionesUsuario(usuario) {
-        const puedeProbar = usuarioPuedeIniciarSesionLocal(usuario);
+        const puedeProbar = !online() && usuarioPuedeIniciarSesionLocal(usuario);
         return [
             `<button class="usuarios-action" type="button" data-user-action="editar" data-user-id="${escaparHtml(usuario.id)}">Editar</button>`,
-            usuario.estado === "activo" || usuario.estado === "pendiente"
+            online() ? "" : usuario.estado === "activo" || usuario.estado === "pendiente"
                 ? `<button class="usuarios-action danger" type="button" data-user-action="desactivar" data-user-id="${escaparHtml(usuario.id)}">Desactivar</button>`
                 : `<button class="usuarios-action" type="button" data-user-action="activar" data-user-id="${escaparHtml(usuario.id)}">Activar</button>`,
             puedeProbar ? `<button class="usuarios-action" type="button" data-user-action="probar" data-user-id="${escaparHtml(usuario.id)}">Probar acceso</button>` : ""
@@ -346,6 +366,7 @@
         document.getElementById("passwordSectionTitle").textContent = "Contraseña temporal";
         document.getElementById("usuarioPasswordHelp").textContent = "Contraseña temporal para desarrollo local.";
         document.getElementById("usuarioEstado").value = "activo";
+        configurarFormularioOnline(false);
         actualizarCamposRelacion();
         abrirModalUsuario();
     }
@@ -372,11 +393,22 @@
         document.getElementById("btnGuardarUsuario").textContent = "Guardar cambios";
         document.getElementById("passwordSectionTitle").textContent = "Cambiar contraseña temporal";
         document.getElementById("usuarioPasswordHelp").textContent = "Dejá estos campos vacíos para mantener la contraseña actual.";
+        configurarFormularioOnline(true);
         actualizarCamposRelacion();
         abrirModalUsuario();
     }
 
+    function configurarFormularioOnline(editando) {
+        if (!online()) return;
+        document.getElementById("usuarioEmail").readOnly = editando;
+        document.getElementById("usuarioUsername").closest("label").hidden = true;
+        document.getElementById("usuarioPassword").disabled = editando;
+        document.getElementById("usuarioPasswordConfirm").disabled = editando;
+        document.getElementById("usuarioPasswordHelp").textContent = editando ? "Para cambiar la contraseña, usá la recuperación desde el login." : "Mínimo 10 caracteres. La cuenta ingresará con su email y esta contraseña.";
+    }
+
     function abrirModalUsuario() {
+        mostrarMensaje("");
         document.getElementById("usuarioModal").hidden = false;
         document.body.classList.add("modal-scroll-locked");
         document.documentElement.classList.add("modal-scroll-locked");
@@ -407,10 +439,30 @@
         };
     }
 
-    function guardarDesdeFormularioUsuario(evento) {
+    async function guardarDesdeFormularioUsuario(evento) {
         evento.preventDefault();
+        if (!online()) return mostrarMensaje("No hay conexión configurada para crear cuentas online.", "error");
         const datos = obtenerDatosFormulario();
         const id = document.getElementById("usuarioIdEdicion").value;
+        if (online()) {
+            if (guardandoRemoto) return;
+            if (!datos.nombre || !datos.apellido || !emailValido(datos.email) || !ROLES_USUARIO.includes(datos.rol)) return mostrarMensaje("Completá nombre, apellido, email y un rol interno.", "error");
+            if (!id && (datos.password.length < 10 || datos.password !== datos.passwordConfirm)) return mostrarMensaje("La contraseña debe tener al menos 10 caracteres y coincidir con su confirmación.", "error");
+            guardandoRemoto = true;
+            const boton = document.getElementById("btnGuardarUsuario");
+            boton.disabled = true;
+            try {
+                const resultado = await window.UsuariosSupabaseService.ejecutar(id ? "update" : "create", { ...datos, id: id || undefined });
+                document.getElementById("usuarioPassword").value = "";
+                document.getElementById("usuarioPasswordConfirm").value = "";
+                cerrarModalUsuario();
+                const mensaje = id ? "Usuario actualizado online." : resultado.recuperado ? "Alta anterior recuperada. La cuenta conserva los datos y la contraseña de ese alta." : "Usuario creado online. Ya puede ingresar con su email si está activo.";
+                try { await cargarUsuariosRemotos(); renderizarUsuarios(); mostrarMensaje(mensaje, "success"); }
+                catch (_) { mostrarMensaje(mensaje + " No se pudo refrescar la lista; recargá la página.", "success"); }
+            } catch (error) { mostrarMensaje(error.message, "error"); }
+            finally { guardandoRemoto = false; boton.disabled = false; }
+            return;
+        }
         const resultado = id ? actualizarUsuario(id, datos) : crearUsuario(datos);
         if (!resultado.ok) return mostrarMensaje((resultado.errores || ["No se pudo guardar el usuario."]).join(" "), "error");
         cerrarModalUsuario();
@@ -420,6 +472,11 @@
 
     function actualizarCamposRelacion() {
         const rol = document.getElementById("usuarioRol")?.value;
+        if (online()) {
+            document.getElementById("usuarioTecnicoBox").hidden = true;
+            document.getElementById("usuarioClienteBox").hidden = true;
+            return;
+        }
         const estadoSelect = document.getElementById("usuarioEstado");
         if (estadoSelect && rol !== "cliente_pendiente" && estadoSelect.value === "pendiente") estadoSelect.value = "activo";
         if (estadoSelect && rol === "cliente_pendiente" && !estado.editandoId && estadoSelect.value === "activo") estadoSelect.value = "pendiente";
@@ -455,6 +512,7 @@
     }
 
     function probarAccesoUsuario(id) {
+        if (online()) return mostrarMensaje("Ingresá con el email real de la cuenta para probarla.", "error");
         if (!requerirPermiso(PERMISOS.USUARIOS_EDITAR)) return;
         const usuario = obtenerUsuarioPorId(id);
         const sesionAdmin = obtenerSesionAdminActual();
@@ -480,6 +538,11 @@
     }
 
     function mostrarMensaje(texto, tipo = "") {
+        const mensajeFormulario = document.getElementById("usuarioFormMensaje");
+        if (mensajeFormulario) {
+            mensajeFormulario.textContent = texto || "";
+            mensajeFormulario.className = `usuarios-message ${tipo ? `is-${tipo}` : ""}`.trim();
+        }
         const mensaje = document.getElementById("usuariosMensaje");
         if (!mensaje) return;
         mensaje.textContent = texto || "";
@@ -499,8 +562,6 @@
 
     window.UsuariosAdmin = { obtenerUsuarioPorId, crearUsuario, actualizarUsuario, cambiarEstadoUsuario, cambiarPasswordUsuario, usernameDisponible, emailDisponible, generarIdUsuario, validarDatosUsuario, obtenerTecnicosDisponibles, obtenerClientesDisponibles, migrarUsuariosNoDestructivo };
 })();
-
-
 
 
 

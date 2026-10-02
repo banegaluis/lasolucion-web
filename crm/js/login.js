@@ -28,7 +28,7 @@ function crearUsuarioEspejoSupabase(verificacion) {
     if (!usuarioAuth?.id || !usuarioAuth.email || !perfil) return null;
 
     const rol = perfil.rol === "admin" ? "administrador" : perfil.rol;
-    if (!['administrador', 'colaborador'].includes(rol)) return null;
+    if (!['administrador', 'colaborador', 'tecnico'].includes(rol)) return null;
 
     const usuarios = obtenerUsuarios();
     const email = String(usuarioAuth.email).trim().toLowerCase();
@@ -46,6 +46,7 @@ function crearUsuarioEspejoSupabase(verificacion) {
         usuario: existente?.username || email,
         email,
         password: "",
+        tecnicoId: verificacion.tecnicoId || null,
         rol,
         estado: "activo",
         telefono: perfil.telefono || existente?.telefono || "",

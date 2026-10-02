@@ -41,8 +41,8 @@
                     <option value="administrador">Administrador</option>
                     <option value="colaborador">Colaborador</option>
                     <option value="tecnico">Técnico</option>
-                    <option value="cliente">Cliente</option>
-                    <option value="cliente_pendiente">Cliente pendiente</option>
+                    
+                    
                 </select>
             </label>
             <label>
@@ -86,7 +86,7 @@
         <form id="usuarioForm" class="usuarios-dialog" novalidate>
             <header class="usuarios-dialog-header">
                 <div>
-                    <p class="usuarios-eyebrow">Gestión local</p>
+                    <p class="usuarios-eyebrow">Acceso interno</p>
                     <h2 id="usuarioModalTitulo">Nuevo usuario</h2>
                 </div>
                 <button id="btnCerrarUsuarioModal" type="button" class="usuarios-close" aria-label="Cerrar formulario">×</button>
@@ -139,6 +139,7 @@
             </div>
 
             <footer class="usuarios-dialog-footer">
+                <p id="usuarioFormMensaje" class="usuarios-message" role="status" aria-live="polite"></p>
                 <button id="btnCancelarUsuario" type="button" class="usuarios-secondary">Cancelar</button>
                 <button id="btnGuardarUsuario" type="submit" class="btn-nueva-orden">Crear usuario</button>
             </footer>
@@ -148,12 +149,15 @@
     <script src="js/storage.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/permisos.js"></script>
-    <script src="js/login.js"></script>
-    <script src="js/usuarios.js"></script>
+    <script src="js/config/supabase-config.js"></script>
+    <script src="js/services/supabaseClient.js"></script>
+    <script src="js/services/authService.js?v=20261002-usuarios"></script>
+    <script src="js/services/usuariosService.js?v=20261002-usuarios"></script>
+    <script src="js/login.js?v=20261002-usuarios"></script>
+    <script src="js/usuarios.js?v=20261002-usuarios"></script>
     <script src="js/layout.js?v=layout-clickout-20260713-1"></script>
 </body>
 </html>
-
 
 
 
