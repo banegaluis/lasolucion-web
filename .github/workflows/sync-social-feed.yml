@@ -1,0 +1,43 @@
+name: Actualizar publicaciones de redes
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+permissions:
+  contents: write
+  pages: write
+concurrency:
+  group: social-feed-sync
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Consultar publicaciones
+        env:
+          META_API_VERSION: ${{ vars.META_API_VERSION }}
+          INSTAGRAM_API_HOST: ${{ vars.INSTAGRAM_API_HOST }}
+          INSTAGRAM_ACCOUNT_ID: ${{ secrets.INSTAGRAM_ACCOUNT_ID }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          FACEBOOK_PAGE_ID: ${{ secrets.FACEBOOK_PAGE_ID }}
+          FACEBOOK_PAGE_ACCESS_TOKEN: ${{ secrets.FACEBOOK_PAGE_ACCESS_TOKEN }}
+          TIKTOK_ACCESS_TOKEN: ${{ secrets.TIKTOK_ACCESS_TOKEN }}
+        run: node scripts/sync-social-feed.mjs
+      - name: Guardar publicaciones y solicitar actualización de Pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! git diff --quiet -- data/social-feed.json; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add data/social-feed.json
+            git commit -m 'Actualizar últimas cinco publicaciones por red'
+            git push origin HEAD:main
+            gh api --method POST "repos/$GITHUB_REPOSITORY/pages/builds"
+          fi

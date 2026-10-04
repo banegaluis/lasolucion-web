@@ -13,6 +13,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%230a0a0a'/%3E%3Cpath d='M22 27h18v35h28v15H22z' fill='%23ffd400'/%3E%3Cpath d='M59 23h19v17H59z' fill='%23fff'/%3E%3C/svg%3E">
 
   <link rel="stylesheet" href="css/public.css?v=20260928-catalogo">
+  <link rel="stylesheet" href="css/social-feed.css?v=20261004">
 </head>
 <body><header class="top">
   <div class="wrap nav">
@@ -20,7 +21,7 @@
     <nav id="menu">
       <a href="index.html#servicios">Qué hacemos</a>
       <a href="#catalogo">Catálogo</a>
-      <a href="index.html#trabajos">Trabajos</a>
+      <a href="#redes">Trabajos</a>
       <a href="index.html#presupuesto">Contacto</a>
       <a href="https://www.instagram.com/lasolucioncba/" target="_blank" rel="noopener">Instagram</a>
     </nav>
@@ -99,21 +100,12 @@
     <div class="wrap">
       <div class="section-head">
         <div><div class="kicker">La Solución en redes</div><h2 id="redes-title">Mirá nuestros trabajos y videos.</h2></div>
-        <p>Seguinos para ver fotos, videos y novedades de La Solución.</p>
+        <p>Las últimas cinco publicaciones de cada red. Para ver todos nuestros trabajos, visitá el perfil.</p>
       </div>
-      <div class="hero-panel" style="min-width:0">
-        <h3>TikTok · @lasolucioncba</h3>
-        <blockquote class="tiktok-embed" cite="https://www.tiktok.com/@lasolucioncba" data-unique-id="lasolucioncba" data-embed-type="creator" style="max-width:720px;min-width:288px;margin:16px auto">
-          <section>
-            <a target="_blank" rel="noopener noreferrer" href="https://www.tiktok.com/@lasolucioncba">Ver videos de @lasolucioncba en TikTok</a>
-          </section>
-        </blockquote>
-        <p class="catalog-note">Las tarjetas muestran vistas previas de TikTok. Tocá una para abrir el video. Si el contenido no carga, podés verlo desde el enlace a TikTok.</p>
-      </div>
-      <div class="hero-actions">
-        <a class="btn btn-secondary" href="https://www.instagram.com/lasolucioncba/" target="_blank" rel="noopener noreferrer">Instagram ↗</a>
-        <a class="btn btn-secondary" href="https://www.tiktok.com/@lasolucioncba" target="_blank" rel="noopener noreferrer">TikTok ↗</a>
-        <a class="btn btn-secondary" href="https://www.facebook.com/lasolucioncba" target="_blank" rel="noopener noreferrer">Facebook ↗</a>
+      <div id="social-feed">
+        <section class="social-network"><div class="social-network-head"><h3>Instagram</h3><a class="btn btn-secondary" href="https://www.instagram.com/lasolucioncba/" target="_blank" rel="noopener noreferrer">Ver más ↗</a></div><p class="social-empty">Encontrá nuestros trabajos y novedades en el perfil.</p></section>
+        <section class="social-network"><div class="social-network-head"><h3>Facebook</h3><a class="btn btn-secondary" href="https://www.facebook.com/lasolucioncba" target="_blank" rel="noopener noreferrer">Ver más ↗</a></div><p class="social-empty">Encontrá nuestros trabajos y novedades en el perfil.</p></section>
+        <section class="social-network"><div class="social-network-head"><h3>TikTok</h3><a class="btn btn-secondary" href="https://www.tiktok.com/@lasolucioncba" target="_blank" rel="noopener noreferrer">Ver más ↗</a></div><p class="social-empty">Encontrá nuestros trabajos y novedades en el perfil.</p></section>
       </div>
     </div>
   </section>
@@ -123,4 +115,4 @@ document.querySelectorAll('.wa-action').forEach(a=>{a.href='https://wa.me/'+numb
 const toggle=document.getElementById('mobileToggle'), menu=document.getElementById('menu');
 toggle.addEventListener('click',()=>{const open=menu.classList.toggle('open');toggle.setAttribute('aria-expanded',String(open));});
 menu.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{menu.classList.remove('open');toggle.setAttribute('aria-expanded','false');}));
-</script><script async src="https://www.tiktok.com/embed.js"></script></body></html>
+</script><script type="module" src="js/social-feed.mjs?v=20261004"></script></body></html>
