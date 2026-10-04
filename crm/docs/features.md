@@ -112,3 +112,11 @@ Actualizado: 28/09/2026. Base de esta etapa: `5d49df9`.
 - Confirmar solo abre Nueva Orden y completa el borrador; no guarda automáticamente. El usuario debe seleccionar/verificar el cliente sugerido y usar “Guardar orden”.
 - El acceso reutiliza el permiso de creación de órdenes. Antes de abrir el formulario se bloquea una coincidencia exacta de cliente, tarea, fecha y hora con las órdenes cargadas.
 - Validación automatizada del intérprete y del conjunto existente. Pendientes: prueba de dictado real en iPhone, variaciones de lenguaje y duplicados existentes con sesión real. No existe todavía integración con audios de WhatsApp ni procesamiento en servidor.
+
+
+## Agenda: completar el dictado natural — 03/10/2026
+
+- Corregida la frase reportada desde iPhone: “mañana domingo 10 de la mañana hay que ir al local del Guille en Duarte esguiro 3226”. Se extraen cliente, fecha y hora; la tarea conserva la visita y el domicilio transcrito para revisión, sin corregir ni asociar automáticamente una dirección.
+- Se aceptan horas con “de la mañana/tarde/noche”; “de la mañana” por sí solo no asigna la fecha de mañana. Las alturas de domicilios no se interpretan como horarios.
+- El texto escrito, pegado o dictado con el teclado se interpreta al recibir input, además de change. Se mantiene la revisión previa y el guardado explícito de Nueva Orden.
+- Pruebas Node del intérprete aprobadas. Pendiente repetir el recorrido publicado desde iPhone y comprobar cliente seleccionado y guardado real.

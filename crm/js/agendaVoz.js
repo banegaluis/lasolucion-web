@@ -20,7 +20,7 @@
     function extraerFecha(texto, ahora) {
         const normal = sinAcentos(texto).toLowerCase();
         if (/\bpasado manana\b/.test(normal)) return fechaISO(sumarDias(ahora, 2));
-        if (/\bmanana\b/.test(normal)) return fechaISO(sumarDias(ahora, 1));
+        if (/\bmanana\b/.test(normal.replace(/\bde\s+la\s+manana\b/g, ""))) return fechaISO(sumarDias(ahora, 1));
         if (/\bhoy\b/.test(normal)) return fechaISO(ahora);
 
         const numerica = normal.match(/\b(\d{1,2})[\/-](\d{1,2})(?:[\/-](\d{2,4}))?\b/);
@@ -42,16 +42,22 @@
 
     function extraerHora(texto) {
         const normal = sinAcentos(texto).toLowerCase();
-        const coincidencia = normal.match(/\ba\s+las?\s+(\d{1,2})(?:(?::|\s+y\s+)(\d{1,2}))?\b/) || normal.match(/\b(\d{1,2})(?::(\d{2}))\s*(?:hs?|horas?)?\b/);
+        const coincidencia = normal.match(/\b(\d{1,2})(?:(?::|\s+y\s+)(\d{1,2}))?\s+de\s+la\s+(manana|tarde|noche)\b/) || normal.match(/\ba\s+las?\s+(\d{1,2})(?:(?::|\s+y\s+)(\d{1,2}))?\b/) || normal.match(/\b(\d{1,2})(?::(\d{2}))\s*(?:hs?|horas?)?\b/);
         if (!coincidencia) return "";
-        const hora = Number(coincidencia[1]);
+        let hora = Number(coincidencia[1]);
         const minutos = Number(coincidencia[2] || 0);
+        if (coincidencia[3]) {
+            if (hora < 1 || hora > 12) return "";
+            if (coincidencia[3] === "manana" && hora === 12) hora = 0;
+            if (coincidencia[3] !== "manana" && hora < 12) hora += 12;
+        }
         if (hora > 23 || minutos > 59) return "";
         return `${String(hora).padStart(2, "0")}:${String(minutos).padStart(2, "0")}`;
     }
 
     function limpiarSegmentosTemporales(texto) {
         return String(texto || "")
+            .replace(/\b(?:a\s+las?\s+)?\d{1,2}(?:(?::|\s+y\s+)\d{1,2})?\s+de\s+la\s+(?:mañana|manana|tarde|noche)\b/gi, " ")
             .replace(/\b(?:el\s+)?(?:pasado\s+mañana|mañana|hoy|lunes|martes|miércoles|miercoles|jueves|viernes|sábado|sabado|domingo)\b/gi, " ")
             .replace(/\b(?:el\s+)?\d{1,2}[\/-]\d{1,2}(?:[\/-]\d{2,4})?\b/g, " ")
             .replace(/\ba\s+las?\s+\d{1,2}(?:(?::|\s+y\s+)\d{1,2})?\b/gi, " ")
@@ -64,9 +70,10 @@
         const separacion = limpio.match(/^(.+?)\s+para\s+(.+)$/i);
         const tareaMarcada = limpio.match(/\btarea\s+(.+?)(?=\s+cliente\s+|$)/i);
         const clienteMarcado = limpio.match(/\bcliente\s+(.+?)(?=\s+tarea\s+|$)/i);
+        const visita = limpio.match(/^(?:hay\s+que\s+)?ir\s+al\s+local\s+de(?:l)?\s+(.+?)(?:\s+en\s+(.+))?$/i);
         const datos = {
-            tarea: (tareaMarcada?.[1] || separacion?.[1] || "").trim(),
-            cliente: (clienteMarcado?.[1] || separacion?.[2] || "").trim(),
+            tarea: (tareaMarcada?.[1] || separacion?.[1] || (visita ? `Ir al local${visita[2] ? ` en ${visita[2]}` : ""}` : "")).trim(),
+            cliente: (clienteMarcado?.[1] || separacion?.[2] || visita?.[1] || "").trim(),
             fecha: extraerFecha(texto, ahora),
             hora: extraerHora(texto)
         };
@@ -147,6 +154,7 @@
         $("btnCancelarAgendaVoz").addEventListener("click", cerrar);
         modal.querySelector("[data-close-agenda-voz]").addEventListener("click", cerrar);
         $("btnEscucharAgendaVoz").addEventListener("click", escuchar);
+        $("agendaVozTexto").addEventListener("input", evento => actualizar(interpretar(evento.target.value)));
         $("agendaVozTexto").addEventListener("change", evento => actualizar(interpretar(evento.target.value)));
         $("btnRevisarAgendaVoz").addEventListener("click", revisar);
     }
