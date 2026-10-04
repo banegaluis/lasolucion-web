@@ -1,8 +1,20 @@
 {
   "version": 1,
   "networks": {
-    "instagram": { "status": "not_connected", "updatedAt": null, "posts": [] },
-    "facebook": { "status": "not_connected", "updatedAt": null, "posts": [] },
-    "tiktok": { "status": "not_connected", "updatedAt": null, "posts": [] }
+    "instagram": {
+      "status": "not_connected",
+      "updatedAt": null,
+      "posts": []
+    },
+    "facebook": {
+      "status": "not_connected",
+      "updatedAt": null,
+      "posts": []
+    },
+    "tiktok": {
+      "status": "not_connected",
+      "updatedAt": null,
+      "posts": []
+    }
   }
 }
