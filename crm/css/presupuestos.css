@@ -1,0 +1,30 @@
+#presupuestosRoot[hidden] { display: none; }
+.presupuesto-editor { padding: 22px; }
+.presupuesto-item { display: grid; grid-template-columns: minmax(180px, 1fr) 100px 150px auto; gap: 12px; align-items: end; margin-bottom: 16px; }
+.presupuesto-acciones { display: flex; flex-wrap: wrap; gap: 12px; }
+.presupuesto-total { font-size: 1.5rem; }
+.presupuesto-check { display: flex; gap: 10px; align-items: center; margin-top: 18px; }
+.presupuesto-check input { width: auto; margin: 0; }
+.presupuesto-documento { background: #fff; color: #17191b; padding: 32px; max-width: 794px; margin: 0 auto 24px; overflow-wrap: anywhere; font: 16px/1.5 Arial, sans-serif; }
+.presupuesto-documento header { display: flex; justify-content: space-between; align-items: center; gap: 20px; border-bottom: 3px solid #f5c518; padding-bottom: 16px; }
+.presupuesto-documento img { width: 190px; max-width: 42%; height: auto; }
+.presupuesto-documento h2 { color: #17191b; font-size: 24px; margin: 0; }
+.presupuesto-documento h3 { color: #17191b; font-size: 18px; margin-top: 28px; }
+.presupuesto-documento p { white-space: pre-wrap; color: #606b80; }
+.presupuesto-documento table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.presupuesto-documento th, .presupuesto-documento td { padding: 12px; text-align: left; border-bottom: 1px solid #ccc; color: #17191b; }
+.presupuesto-documento th { background: #17191b; color: white; }
+.presupuesto-documento th:last-child, .presupuesto-documento td:last-child { text-align: right; width: 28%; }
+.presupuesto-documento tfoot td { background: #17191b; color: white; font-weight: bold; }
+.presupuesto-documento small { display: block; color: #606b80; }
+.presupuesto-documento footer { margin-top: 36px; border-top: 1px solid #ccc; padding-top: 12px; color: #606b80; font-size: 12px; }
+@media(max-width: 650px) { .presupuesto-item { grid-template-columns: 1fr 1fr; } .presupuesto-item label:first-child { grid-column: 1 / -1; } .presupuesto-item button { grid-column: 1 / -1; } .presupuesto-documento { padding: 18px; font-size: 14px; } .presupuesto-documento header { flex-wrap: wrap; } }
+@page { size: A4; margin: 14mm; }
+@media print {
+ body { background: white !important; }
+ body > :not(main), #presupuestosRoot > :not(section), #presupuestosRoot > section > h2 { display: none !important; }
+ #presupuestosRoot { display: block !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
+ .presupuesto-documento { max-width: none; padding: 0; margin: 0; font-size: 10pt; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+ .presupuesto-documento tr, .presupuesto-documento header { break-inside: avoid; }
+ .presupuesto-documento h3 { break-after: avoid; }
+}

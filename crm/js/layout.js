@@ -29,6 +29,7 @@ const navIcons = {
         { href: "dashboard.html", label: "Inicio", icon: navIcons.inicio, permission: ["dashboard.verGeneral", "dashboard.verOperativo", "dashboard.verTecnico", "dashboard.verCliente", "dashboard.verClientePendiente"] },
         { href: "agenda.html", label: "Agenda", icon: navIcons.agenda, permission: ["agenda.verCompleta", "agenda.verPropia"] },
         { href: "ordenes.html", label: "Órdenes", icon: navIcons.ordenes, permission: ["ordenes.verTodas", "ordenes.verAsignadas"] },
+        { href: "presupuestos.html", label: "Presupuestos", icon: navIcons.ordenes, permission: "presupuestos.editar" },
         { href: "clientes.html", label: "Clientes", icon: navIcons.clientes, permission: "clientes.verTodos" },
         { href: "tecnicos.html", label: "Técnicos", icon: navIcons.tecnicos, permission: "tecnicos.ver" },
         { href: "usuarios.html", label: "Usuarios", icon: navIcons.usuarios, permission: "usuarios.ver" },
@@ -162,6 +163,7 @@ const navIcons = {
 
     function buildSearchIndex() {
         const actions = [
+            { type: "Módulo", title: "Presupuestos", description: "Crear presupuesto y guardar como PDF", href: "presupuestos.html", keywords: "presupuesto cotizacion pdf" },
             { type: "Función", title: "+ NUEVA ORDEN", description: "Crear una orden de trabajo", href: "agenda.html#nueva-orden", keywords: "crear nueva orden trabajo cargar" },
             { type: "Módulo", title: "Inicio", description: "Dashboard principal", href: "dashboard.html", keywords: "inicio dashboard métricas resumen" },
             { type: "M\u00f3dulo", title: "\u00d3rdenes", description: "Ver \u00f3rdenes activas e historial", href: "ordenes.html", keywords: "ordenes \u00f3rdenes trabajos historial activas" },

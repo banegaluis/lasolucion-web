@@ -120,3 +120,11 @@ Actualizado: 28/09/2026. Base de esta etapa: `5d49df9`.
 - Se aceptan horas con “de la mañana/tarde/noche”; “de la mañana” por sí solo no asigna la fecha de mañana. Las alturas de domicilios no se interpretan como horarios.
 - El texto escrito, pegado o dictado con el teclado se interpreta al recibir input, además de change. Se mantiene la revisión previa y el guardado explícito de Nueva Orden.
 - Pruebas Node del intérprete aprobadas. Pendiente repetir el recorrido publicado desde iPhone y comprobar cliente seleccionado y guardado real.
+
+## Presupuestos (07/10/2026)
+
+- Formulario para roles con `presupuestos.editar`: cliente, dirección opcional, rubro, alcance, fecha, conceptos, cantidades, precios y condiciones.
+- Total automático y vista previa con marca La Solución; impresión / Guardar como PDF mediante el navegador.
+- Borrador manual por usuario en este navegador, sin guardado en Supabase ni historial compartido.
+- Ejemplo de Arre Taquería por $80.000 disponible para cargar.
+- Pendiente: validar impresión/compartir en iPhone real y conectar presupuestos e ítems a Supabase.
