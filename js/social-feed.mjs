@@ -1,4 +1,4 @@
-import { NETWORKS, latestPosts, playerUrl } from './social-feed-core.mjs';
+import { NETWORKS, latestPosts, selectedPosts, displayFeed, playerUrl } from './social-feed-core.mjs';
 
 const root = document.getElementById('social-feed');
 const element = (tag, className, text) => {
@@ -22,7 +22,8 @@ function render(feed, failed = false) {
     const title = element('h3', '', config.name); title.id = 'social-title-' + network;
     head.append(title, link('Ver más ↗', config.profile, 'btn btn-secondary'));
     group.append(head);
-    const posts = latestPosts(network, feed?.networks?.[network]?.posts);
+    const entry = feed?.networks?.[network];
+    const posts = entry?.status === 'manual' ? selectedPosts(network, entry.posts) : latestPosts(network, entry?.posts);
     if (!posts.length) {
       group.append(element('p', 'social-empty', failed ? 'No pudimos cargar las publicaciones. Podés verlas en nuestro perfil.' : 'Encontrá nuestros trabajos y novedades en el perfil.'));
     } else {
@@ -50,9 +51,12 @@ function render(feed, failed = false) {
         view.append(button); card.append(view);
         const body = element('div', 'social-post-body');
         if (post.caption) body.append(element('p', 'social-caption', post.caption));
-        const date = element('time', 'social-date', new Date(post.publishedAt).toLocaleDateString('es-AR'));
-        date.dateTime = post.publishedAt;
-        body.append(date, link('Abrir en ' + config.name + ' ↗', post.url, 'social-original'));
+        if (post.publishedAt) {
+          const date = element('time', 'social-date', new Date(post.publishedAt).toLocaleDateString('es-AR'));
+          date.dateTime = post.publishedAt;
+          body.append(date);
+        }
+        body.append(link('Abrir en ' + config.name + ' ↗', post.url, 'social-original'));
         card.append(body); grid.append(card);
       }
       group.append(grid);
@@ -66,11 +70,15 @@ if (root) {
   render(null);
   async function refresh() {
     try {
-      const response = await fetch(new URL('../data/social-feed.json', import.meta.url), { cache: 'no-store', signal: AbortSignal.timeout(15000) });
-      if (!response.ok) throw new Error('Feed unavailable');
-      const feed = await response.json();
-      if (!feed || typeof feed.networks !== 'object') throw new Error('Invalid feed');
-      render(feed);
+      const results = await Promise.allSettled(['social-feed.json', 'social-feed-manual.json'].map(async file => {
+        const response = await fetch(new URL('../data/' + file, import.meta.url), { cache: 'no-store', signal: AbortSignal.timeout(15000) });
+        if (!response.ok) throw new Error('Feed unavailable');
+        const feed = await response.json();
+        if (!feed || !feed.networks || typeof feed.networks !== 'object') throw new Error('Invalid feed');
+        return feed;
+      }));
+      if (results.every(result => result.status === 'rejected')) throw new Error('Feeds unavailable');
+      render(displayFeed(results[0].value, results[1].value));
     } catch {
       if (!root.querySelector('.social-post')) render(null, true);
     }

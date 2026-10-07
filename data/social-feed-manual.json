@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "networks": {
+    "instagram": { "posts": [] },
+    "facebook": { "posts": [] },
+    "tiktok": { "posts": [] }
+  }
+}

@@ -58,3 +58,17 @@ Referencias oficiales:
 - https://developers.facebook.com/documentation/pages-api
 - https://www.postman.com/meta/instagram/overview
 - https://docs.github.com/en/rest/pages/pages#request-a-github-pages-build
+
+## Selección manual mientras se conectan las cuentas
+
+`data/social-feed-manual.json` acepta hasta cinco publicaciones por red, en el orden
+indicado. Cada entrada requiere `url`; `caption`, `image` y `publishedAt` son
+opcionales. Sin fecha real no se muestra una fecha inventada. Usar enlaces completos
+de publicaciones, no enlaces al perfil ni enlaces cortos de compartir.
+
+La selección se muestra cuando la red no tiene una sincronización correcta con
+status `ready`. Un resultado automático correcto, incluso vacío, tiene prioridad.
+El workflow no modifica el archivo manual. Actualizar estos enlaces es manual;
+este modo no obtiene las publicaciones nuevas del perfil.
+
+Las listas siguen vacías hasta recibir enlaces reales del propietario.

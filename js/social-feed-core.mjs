@@ -40,6 +40,32 @@ export function safeImage(value) {
   catch { return null; }
 }
 
+// Manual selection keeps editorial order and does not invent publication dates.
+export function selectedPosts(network, posts) {
+  const seen = new Set();
+  return (Array.isArray(posts) ? posts : []).filter(post => post && typeof post === 'object').map(post => ({
+    id: String(post.id || ''), url: postUrl(network, post.url),
+    caption: String(post.caption || '').slice(0, 1000),
+    publishedAt: Number.isFinite(Date.parse(post.publishedAt)) ? post.publishedAt : null,
+    image: safeImage(post.image)
+  })).filter(post => {
+    if (!post.url || seen.has(post.url)) return false;
+    seen.add(post.url); return true;
+  }).slice(0, LIMIT);
+}
+
+export function displayFeed(automatic, manual) {
+  const networks = {};
+  for (const network of Object.keys(NETWORKS)) {
+    const current = automatic?.networks?.[network];
+    const selection = selectedPosts(network, manual?.networks?.[network]?.posts);
+    networks[network] = selection.length && current?.status !== 'ready'
+      ? { status: 'manual', posts: selection }
+      : { ...current, posts: latestPosts(network, current?.posts) };
+  }
+  return { version: 1, networks };
+}
+
 export function playerUrl(network, post) {
   const url = postUrl(network, post.url);
   if (!url) return null;
