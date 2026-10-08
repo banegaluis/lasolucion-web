@@ -1,8 +1,18 @@
 {
   "version": 1,
   "networks": {
-    "instagram": { "posts": [] },
-    "facebook": { "posts": [] },
-    "tiktok": { "posts": [] }
+    "instagram": {
+      "posts": [
+        {
+          "url": "https://www.instagram.com/reel/DPBrCXOjXx6/"
+        }
+      ]
+    },
+    "facebook": {
+      "posts": []
+    },
+    "tiktok": {
+      "posts": []
+    }
   }
 }
