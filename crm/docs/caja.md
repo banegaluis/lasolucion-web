@@ -24,9 +24,13 @@ Caja es un libro nuevo: no importa ni sincroniza automáticamente `pagos`/`gasto
 
 ## Estado de entrega
 
-Implementación en rama; no publicada. La ejecución del SQL en `lasolucionapp` (`hxphinxgxladtjfnosvi`) fue bloqueada por revisión automática por falta de autorización explícita para modificar esa base real. No se cambió el esquema. Solicitar esa autorización con este SQL revisable antes de activar.
+Implementación en rama; no publicada. El 16/10 se aplicó `caja_movimientos` en `lasolucionapp`. Se detectó una tabla preexistente vacía con columnas `ambito`, `medio`, `origen` y `destino`, y tipo `deuda`; CREATE TABLE IF NOT EXISTS conservó esa estructura. Los permisos y trigger se aplicaron, pero la prueba de guardado falló porque falta `cuenta`. No hay movimientos de prueba persistidos.
 
-Pruebas automatizadas: importes argentinos, ambigüedad, negaciones, flujo, saldos, acceso frontend e idempotencia de reintento mediante servicio simulado. Pendiente: pruebas reales RLS/SQL, concurrencia y navegador.
+**Bloqueo:** falta aplicar `docs/sql/caja_compatibilidad.sql`, que agrega `categoria`, `cuenta` y `cuenta_destino`, amplía los tipos aceptados conservando los anteriores y adapta el trigger para conservar los campos previos. La revisión automática exige autorización explícita para modificar esta estructura existente. No fusionar ni habilitar la pantalla hasta aplicar y verificar la compatibilidad.
+
+Pruebas automatizadas: 8 aprobadas. La prueba real de saldo y permisos no terminó por la incompatibilidad; no se presenta como aprobada. Pendientes SQL/RLS completos, concurrencia y navegador.
+
+El asesor de seguridad no señaló objetos nuevos de Caja, pero informó advertencias preexistentes sobre otras funciones, extensiones y configuración de contraseñas; no se modificaron como parte de esta tarea.
 
 ## Prueba de aceptación al activar
 

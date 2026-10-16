@@ -134,5 +134,5 @@ Actualizado: 28/09/2026. Base de esta etapa: `5d49df9`.
 - Carga con dictado del teclado → interpretación conservadora → edición → confirmación.
 - Cobros, gastos, saldos pendientes y cobros parciales, retiros/aportes personales y transferencias.
 - Relaciones explícitas con cliente y orden; resumen por período sin presentar flujo como ganancia.
-- Solo administrador activo; SQL con RLS preparado. Aplicación en base real bloqueada por revisión automática, requiere autorización explícita.
+- Solo administrador activo; RLS aplicado; tabla preexistente incompatible con el formulario. Ajuste de compatibilidad bloqueado por revisión automática, requiere autorización explícita.
 - Sin WhatsApp conectado, conciliación histórica ni prueba real en Safari todavía. Ver [Caja](caja.md).
