@@ -1,0 +1,7 @@
+#cajaRoot [hidden] { display:none !important; }
+.caja-panel { padding:22px; margin-bottom:20px; }
+.caja-panel fieldset { border:0; margin:0; padding:0; min-width:0; }
+.caja-panel button { margin:12px 8px 0 0; }
+.caja-panel p { line-height:1.6; white-space:pre-line; overflow-wrap:anywhere; }
+.caja-panel input,.caja-panel select,.caja-panel textarea { font-size:16px; }
+.caja-movimiento { padding:14px 0; border-bottom:1px solid var(--border-color,#303030); overflow-wrap:anywhere; }

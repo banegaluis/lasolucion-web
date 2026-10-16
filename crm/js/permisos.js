@@ -14,6 +14,7 @@ const ROLES = Object.freeze({
 });
 
 const PERMISOS = Object.freeze({
+    CAJA_ADMINISTRAR: "caja.administrar",
     DASHBOARD_VER_GENERAL: "dashboard.verGeneral",
     DASHBOARD_VER_OPERATIVO: "dashboard.verOperativo",
     DASHBOARD_VER_TECNICO: "dashboard.verTecnico",
@@ -156,6 +157,7 @@ const ACCESO_PAGINAS = Object.freeze({
     ]),
     "ordenes.html": Object.freeze([PERMISOS.ORDENES_VER_TODAS, PERMISOS.ORDENES_VER_ASIGNADAS]),
     "agenda.html": Object.freeze([PERMISOS.AGENDA_VER_COMPLETA, PERMISOS.AGENDA_VER_PROPIA]),
+    "caja.html": Object.freeze([PERMISOS.CAJA_ADMINISTRAR]),
     "presupuestos.html": Object.freeze([PERMISOS.PRESUPUESTOS_EDITAR]),
     "clientes.html": Object.freeze([PERMISOS.CLIENTES_VER_TODOS]),
     "tecnicos.html": Object.freeze([PERMISOS.TECNICOS_VER, PERMISOS.TECNICOS_ADMINISTRAR]),
