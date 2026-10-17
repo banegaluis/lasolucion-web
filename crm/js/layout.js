@@ -26,6 +26,7 @@ const navIcons = {
     };
 
     const navigationItems = [
+        { href: "caja.html", label: "Caja", icon: navIcons.estadisticas, permission: "caja.administrar" },
         { href: "dashboard.html", label: "Inicio", icon: navIcons.inicio, permission: ["dashboard.verGeneral", "dashboard.verOperativo", "dashboard.verTecnico", "dashboard.verCliente", "dashboard.verClientePendiente"] },
         { href: "agenda.html", label: "Agenda", icon: navIcons.agenda, permission: ["agenda.verCompleta", "agenda.verPropia"] },
         { href: "ordenes.html", label: "Órdenes", icon: navIcons.ordenes, permission: ["ordenes.verTodas", "ordenes.verAsignadas"] },
