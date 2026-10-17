@@ -129,10 +129,10 @@ Actualizado: 28/09/2026. Base de esta etapa: `5d49df9`.
 - Ejemplo de Arre Taquería por $80.000 disponible para cargar.
 - Pendiente: validar impresión/compartir en iPhone real y conectar presupuestos e ítems a Supabase.
 
-## Caja y movimientos (rama, pendiente de activación)
+## Caja y movimientos
 
 - Carga con dictado del teclado → interpretación conservadora → edición → confirmación.
 - Cobros, gastos, saldos pendientes y cobros parciales, retiros/aportes personales y transferencias.
 - Relaciones explícitas con cliente y orden; resumen por período sin presentar flujo como ganancia.
-- Solo administrador activo; RLS aplicado; tabla preexistente incompatible con el formulario. Ajuste de compatibilidad bloqueado por revisión automática, requiere autorización explícita.
+- Solo administrador activo; Tabla nueva y RLS aplicados el 17/10/2026. Guardado, cobro parcial, bloqueo de sobrecobro y restricciones de acceso comprobados mediante transacción revertida.
 - Sin WhatsApp conectado, conciliación histórica ni prueba real en Safari todavía. Ver [Caja](caja.md).

@@ -24,17 +24,17 @@ Caja es un libro nuevo: no importa ni sincroniza automáticamente `pagos`/`gasto
 
 ## Estado de entrega
 
-Implementación en rama; no publicada. El 16/10 se aplicó `caja_movimientos` en `lasolucionapp`. Se detectó una tabla preexistente vacía con columnas `ambito`, `medio`, `origen` y `destino`, y tipo `deuda`; CREATE TABLE IF NOT EXISTS conservó esa estructura. Los permisos y trigger se aplicaron, pero la prueba de guardado falló porque falta `cuenta`. No hay movimientos de prueba persistidos.
+El 17/10/2026 se reemplazó la tabla anterior vacía por la estructura nueva, con autorización del usuario. Se comprobó que tenía cero filas y ninguna referencia externa. La migración bloquea la tabla y cancela el reemplazo si aparecen movimientos; no usa CASCADE.
 
-**Bloqueo:** falta aplicar `docs/sql/caja_compatibilidad.sql`, que agrega `categoria`, `cuenta` y `cuenta_destino`, amplía los tipos aceptados conservando los anteriores y adapta el trigger para conservar los campos previos. La revisión automática exige autorización explícita para modificar esta estructura existente. No fusionar ni habilitar la pantalla hasta aplicar y verificar la compatibilidad.
+Validado en Supabase mediante transacción revertida: administrador inserta y lee; deuda de $80.000 menos cobro de $30.000 deja $50.000; se rechaza sobrecobro; colaborador no puede leer ni insertar; anon no tiene privilegio de lectura. No quedaron movimientos ficticios. Ocho pruebas automatizadas de intérprete, cálculos y servicio aprobadas.
 
-Pruebas automatizadas: 8 aprobadas. La prueba real de saldo y permisos no terminó por la incompatibilidad; no se presenta como aprobada. Pendientes SQL/RLS completos, concurrencia y navegador.
+Pendientes: prueba de concurrencia desde dos dispositivos y recorrido de interfaz real en Safari/iPhone. WhatsApp no está conectado. El asesor de seguridad informó advertencias preexistentes ajenas a Caja (funciones y extensiones); no se modificaron dentro de esta tarea.
 
-El asesor de seguridad no señaló objetos nuevos de Caja, pero informó advertencias preexistentes sobre otras funciones, extensiones y configuración de contraseñas; no se modificaron como parte de esta tarea.
+SQL de instalación: `docs/sql/caja_movimientos.sql`. Reemplazo aplicado: `docs/sql/caja_reemplazar_vacia.sql`. El ajuste de compatibilidad anterior se descartó al optar por la nueva tabla.
 
 ## Prueba de aceptación al activar
 
-1. Aplicar SQL autorizado y comprobar acceso con administrador, técnico y usuario sin sesión; los dos últimos no deben leer ni insertar.
+1. Comprobar acceso con administrador, técnico y usuario sin sesión; los dos últimos no deben leer ni insertar.
 2. Dictar «Hoy gasté 25 mil pesos en caños, en efectivo», revisar, confirmar y recargar. Verificar una sola fila.
 3. Crear saldo de $80.000 vinculado a cliente/orden y cobrar $30.000 desde «Registrar cobro». Debe quedar $50.000; rechazar sobrecobro, incluso desde dos dispositivos.
 4. Registrar retiro y transferencia; verificar que no inflen ingresos operativos.
