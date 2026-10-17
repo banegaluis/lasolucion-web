@@ -1,42 +1,10 @@
-﻿<!DOCTYPE html>
-<html lang="es">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Solución | Configuración</title>
-    <link rel="icon" type="image/png" href="assets/logo/logo.png">
-    <link rel="stylesheet" href="css/style.css?v=sidebar-hidden-20260713-1">
-</head>
-
-<body>
-<main class="content placeholder-page">
-    <h1>Configuración</h1>
-    <p>Esta sección está preparada para futuras opciones de configuración.</p>
-</main>
-
-<script src="js/storage.js"></script>
-<script src="js/auth.js"></script>
-    <script src="js/permisos.js"></script>
-<script src="js/login.js?v=20261002-usuarios"></script>
-
-    <script src="js/layout.js?v=layout-clickout-20260713-1"></script>
-</body>
-
-</html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>La Solución | Configuración</title><link rel="icon" href="assets/logo/logo.png"><link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/dashboard.css"><link rel="stylesheet" href="css/clientes.css"><link rel="stylesheet" href="css/caja.css"><style>#botPanel[hidden]{display:none}.bot-permiso{display:flex;gap:12px;align-items:center;padding:10px 0}.bot-permiso input{width:auto;margin:0}.bot-acciones{display:flex;flex-wrap:wrap;gap:8px}</style></head><body>
+<main class="content clientes-page"><header class="clientes-hero"><div><p class="clientes-eyebrow">Administración</p><h1>Configuración del bot</h1><p>Números autorizados, permisos y trazabilidad.</p></div></header><p id="estadoBot" role="status" aria-live="polite">Comprobando acceso de administrador…</p>
+<div id="botPanel" hidden>
+<section class="clientes-detail-card caja-panel"><h2>Conexión pendiente</h2><p>Este panel guarda los accesos. El bot de WhatsApp todavía no está conectado: aún no recibe audios ni procesa operaciones.</p><p>Número del negocio previsto: 351 543 9183. Los números de esta lista son las personas que podrán utilizar el bot.</p></section>
+<section class="clientes-detail-card caja-panel"><h2>Números autorizados</h2><div class="bot-acciones"><button id="nuevoAcceso" type="button" class="dashboard-primary-action">Agregar número</button><button id="actualizarBot" type="button" class="role-action-button">Actualizar</button></div><div id="listaAccesos"></div></section>
+<form id="formBot" class="clientes-detail-card caja-panel" hidden><h2 id="tituloBot">Agregar número</h2><fieldset id="camposBot"><div class="clientes-form-grid"><label><span>Número internacional</span><input id="numeroBot" type="tel" required placeholder="+5493511234567" maxlength="30"><small>Incluí + y código de país. Verificá el número antes de habilitarlo.</small></label><label><span>Persona del CRM</span><select id="personaBot" required></select></label></div><p id="rolBot"></p><label class="bot-permiso"><input id="activoBot" type="checkbox">Acceso habilitado</label><h3>Qué puede registrar o consultar</h3><div id="permisosBot"></div><p>Consultar Caja o todas las deudas permite ver información del negocio. Administrar estos accesos queda reservado al administrador dentro del CRM.</p><button type="submit" class="dashboard-primary-action">Revisar cambios</button><button id="cancelarBot" type="button" class="role-action-button">Cancelar</button></fieldset></form>
+<section id="confirmarPanel" class="clientes-detail-card caja-panel" hidden><h2>Confirmar permisos</h2><p id="detalleBot"></p><button id="guardarBot" class="dashboard-primary-action" type="button">Confirmar y guardar</button><button id="volverBot" class="role-action-button" type="button">Volver a editar</button></section>
+<section class="clientes-detail-card caja-panel"><h2>Historial y actividad</h2><label class="clientes-full-field"><span>Filtrar por número / persona</span><select id="filtroBot"><option value="">Todos</option></select></label><h3>Cambios de permisos</h3><p>Últimos 100 cambios del filtro seleccionado.</p><div id="historialBot"></div><h3>Operaciones del bot</h3><p>Últimos 100 eventos del filtro seleccionado.</p><div id="actividadBot"></div></section>
+</div></main>
+<script src="js/storage.js"></script><script src="js/auth.js"></script><script src="js/permisos.js"></script><script src="js/login.js?v=20261002-usuarios"></script><script src="js/config/supabase-config.js"></script><script src="js/services/supabaseClient.js"></script><script src="js/services/authService.js?v=20261002-usuarios"></script><script src="js/botAccesosCore.js"></script><script src="js/services/botAccesosService.js"></script><script src="js/botAccesos.js"></script><script src="js/layout.js?v=20261017-bot"></script></body></html>

@@ -136,3 +136,10 @@ Actualizado: 28/09/2026. Base de esta etapa: `5d49df9`.
 - Relaciones explícitas con cliente y orden; resumen por período sin presentar flujo como ganancia.
 - Solo administrador activo; Tabla nueva y RLS aplicados el 17/10/2026. Guardado, cobro parcial, bloqueo de sobrecobro y restricciones de acceso comprobados mediante transacción revertida.
 - Sin WhatsApp conectado, conciliación histórica ni prueba real en Safari todavía. Ver [Caja](caja.md).
+
+## Configuración: accesos del bot
+
+- Panel exclusivo de administrador con número, persona/rol del CRM, estado y permisos granulares.
+- Confirmación de cambios, revocación, protección frente a edición concurrente e historial automático.
+- Vista de actividad filtrada; sin actividad ficticia. La conexión WhatsApp sigue pendiente.
+- Base con RLS aplicada; pruebas de permisos e historial aprobadas. Ver [Accesos del bot](bot-accesos.md).
