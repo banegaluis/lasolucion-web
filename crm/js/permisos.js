@@ -157,6 +157,7 @@ const ACCESO_PAGINAS = Object.freeze({
     ]),
     "ordenes.html": Object.freeze([PERMISOS.ORDENES_VER_TODAS, PERMISOS.ORDENES_VER_ASIGNADAS]),
     "agenda.html": Object.freeze([PERMISOS.AGENDA_VER_COMPLETA, PERMISOS.AGENDA_VER_PROPIA]),
+    "vencimientos.html": Object.freeze([PERMISOS.CONFIGURACION_EDITAR]),
     "caja.html": Object.freeze([PERMISOS.CAJA_ADMINISTRAR]),
     "presupuestos.html": Object.freeze([PERMISOS.PRESUPUESTOS_EDITAR]),
     "clientes.html": Object.freeze([PERMISOS.CLIENTES_VER_TODOS]),
