@@ -81,7 +81,7 @@ create policy vencimientos_avisos_admin_registro_manual on public.vencimientos_a
   and proveedor_id is null
   and exists (
     select 1 from public.vencimientos v
-    where v.id=vencimiento_id and v.fecha_vencimiento=fecha_vencimiento
+    where v.id=vencimiento_id and v.fecha_vencimiento=vencimientos_avisos.fecha_vencimiento
       and v.activo and v.whatsapp_autorizado
       and dias_antes=any(v.avisos_dias)
   )
