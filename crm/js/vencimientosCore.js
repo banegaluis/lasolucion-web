@@ -32,9 +32,10 @@
    return lista.sort((a,b)=>b-a);
  }
  function normalizarTelefono(t){
-   const digitos=String(t||'').replace(/\D/g,'');
-   if(digitos.length<10||digitos.length>15)return null;
-   return digitos;
+   const limpio=String(t||'').trim().replace(/[\s().-]/g,'');
+   // No adivinar códigos de país ni convertir números locales: validar E.164.
+   if(!/^\+[1-9][0-9]{7,14}$/.test(limpio))return null;
+   return limpio.slice(1);
  }
  function mensaje(v,cliente){
    const nombre=String(cliente?.nombre_completo||[cliente?.nombre,cliente?.apellido].filter(Boolean).join(' ')||'').trim();
