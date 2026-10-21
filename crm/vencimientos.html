@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+ <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+ <title>La Solución | Vencimientos y recordatorios</title>
+ <link rel="icon" href="assets/logo/logo.png">
+ <link rel="stylesheet" href="css/style.css">
+ <link rel="stylesheet" href="css/dashboard.css">
+ <link rel="stylesheet" href="css/clientes.css">
+ <link rel="stylesheet" href="css/vencimientos.css?v=20261021-1">
+</head>
+<body>
+<main class="content clientes-page vencimientos-page">
+ <header class="clientes-hero"><div><p class="clientes-eyebrow">Seguimiento de clientes</p><h1>Vencimientos y recordatorios</h1><p>Certificados, controles y mantenimientos periódicos. Las fechas no implican obligaciones normativas automáticas.</p></div><button id="vNuevo" type="button" class="dashboard-primary-action" hidden>+ Nuevo vencimiento</button></header>
+ <p class="v-estado" id="vEstado" role="status" aria-live="polite">Comprobando sesión…</p>
+ <section id="vPanel" hidden>
+  <section class="clientes-summary v-resumen" aria-label="Resumen de vencimientos">
+   <div class="clientes-metric-card"><span>Activos</span><strong id="vActivos">0</strong></div>
+   <div class="clientes-metric-card"><span>En próximos 30 días</span><strong id="vProximos">0</strong></div>
+   <div class="clientes-metric-card"><span>Vencidos</span><strong id="vVencidos">0</strong></div>
+   <div class="clientes-metric-card"><span>Contactos registrados</span><strong id="vContactos">0</strong></div>
+  </section>
+  <section class="clientes-detail-card v-nota"><strong>WhatsApp aún no automatizado.</strong> Podés abrir un chat con texto preparado y declarar el contacto después de enviarlo. No se enviarán mensajes por sí solos. Para los avisos automáticos se requiere integrar el bot oficial, una plantilla aprobada y el consentimiento verificable del cliente.</section>
+  <section id="vEditor" class="clientes-detail-card v-editor" hidden>
+   <h2 id="vTituloEditor">Nuevo vencimiento</h2>
+   <form id="vForm" autocomplete="off">
+    <div class="v-campos">
+     <label>Cliente <select id="vCliente" required></select></label>
+     <label>Concepto <input id="vTitulo" required maxlength="160" placeholder="Ej.: Renovación de certificado de gas"></label>
+     <label>Fecha registrada <input id="vFecha" type="date" required></label>
+     <label>Repetición <select id="vPeriodicidad"><option value="12">Cada 12 meses (anual)</option><option value="6">Cada 6 meses</option><option value="24">Cada 24 meses</option><option value="">Sin repetición</option></select></label>
+     <label class="v-ancho">Observaciones <textarea id="vDetalle" rows="2" placeholder="Número de certificado, instalación, referencia, etc."></textarea></label>
+    </div>
+    <fieldset class="v-opciones"><legend>Fechas de aviso que se calcularán</legend>
+     <label><input type="checkbox" name="vDias" value="30" checked> 30 días antes</label>
+     <label><input type="checkbox" name="vDias" value="7" checked> 7 días antes</label>
+     <label><input type="checkbox" name="vDias" value="0" checked> El mismo día</label>
+    </fieldset>
+    <label class="v-check"><input id="vAutorizado" type="checkbox"> El cliente autorizó recibir avisos por WhatsApp</label>
+    <label class="v-ancho">Cómo y cuándo autorizó <input id="vFuente" maxlength="250" placeholder="Ej.: mensaje del cliente del 14/10/2026 (verificar respaldo)" disabled></label>
+    <label class="v-check"><input id="vActivo" type="checkbox" checked> Seguimiento activo</label>
+    <p class="v-ayuda">La repetición es orientativa: una nueva fecha de vigencia solo se registra cuando confirmás la renovación. No se declara renovado por el simple paso del tiempo.</p>
+    <div class="v-acciones"><button type="submit" class="dashboard-primary-action">Guardar vencimiento</button><button id="vCancelar" type="button" class="role-action-button">Cancelar</button></div>
+   </form>
+  </section>
+  <section class="clientes-detail-card">
+   <div class="v-barra"><h2>Próximos vencimientos</h2><label>Buscar <input type="search" id="vBuscar" placeholder="Cliente o concepto"></label></div>
+   <div id="vListado" class="v-listado" aria-live="polite"></div>
+  </section>
+  <section class="clientes-detail-card"><h2>Historial de renovaciones y contactos</h2><p class="v-ayuda">Un contacto manual solo figura cuando confirmás que efectivamente lo enviaste. El bot futuro registrará aparte el resultado real de la API.</p><div id="vHistorial"></div></section>
+ </section>
+</main>
+<script src="js/storage.js"></script><script src="js/auth.js"></script><script src="js/permisos.js"></script>
+<script src="js/login.js?v=20261002-usuarios"></script><script src="js/config/supabase-config.js"></script>
+<script src="js/services/supabaseClient.js"></script><script src="js/services/authService.js?v=20261002-usuarios"></script>
+<script src="js/vencimientosCore.js?v=20261021-1"></script>
+<script src="js/services/vencimientosService.js?v=20261021-1"></script>
+<script src="js/vencimientos.js?v=20261021-1"></script>
+<script src="js/layout.js?v=20261021-vencimientos"></script>
+</body></html>
