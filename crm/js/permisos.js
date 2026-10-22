@@ -164,7 +164,8 @@ const ACCESO_PAGINAS = Object.freeze({
     "usuarios.html": Object.freeze([PERMISOS.USUARIOS_VER]),
     "mensajes.html": Object.freeze([PERMISOS.MENSAJES_VER]),
     "estadisticas.html": Object.freeze([PERMISOS.ESTADISTICAS_VER_GENERALES]),
-    "configuracion.html": Object.freeze([PERMISOS.CONFIGURACION_VER, PERMISOS.CONFIGURACION_EDITAR])
+    "configuracion.html": Object.freeze([PERMISOS.CONFIGURACION_VER, PERMISOS.CONFIGURACION_EDITAR]),
+    "bot-pruebas.html": Object.freeze([PERMISOS.CONFIGURACION_EDITAR])
 });
 
 function normalizarRolPermisos(rol) {
