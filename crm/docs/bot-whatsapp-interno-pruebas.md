@@ -1,6 +1,9 @@
-# WhatsApp bot — etapa interna de pruebas
+# Laso — asistente interno de La Solución, etapa de pruebas
 
 **Estado: preparado en rama de desarrollo, NO desplegado.** No se envían mensajes, no se crean órdenes y no se gestionan clientes.
+
+## Identidad
+- **Laso** es el nombre interno del asistente; no modifica el nombre público de WhatsApp Business ni representa aprobación por Meta.
 
 ## Qué incluye
 - Receptor GET/POST para Meta WhatsApp Cloud API en \`supabase/functions/whatsapp-interno/\`.
