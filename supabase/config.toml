@@ -1,0 +1,4 @@
+# Webhook externo: el gateway no recibe JWT. El código valida la firma HMAC Meta.
+# Sigue INACTIVO mientras no se despliegue y configure WHATSAPP_BOT_MODO=interno.
+[functions.whatsapp-interno]
+verify_jwt = false
