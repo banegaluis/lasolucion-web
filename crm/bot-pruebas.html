@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La Solución | Laso · Pruebas</title>
+<link rel="icon" href="assets/logo/logo.png"><link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/dashboard.css"><link rel="stylesheet" href="css/clientes.css">
+<style>
+.bot-review{padding:20px}.bot-review h2{margin-top:0}.bot-row{margin:12px 0;padding:14px;border:1px solid #363a42;border-radius:14px;background:#14161a}
+.bot-row strong{color:#f5c518}.bot-row small{color:#aeb5bf}.bot-row p{overflow-wrap:anywhere;white-space:pre-wrap;margin:10px 0}
+.bot-status{padding:8px 0;color:#f5c518}.bot-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.bot-actions button{min-height:42px;width:auto}.bot-review .bot-muted{color:#bac0c8}
+</style></head>
+<body><main class="content clientes-page">
+<header class="clientes-hero"><div><p class="clientes-eyebrow">Solo equipo interno · Administración</p>
+<h1>Laso · Bandeja de pruebas</h1><p>Mensajes autorizados recibidos de WhatsApp, sin crear órdenes ni responder a nadie.</p></div></header>
+<section class="clientes-detail-card bot-review"><h2>Modo seguro</h2>
+<p class="bot-muted">Este panel es solo de lectura. El receptor de WhatsApp permanece apagado hasta configurar Meta y habilitar el modo interno. Los audios se registrarán como pendientes de transcripción; no se descargan ni se transcriben todavía.</p>
+<div class="bot-actions"><button type="button" id="botRefrescar" class="dashboard-primary-action" hidden>Actualizar bandeja</button>
+<p class="bot-status" role="status" id="botEstado">Verificando administrador…</p></div>
+<div id="botEntradas" aria-live="polite"></div></section>
+</main>
+<script src="js/storage.js"></script><script src="js/auth.js"></script><script src="js/permisos.js"></script>
+<script src="js/login.js?v=20261002-usuarios"></script><script src="js/config/supabase-config.js"></script>
+<script src="js/services/supabaseClient.js"></script><script src="js/services/authService.js?v=20261002-usuarios"></script>
+<script src="js/botPruebas.js?v=20261021-1"></script><script src="js/layout.js?v=20261021-bot"></script>
+</body></html>
