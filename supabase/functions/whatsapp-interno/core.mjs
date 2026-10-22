@@ -1,12 +1,12 @@
 // Núcleo puro, sin credenciales ni efectos laterales.
 const REMITENTE=/^[1-9][0-9]{7,14}$/;
-const ID=/^[A-Za-z0-9_.:-]{5,250}$/;
+const ID=/^[A-Za-z0-9_.:=-]{5,250}$/;
 export function remitenteE164(from){
  const numero=String(from??'').trim();
  return REMITENTE.test(numero)?'+'+numero:null;
 }
 export function esComandoAgenda(texto){
- return /^(?:agend[áa]|agenda|agendar|turno|program[áa]|programar|nueva orden)\b/i.test(String(texto||'').trim());
+ return /^(?:agend[áa]|agenda|agendar|turno|program[áa]|programar|nueva orden)(?=\s|$|[.,;:])/i.test(String(texto||'').trim());
 }
 export function extraerMensajes(payload,phoneId){
  if(payload?.object!=='whatsapp_business_account'||!phoneId)return [];
