@@ -13,9 +13,9 @@ export function interpretarSolicitudInterna(texto){
   return {valido:false,motivo:'texto_vacio_o_excesivo',accion:'ninguna',requiere_confirmacion:true};
  const original=texto.trim();
  // Solo se permite preparar borradores, jamás ejecutar una instrucción recibida.
- const tipo=/^(?:agend[áa]|agenda|agendar|turno|program[áa]|programar|nueva orden)\b/i.test(original)
-   ?'agenda':/^(?:presupuest[áa]|presupuestar|presupuesto|cotiz[áa]|cotizar)\b/i.test(original)
-   ?'presupuesto':/^(?:record[áa]|recordar|recordatorio)\b/i.test(original)
+ const tipo=/^(?:agend[áa]|agenda|agendar|turno|program[áa]|programar|nueva orden)(?=\s|$|[.,;:])/i.test(original)
+   ?'agenda':/^(?:presupuest[áa]|presupuestar|presupuesto|cotiz[áa]|cotizar)(?=\s|$|[.,;:])/i.test(original)
+   ?'presupuesto':/^(?:record[áa]|recordar|recordatorio)(?=\s|$|[.,;:])/i.test(original)
    ?'recordatorio':'nota';
  let fecha=null, hora=null;
  const fechaMatch=original.match(RE_FECHA);
@@ -29,7 +29,7 @@ export function interpretarSolicitudInterna(texto){
  const faltantes=[];
  if((tipo==='agenda'||tipo==='recordatorio')&&!fecha)faltantes.push('fecha_explicita');
  if((tipo==='agenda'||tipo==='recordatorio')&&!hora)faltantes.push('hora_explicita');
- if(tipo==='agenda'&&!/\b(?:cliente|para|en|direcci[oó]n)\b/i.test(original))faltantes.push('cliente_o_ubicacion');
+ if(tipo==='agenda'&&!/\b(?:cliente|para|en|direcci[oó]n)(?=\s|$|[.,;:])/i.test(original))faltantes.push('cliente_o_ubicacion');
  return {
   valido:true,
   accion:'preparar_borrador',
