@@ -1,42 +1,79 @@
-// Laso — interpretación preliminar SIN efectos laterales ni datos externos.
-// No sustituye a un motor conversacional ni habilita acciones automáticas.
-const MAX_TEXTO=2000;
-const RE_FECHA=/\b(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})\b/;
-const RE_HORA=/\b([01]?\d|2[0-3]):([0-5]\d)\b/;
+// Laso — interpretación preliminar sin efectos laterales ni datos externos.
+// El resultado nunca habilita escrituras, mensajes salientes ni acciones autónomas.
+const MAX_TEXTO = 2000;
+const ZONA = 'America/Argentina/Cordoba';
+const RE_FECHA = /\b(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})\b/;
+const RE_HORA = /\b([01]?\d|2[0-3]):([0-5]\d)\b/;
+const RE_HORA_NATURAL = /\ba\s+las?\s+([01]?\d|2[0-3])\b|\b([01]?\d|2[0-3])\s*(?:hs?\.?|horas?)\b/i;
+const RE_RELATIVA = /(?:^|[\s(,;])(?:pasado\s+ma[ñn]ana|ma[ñn]ana|hoy)(?=$|[\s).,;:!?])/i;
+const RE_AGENDA = /^(?:agend(?:a|á|ar|ame|áme)|agenda|turno|program(?:a|á|ar|ame|áme)|nueva orden)(?=\s|$|[.,;:])/i;
+const RE_PRESUPUESTO = /^(?:presupuest(?:a|á|ar|ame|áme|o)|cotiz(?:a|á|ar|ame|áme))(?:\s|$|[.,;:])/i;
+const RE_RECORDATORIO = /^(?:record(?:a|á|ar|ame|áme|atorio)|recu[eé]rdame)(?=\s|$|[.,;:])/i;
 
-function fechaValida(d,m,a){
- const fecha=new Date(Date.UTC(a,m-1,d));
- return fecha.getUTCFullYear()===a&&fecha.getUTCMonth()===m-1&&fecha.getUTCDate()===d;
+function fechaValida(d, m, a) {
+  const fecha = new Date(Date.UTC(a, m - 1, d));
+  return fecha.getUTCFullYear() === a && fecha.getUTCMonth() === m - 1 && fecha.getUTCDate() === d;
 }
-export function interpretarSolicitudInterna(texto){
- if(typeof texto!=='string'||!texto.trim()||texto.length>MAX_TEXTO)
-  return {valido:false,motivo:'texto_vacio_o_excesivo',accion:'ninguna',requiere_confirmacion:true};
- const original=texto.trim();
- // Solo se permite preparar borradores, jamás ejecutar una instrucción recibida.
- const tipo=/^(?:agend[áa]|agenda|agendar|turno|program[áa]|programar|nueva orden)(?=\s|$|[.,;:])/i.test(original)
-   ?'agenda':/^(?:presupuest[áa]|presupuestar|presupuesto|cotiz[áa]|cotizar)(?=\s|$|[.,;:])/i.test(original)
-   ?'presupuesto':/^(?:record[áa]|recordar|recordatorio)(?=\s|$|[.,;:])/i.test(original)
-   ?'recordatorio':'nota';
- let fecha=null, hora=null;
- const fechaMatch=original.match(RE_FECHA);
- if(fechaMatch){
-  const [,dia,mes,anio]=fechaMatch.map(String);
-  const d=Number(dia),m=Number(mes),a=Number(anio);
-  if(fechaValida(d,m,a))fecha=`${anio}-${mes.padStart(2,'0')}-${dia.padStart(2,'0')}`;
- }
- const horaMatch=original.match(RE_HORA);
- if(horaMatch)hora=`${horaMatch[1].padStart(2,'0')}:${horaMatch[2]}`;
- const faltantes=[];
- if((tipo==='agenda'||tipo==='recordatorio')&&!fecha)faltantes.push('fecha_explicita');
- if((tipo==='agenda'||tipo==='recordatorio')&&!hora)faltantes.push('hora_explicita');
- if(tipo==='agenda'&&!/\b(?:cliente|para|en|direcci[oó]n)(?=\s|$|[.,;:])/i.test(original))faltantes.push('cliente_o_ubicacion');
- return {
-  valido:true,
-  accion:'preparar_borrador',
-  tipo, texto_original:original,
-  fecha, hora, faltantes,
-  requiere_confirmacion:true,
-  puede_ejecutar:false,
-  puede_enviar:false
- };
+function isoFecha(a, m, d) {
+  return String(a).padStart(4, '0') + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+}
+function fechaLocalEnCordoba(ahora) {
+  if (!(ahora instanceof Date) || !Number.isFinite(ahora.getTime())) return null;
+  const partes = new Intl.DateTimeFormat('en-US', {
+    timeZone: ZONA, year: 'numeric', month: '2-digit', day: '2-digit'
+  }).formatToParts(ahora);
+  const campos = Object.fromEntries(partes.filter(p => p.type !== 'literal').map(p => [p.type, p.value]));
+  return { a: Number(campos.year), m: Number(campos.month), d: Number(campos.day) };
+}
+function sumarDias(fecha, cantidad) {
+  const d = new Date(Date.UTC(fecha.a, fecha.m - 1, fecha.d + cantidad));
+  return isoFecha(d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate());
+}
+function leerFecha(texto, ahora) {
+  const explicita = texto.match(RE_FECHA);
+  if (explicita) {
+    const d = Number(explicita[1]), m = Number(explicita[2]), a = Number(explicita[3]);
+    return fechaValida(d, m, a)
+      ? { fecha: isoFecha(a, m, d), origen_fecha: 'explicita' }
+      : { fecha: null, origen_fecha: 'explicita_invalida' };
+  }
+  const relativa = texto.match(RE_RELATIVA);
+  if (!relativa) return { fecha: null, origen_fecha: null };
+  const local = fechaLocalEnCordoba(ahora);
+  if (!local) return { fecha: null, origen_fecha: 'relativa_sin_referencia' };
+  const palabra = relativa[0].trim().toLowerCase();
+  const dias = palabra.startsWith('pasado') ? 2 : palabra === 'hoy' ? 0 : 1;
+  return { fecha: sumarDias(local, dias), origen_fecha: 'relativa' };
+}
+function leerHora(texto) {
+  const exacta = texto.match(RE_HORA);
+  if (exacta) return exacta[1].padStart(2, '0') + ':' + exacta[2];
+  const natural = texto.match(RE_HORA_NATURAL);
+  const hora = natural && (natural[1] ?? natural[2]);
+  return hora == null ? null : hora.padStart(2, '0') + ':00';
+}
+
+// El reloj se inyecta para no inventar qué significa «mañana» cuando falta contexto.
+export function interpretarSolicitudInterna(texto, { ahora = null } = {}) {
+  if (typeof texto !== 'string' || !texto.trim() || texto.length > MAX_TEXTO) {
+    return { valido: false, motivo: 'texto_vacio_o_excesivo', accion: 'ninguna',
+      requiere_confirmacion: true, puede_ejecutar: false, puede_enviar: false };
+  }
+  const original = texto.trim();
+  // Nunca interpretar instrucciones incluidas en el mensaje como autorización.
+  const tipo = RE_AGENDA.test(original) ? 'agenda'
+    : RE_PRESUPUESTO.test(original) ? 'presupuesto'
+    : RE_RECORDATORIO.test(original) ? 'recordatorio' : 'nota';
+  const { fecha, origen_fecha } = leerFecha(original, ahora);
+  const hora = leerHora(original);
+  const faltantes = [];
+  if ((tipo === 'agenda' || tipo === 'recordatorio') && !fecha) faltantes.push('fecha_explicita');
+  if ((tipo === 'agenda' || tipo === 'recordatorio') && !hora) faltantes.push('hora_explicita');
+  // Es una pista textual, no una validación ni vinculación de cliente en CRM.
+  if (tipo === 'agenda' && !/\b(?:cliente|para|en|direcci[oó]n)(?=\s|$|[.,;:])/i.test(original)) {
+    faltantes.push('cliente_o_ubicacion');
+  }
+  return { valido: true, accion: 'preparar_borrador', tipo, texto_original: original,
+    fecha, hora, origen_fecha, zona_horaria: ZONA, faltantes,
+    requiere_confirmacion: true, puede_ejecutar: false, puede_enviar: false };
 }
