@@ -35,3 +35,11 @@ Resultado local reportado al 8/11/2026: 12 pruebas del módulo aprobadas con Nod
 - El ejemplo «Agendame mañana a las 10 para Guille» produce una fecha si hay reloj inyectado, pero **no crea turno real**.
 - No atribuir esta prueba a la implementación desplegada en Supabase ni a WhatsApp.
 - No activar mensajes externos, gastos, escritura de datos ni acceso a Caja por una instrucción recibida en el propio chat.
+
+## Corrección 9/11/2026: horarios inválidos y ambiguos
+- «a las 10:75» ya no se reduce a 10:00. Horarios inválidos, incluso acompañados de otro válido, dejan `hora: null` y solicitan `hora_explicita`.
+- Varios horarios distintos (incluidos formatos mixtos) requieren aclaración. Repetir el mismo horario no genera un faltante.
+- No resuelve aún franjas «tarde/noche», rangos ni correcciones conversacionales. Mantiene confirmación obligatoria y ninguna ejecución/envío.
+- Módulo puro sin conexión al webhook: no implica activación ni mejora desplegada.
+
+Validación local del 9/11/2026 (Node v24.22.1): `node --test tests/*.test.cjs tests/*.test.mjs`, 105 pruebas aprobadas, 0 fallos; 8 pruebas nuevas. `git diff --check` sin errores. No se probaron Safari, flujos reales de Nueva Orden/agenda/PDF, Deno, webhook ni audio. No se midió ahorro de tiempo operativo.

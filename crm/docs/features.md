@@ -143,3 +143,6 @@ Actualizado: 28/09/2026. Base de esta etapa: `5d49df9`.
 - Confirmación de cambios, revocación, protección frente a edición concurrente e historial automático.
 - Vista de actividad filtrada; sin actividad ficticia. La conexión WhatsApp sigue pendiente.
 - Base con RLS aplicada; pruebas de permisos e historial aprobadas. Ver [Accesos del bot](bot-accesos.md).
+
+### Laso — corrección de horarios en desarrollo (9/11/2026)
+El intérprete de borradores rechaza horarios numéricos inválidos y exige aclaración cuando encuentra horarios distintos. Evita convertir «10:75» en «10:00». Solo en rama de desarrollo; sin webhook, escrituras ni envíos. Ver `laso-secretario-roadmap.md`.

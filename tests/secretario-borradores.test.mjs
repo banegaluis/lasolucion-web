@@ -78,3 +78,19 @@ test('texto inválido se rechaza sin efectos', () => {
     assert.equal(r.puede_enviar, false);
   }
 });
+
+for (const horario of ['a las 10:75', 'a las 24:00 o a las 9', 'a las 10:30 o 11:00', 'a las 9 o a las 10', 'a las 10:30 o a las 11', 'a las 29', 'a las 10:5']) {
+  test(`horario inválido o ambiguo pide aclaración: ${horario}`, () => {
+    const r = interpreto(`Agendame para Guille 12/11/2026 ${horario}`);
+    assert.equal(r.hora, null);
+    assert.ok(r.faltantes.includes('hora_explicita'));
+    assert.equal(r.requiere_confirmacion, true);
+    assert.equal(r.puede_ejecutar, false);
+    assert.equal(r.puede_enviar, false);
+  });
+}
+test('repetir el mismo horario no crea ambigüedad y conserva medianoche', () => {
+  for (const [texto, esperado] of [['a las 9, 09:00', '09:00'], ['00:00', '00:00'], ['23:59', '23:59']]) {
+    assert.equal(interpreto(`Agendá para Guille 12/11/2026 ${texto}`).hora, esperado);
+  }
+});

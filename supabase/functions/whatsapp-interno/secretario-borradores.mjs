@@ -3,8 +3,8 @@
 const MAX_TEXTO = 2000;
 const ZONA = 'America/Argentina/Cordoba';
 const RE_FECHA = /\b(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})\b/;
-const RE_HORA = /\b([01]?\d|2[0-3]):([0-5]\d)\b/;
-const RE_HORA_NATURAL = /\ba\s+las?\s+([01]?\d|2[0-3])\b|\b([01]?\d|2[0-3])\s*(?:hs?\.?|horas?)\b/i;
+const RE_HORA = /\b(\d+):(\d+)\b/g;
+const RE_HORA_NATURAL = /\ba\s+las?\s+(\d+)\b|\b(\d+)\s*(?:hs?\.?|horas?)\b/gi;
 const RE_RELATIVA = /(?:^|[\s(,;])(?:pasado\s+ma[ñn]ana|ma[ñn]ana|hoy)(?=$|[\s).,;:!?])/i;
 const RE_AGENDA = /^(?:agend(?:a|á|ar|ame|áme)|agenda|turno|program(?:a|á|ar|ame|áme)|nueva orden)(?=\s|$|[.,;:])/i;
 const RE_PRESUPUESTO = /^(?:presupuest(?:a|á|ar|ame|áme|o)|cotiz(?:a|á|ar|ame|áme))(?:\s|$|[.,;:])/i;
@@ -46,11 +46,22 @@ function leerFecha(texto, ahora) {
   return { fecha: sumarDias(local, dias), origen_fecha: 'relativa' };
 }
 function leerHora(texto) {
-  const exacta = texto.match(RE_HORA);
-  if (exacta) return exacta[1].padStart(2, '0') + ':' + exacta[2];
-  const natural = texto.match(RE_HORA_NATURAL);
-  const hora = natural && (natural[1] ?? natural[2]);
-  return hora == null ? null : hora.padStart(2, '0') + ':00';
+  const horas = [];
+  // Consumir también horarios inválidos: nunca rescatar «10» de «10:75».
+  for (const m of texto.matchAll(RE_HORA)) {
+    if (m[1].length > 2 || m[2].length !== 2 || Number(m[1]) > 23 || Number(m[2]) > 59) return null;
+    horas.push(m[1].padStart(2, '0') + ':' + m[2]);
+  }
+  // Ocultar los horarios completos para no volver a leer su parte horaria.
+  const sinExactas = texto.replace(RE_HORA, '');
+  for (const m of sinExactas.matchAll(RE_HORA_NATURAL)) {
+    const hora = m[1] ?? m[2];
+    if (hora.length > 2 || Number(hora) > 23) return null;
+    horas.push(hora.padStart(2, '0') + ':00');
+  }
+  const distintas = [...new Set(horas)];
+  // Opciones y correcciones requieren aclaración, no elegir el primer horario.
+  return distintas.length === 1 ? distintas[0] : null;
 }
 
 // El reloj se inyecta para no inventar qué significa «mañana» cuando falta contexto.
