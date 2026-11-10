@@ -5,7 +5,7 @@ Pruebas: `tests/secretario-borradores.test.mjs`.
 
 **Estado:** módulo puro de interpretación en rama del PR #12. **NO está conectado al webhook de Meta, al CRM ni desplegado en Supabase.** No es un modelo conversacional: usa reglas simples y deterministas. Ningún texto ejecuta órdenes o envía mensajes.
 
-## Funcionalidad probada (Node 22, pruebas locales de desarrollo)
+## Funcionalidad probada (pruebas locales de desarrollo)
 - Clasifica borradores internos: agenda, recordatorio, presupuesto y nota.
 - Reconoce expresiones frecuentes: «Agendame», «Agendá», «Recordame», «Presupuestame».
 - Acepta fechas DD/MM/AAAA y horarios HH:MM; también «a las 10» o «9 hs».
@@ -43,3 +43,10 @@ Resultado local reportado al 8/11/2026: 12 pruebas del módulo aprobadas con Nod
 - Módulo puro sin conexión al webhook: no implica activación ni mejora desplegada.
 
 Validación local del 9/11/2026 (Node v24.22.1): `node --test tests/*.test.cjs tests/*.test.mjs`, 105 pruebas aprobadas, 0 fallos; 8 pruebas nuevas. `git diff --check` sin errores. No se probaron Safari, flujos reales de Nueva Orden/agenda/PDF, Deno, webhook ni audio. No se midió ahorro de tiempo operativo.
+
+## Corrección 10/11/2026: mañana y tarde junto a una hora
+- «3 de la tarde» y «3:30 de la tarde» producen 15:00 y 15:30; se admite también la hora de 24 h (15 de la tarde). «9 de la mañana» conserva 09:00.
+- «De la mañana» ya no se interpreta como fecha relativa. Sin otro día indicado, pide fecha; «mañana a las 9 de la mañana» conserva el día siguiente.
+- Por criterio conservador, «12 de la mañana/tarde», «de la noche», contradicciones y horarios inválidos piden hora explícita de 24 h. No interpreta todas las variantes del habla, rangos ni correcciones conversacionales.
+- Validación: 120 pruebas locales aprobadas, 0 fallos (15 nuevas), con `node --test tests/*.test.cjs tests/*.test.mjs`; `git diff --check` limpio. Los dos errores reproducidos (03:00 en vez de 15:00 y fecha siguiente inventada) quedan cubiertos. No se midió ahorro de tiempo de uso real.
+- Se mantienen confirmación obligatoria, ejecución/envío deshabilitados y módulo sin conectar al webhook. No se probaron audio, Deno, Safari ni flujos reales de Nueva Orden, agenda y PDF. Sin cambios de interfaz ni producción.

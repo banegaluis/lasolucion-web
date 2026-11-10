@@ -146,3 +146,6 @@ Actualizado: 28/09/2026. Base de esta etapa: `5d49df9`.
 
 ### Laso — corrección de horarios en desarrollo (9/11/2026)
 El intérprete de borradores rechaza horarios numéricos inválidos y exige aclaración cuando encuentra horarios distintos. Evita convertir «10:75» en «10:00». Solo en rama de desarrollo; sin webhook, escrituras ni envíos. Ver `laso-secretario-roadmap.md`.
+
+### Laso — franjas horarias en desarrollo (10/11/2026)
+El intérprete convierte «3 de la tarde» a 15:00 y evita tomar «de la mañana» como el día siguiente. Pide aclaración en franjas ambiguas o contradictorias. Incluye 15 pruebas nuevas; continúa sin integración al webhook, sin ejecución ni envíos. Detalle y límites en `laso-secretario-roadmap.md`.

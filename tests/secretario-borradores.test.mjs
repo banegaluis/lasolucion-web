@@ -94,3 +94,37 @@ test('repetir el mismo horario no crea ambigüedad y conserva medianoche', () =>
     assert.equal(interpreto(`Agendá para Guille 12/11/2026 ${texto}`).hora, esperado);
   }
 });
+
+for (const [horario, esperado] of [
+  ['a las 3 de la tarde', '15:00'], ['3:30 de la tarde', '15:30'],
+  ['a las 15 de la tarde', '15:00'], ['a las 9 de la mañana', '09:00'],
+  ['09:15 DE LA MANANA', '09:15'], ['3 de la tarde o 15:00', '15:00'],
+]) {
+  test(`franja explícita conserva la hora correcta: ${horario}`, () => {
+    const r = interpreto(`Agendá para Guille hoy ${horario}`, new Date('2026-11-10T12:00:00Z'));
+    assert.equal(r.hora, esperado);
+    assert.equal(r.fecha, '2026-11-10');
+    assert.deepEqual(r.faltantes, []);
+    assert.equal(r.requiere_confirmacion, true);
+    assert.equal(r.puede_ejecutar, false);
+    assert.equal(r.puede_enviar, false);
+  });
+}
+for (const horario of ['12 de la mañana', '12 de la tarde', '1 de la noche', '15 de la mañana', '0 de la tarde', '3:75 de la tarde', '3:5 de la tarde', '3 de la tarde o 16:00']) {
+  test(`franja inválida, no admitida o contradictoria pide aclaración: ${horario}`, () => {
+    const r = interpreto(`Agendá para Guille 12/11/2026 ${horario}`);
+    assert.equal(r.hora, null);
+    assert.ok(r.faltantes.includes('hora_explicita'));
+    assert.equal(r.requiere_confirmacion, true);
+    assert.equal(r.puede_ejecutar, false);
+    assert.equal(r.puede_enviar, false);
+  });
+}
+test('la franja mañana no inventa fecha ni oculta una fecha relativa real', () => {
+  const ahora = new Date('2026-11-10T12:00:00Z');
+  const r = interpreto('Agendá para Guille a las 9 de la mañana', ahora);
+  assert.equal(r.fecha, null);
+  assert.ok(r.faltantes.includes('fecha_explicita'));
+  assert.equal(interpreto('Agendá para Guille mañana a las 9 de la mañana', ahora).fecha, '2026-11-11');
+  assert.equal(interpreto('Agendá para Guille a las 9 de la mañana pasado mañana', ahora).fecha, '2026-11-12');
+});

@@ -5,6 +5,7 @@ const ZONA = 'America/Argentina/Cordoba';
 const RE_FECHA = /\b(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})\b/;
 const RE_HORA = /\b(\d+):(\d+)\b/g;
 const RE_HORA_NATURAL = /\ba\s+las?\s+(\d+)\b|\b(\d+)\s*(?:hs?\.?|horas?)\b/gi;
+const RE_HORA_FRANJA = /\b(\d+)(?::(\d+))?\s+de\s+la\s+(ma[ñn]ana|tarde|noche)\b/gi;
 const RE_RELATIVA = /(?:^|[\s(,;])(?:pasado\s+ma[ñn]ana|ma[ñn]ana|hoy)(?=$|[\s).,;:!?])/i;
 const RE_AGENDA = /^(?:agend(?:a|á|ar|ame|áme)|agenda|turno|program(?:a|á|ar|ame|áme)|nueva orden)(?=\s|$|[.,;:])/i;
 const RE_PRESUPUESTO = /^(?:presupuest(?:a|á|ar|ame|áme|o)|cotiz(?:a|á|ar|ame|áme))(?:\s|$|[.,;:])/i;
@@ -37,7 +38,8 @@ function leerFecha(texto, ahora) {
       ? { fecha: isoFecha(a, m, d), origen_fecha: 'explicita' }
       : { fecha: null, origen_fecha: 'explicita_invalida' };
   }
-  const relativa = texto.match(RE_RELATIVA);
+  // «De la mañana» describe una franja, no el día siguiente.
+  const relativa = texto.replace(/\bde\s+la\s+ma[ñn]ana\b/gi, '').match(RE_RELATIVA);
   if (!relativa) return { fecha: null, origen_fecha: null };
   const local = fechaLocalEnCordoba(ahora);
   if (!local) return { fecha: null, origen_fecha: 'relativa_sin_referencia' };
@@ -47,13 +49,28 @@ function leerFecha(texto, ahora) {
 }
 function leerHora(texto) {
   const horas = [];
+  // Franjas adjuntas a una hora: no descartar el calificativo al leer el número.
+  for (const m of texto.matchAll(RE_HORA_FRANJA)) {
+    let h = Number(m[1]);
+    const minutos = m[2] ?? '00';
+    const franja = m[3].toLowerCase();
+    if (m[1].length > 2 || h > 23 || minutos.length !== 2 || Number(minutos) > 59) return null;
+    // «12 de la mañana/tarde» y «de la noche» requieren una hora de 24 h.
+    if (franja === 'noche' || h === 12) return null;
+    if (franja === 'tarde') {
+      if (h === 0) return null;
+      if (h < 12) h += 12;
+    } else if (h > 11) return null;
+    horas.push(String(h).padStart(2, '0') + ':' + minutos);
+  }
+  const sinFranjas = texto.replace(RE_HORA_FRANJA, '');
   // Consumir también horarios inválidos: nunca rescatar «10» de «10:75».
-  for (const m of texto.matchAll(RE_HORA)) {
+  for (const m of sinFranjas.matchAll(RE_HORA)) {
     if (m[1].length > 2 || m[2].length !== 2 || Number(m[1]) > 23 || Number(m[2]) > 59) return null;
     horas.push(m[1].padStart(2, '0') + ':' + m[2]);
   }
   // Ocultar los horarios completos para no volver a leer su parte horaria.
-  const sinExactas = texto.replace(RE_HORA, '');
+  const sinExactas = sinFranjas.replace(RE_HORA, '');
   for (const m of sinExactas.matchAll(RE_HORA_NATURAL)) {
     const hora = m[1] ?? m[2];
     if (hora.length > 2 || Number(hora) > 23) return null;
