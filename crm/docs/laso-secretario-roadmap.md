@@ -22,7 +22,7 @@ node --test tests/secretario-borradores.test.mjs
 Resultado local reportado al 8/11/2026: 12 pruebas del módulo aprobadas con Node 22. Esto **no sustituye** CI, pruebas Deno, integración con la API, test del webhook real ni ensayos desde iPhone.
 
 ## Diseño seguro de la siguiente fase
-1. Simulador de solicitudes sin datos personales: pedido → borrador → aclaración → aprobación.
+1. Completar el simulador de solicitudes sin datos personales: pedido → borrador → aclaración → aprobación. La preparación de preguntas y resumen existe desde el 11/11; la aprobación con estado todavía no.
 2. Interpretación ampliada para días de semana y fechas coloquiales con resolución determinista de zona y ambigüedades, sin inventar horarios.
 3. Consulta mínima y autorizada de agenda/clientes, sin exponer datos a remitentes no autenticados.
 4. Voz interna optativa con consentimiento, control de costos, política de retención y eliminación de audios.
@@ -50,3 +50,11 @@ Validación local del 9/11/2026 (Node v24.22.1): `node --test tests/*.test.cjs t
 - Por criterio conservador, «12 de la mañana/tarde», «de la noche», contradicciones y horarios inválidos piden hora explícita de 24 h. No interpreta todas las variantes del habla, rangos ni correcciones conversacionales.
 - Validación: 120 pruebas locales aprobadas, 0 fallos (15 nuevas), con `node --test tests/*.test.cjs tests/*.test.mjs`; `git diff --check` limpio. Los dos errores reproducidos (03:00 en vez de 15:00 y fecha siguiente inventada) quedan cubiertos. No se midió ahorro de tiempo de uso real.
 - Se mantienen confirmación obligatoria, ejecución/envío deshabilitados y módulo sin conectar al webhook. No se probaron audio, Deno, Safari ni flujos reales de Nueva Orden, agenda y PDF. Sin cambios de interfaz ni producción.
+
+## Revisión interna 11/11/2026
+- Nuevo módulo puro `supabase/functions/whatsapp-interno/secretario-revision.mjs`, función `prepararRevisionInterna(texto, { ahora })`. Reutiliza el intérprete; no confía en flags externos de un borrador.
+- Para agenda/recordatorios devuelve preguntas en español por los faltantes detectados y un resumen estructurado con pedido original, fecha, hora y zona. Agrupa todos los faltantes en una revisión. No vuelve a preguntar por campos ya interpretados.
+- Estados: `entrada_invalida`, `revision_manual` (otros tipos o confirmaciones sueltas), `necesita_aclaracion` y `pendiente_revision`. Este último no equivale a aprobación ni valida la tarea o el cliente: el indicio textual del intérprete sigue requiriendo revisión humana.
+- Para aclarar, se reenvía el pedido completo; no mantiene conversación, no combina respuestas parciales ni recibe aprobaciones. Tampoco persiste, autentica, envía o conecta al webhook. Siempre requiere confirmación, con ejecución/envío deshabilitados.
+- Pruebas: `node --test tests/*.test.cjs tests/*.test.mjs`, 128/128 aprobadas en Node v24.22.1; 8 pruebas nuevas. Caso medido: 3 faltantes agrupados en una revisión; con fecha y cliente indicados pregunta solo por la hora. No hay medición de ahorro operativo real.
+- No se ejecutaron pruebas de audio, Deno, Safari ni flujos CRM reales (Nueva Orden, agenda, PDF). Dashboard sin cambios; `WHATSAPP_BOT_MODO=apagado` sigue por defecto. Próximo paso: estado versionado para correcciones y aprobación vinculada al borrador, con rechazo de confirmaciones antiguas.

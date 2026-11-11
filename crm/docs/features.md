@@ -149,3 +149,6 @@ El intérprete de borradores rechaza horarios numéricos inválidos y exige acla
 
 ### Laso — franjas horarias en desarrollo (10/11/2026)
 El intérprete convierte «3 de la tarde» a 15:00 y evita tomar «de la mañana» como el día siguiente. Pide aclaración en franjas ambiguas o contradictorias. Incluye 15 pruebas nuevas; continúa sin integración al webhook, sin ejecución ni envíos. Detalle y límites en `laso-secretario-roadmap.md`.
+
+### Laso — preparación de revisión interna (11/11/2026)
+Nuevo módulo puro que agrupa preguntas por datos faltantes y prepara un resumen de agenda/recordatorios. No acepta confirmaciones, no guarda ni envía mensajes. Incluye 8 pruebas nuevas; queda pendiente el circuito con estado y aprobación vinculada al borrador. Detalle en `laso-secretario-roadmap.md`.
