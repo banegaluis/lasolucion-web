@@ -152,3 +152,6 @@ El intérprete convierte «3 de la tarde» a 15:00 y evita tomar «de la mañana
 
 ### Laso — preparación de revisión interna (11/11/2026)
 Nuevo módulo puro que agrupa preguntas por datos faltantes y prepara un resumen de agenda/recordatorios. No acepta confirmaciones, no guarda ni envía mensajes. Incluye 8 pruebas nuevas; queda pendiente el circuito con estado y aprobación vinculada al borrador. Detalle en `laso-secretario-roadmap.md`.
+
+### Laso — sesión versionada de simulación (12/11/2026)
+El nuevo módulo de sesión invalida la confirmación simulada ante correcciones y rechaza referencias a versiones viejas u otros borradores. Incluye 9 pruebas nuevas; no autentica, persiste, guarda turnos ni envía mensajes. Confirmación real e integración siguen pendientes. Ver `laso-secretario-roadmap.md`.
