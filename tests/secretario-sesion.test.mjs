@@ -74,3 +74,48 @@ test('reloj de referencia no cambia al modificar el objeto externo', () => {
   const r = s.corregir(texto.replace('10:00', '11:00'), ref());
   assert.equal(r.sesion.revision.resumen.fecha, '2026-11-13');
 });
+
+test('cancelar revoca la confirmación y bloquea nuevas acciones', () => {
+  const s = crear();
+  s.confirmar(ref());
+  const r = s.cancelar(ref());
+  assert.equal(r.ok, true);
+  assert.equal(r.sesion.estado_sesion, 'cancelada');
+  assert.equal(r.sesion.confirmacion_simulada, false);
+  assert.equal(s.confirmar(ref()).motivo, 'sesion_cancelada');
+  assert.equal(s.corregir(pedido.replace('10:00', '15:00'), ref()).motivo, 'sesion_cancelada');
+  assert.equal(s.consultar().revision.resumen.hora, '10:00');
+  assert.equal(s.consultar().puede_ejecutar, false);
+  assert.equal(s.consultar().puede_enviar, false);
+});
+test('reintentar cancelación es idempotente', () => {
+  const s = crear();
+  const primera = s.cancelar(ref());
+  const segunda = s.cancelar(ref());
+  assert.equal(segunda.motivo, 'ya_cancelada');
+  assert.deepEqual(primera.sesion, segunda.sesion);
+});
+test('cancelación vieja o de otro borrador no descarta la versión vigente', () => {
+  const s = crear();
+  s.corregir(pedido, ref());
+  for (const r of [ref(), { id: 'otro', version: 2 }, undefined, ref('2')]) {
+    assert.equal(s.cancelar(r).ok, false);
+    assert.equal(s.consultar().estado_sesion, 'activa');
+  }
+  assert.equal(s.cancelar(ref(2)).ok, true);
+});
+test('se puede descartar un pedido incompleto sin aprobarlo', () => {
+  const s = crear('Agendá revisar calefón');
+  assert.equal(s.cancelar(ref()).ok, true);
+  assert.equal(s.confirmar(ref()).ok, false);
+  assert.equal(s.consultar().confirmacion_simulada, false);
+});
+test('modificar la copia no reabre la sesión y no afecta otra sesión', () => {
+  const s = crear();
+  const otra = crearSesionRevision({ id: 'otro', texto: pedido });
+  s.cancelar(ref());
+  s.consultar().estado_sesion = 'activa';
+  assert.equal(s.confirmar(ref()).ok, false);
+  assert.equal(otra.consultar().estado_sesion, 'activa');
+  assert.equal(otra.confirmar({ id: 'otro', version: 1 }).ok, true);
+});

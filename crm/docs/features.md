@@ -155,3 +155,6 @@ Nuevo módulo puro que agrupa preguntas por datos faltantes y prepara un resumen
 
 ### Laso — sesión versionada de simulación (12/11/2026)
 El nuevo módulo de sesión invalida la confirmación simulada ante correcciones y rechaza referencias a versiones viejas u otros borradores. Incluye 9 pruebas nuevas; no autentica, persiste, guarda turnos ni envía mensajes. Confirmación real e integración siguen pendientes. Ver `laso-secretario-roadmap.md`.
+
+### Laso — cancelación interna en simulación (13/11/2026)
+Se puede cancelar un borrador con su identificador y versión vigentes. La cancelación revoca la confirmación simulada e impide nuevas correcciones o confirmaciones; repetirla no cambia el resultado. Cinco pruebas nuevas. Sin integración, persistencia ni efectos externos; vencimiento pendiente. Ver `laso-secretario-roadmap.md`.
