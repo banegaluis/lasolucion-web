@@ -119,3 +119,61 @@ test('modificar la copia no reabre la sesión y no afecta otra sesión', () => {
   assert.equal(otra.consultar().estado_sesion, 'activa');
   assert.equal(otra.confirmar({ id: 'otro', version: 1 }).ok, true);
 });
+
+test('vence exactamente al límite y revoca confirmación previa', () => {
+  let t = 1000;
+  const s = crearSesionRevision({ id: 'prueba', texto: pedido, reloj: () => t, vigenciaMs: 100 });
+  t = 1099;
+  assert.equal(s.confirmar(ref()).ok, true);
+  t = 1100;
+  assert.equal(s.confirmar(ref()).motivo, 'sesion_vencida');
+  assert.equal(s.consultar().confirmacion_simulada, false);
+  assert.equal(s.consultar().estado_sesion, 'vencida');
+  assert.equal(s.corregir(pedido, ref()).ok, false);
+  assert.equal(s.cancelar(ref()).ok, false);
+});
+test('corregir no extiende el vencimiento y consultar lo detecta', () => {
+  let t = 1000;
+  const s = crearSesionRevision({ id: 'prueba', texto: pedido, reloj: () => t, vigenciaMs: 100 });
+  t = 1090;
+  s.corregir(pedido, ref());
+  assert.equal(s.consultar().vence_en_ms, 1100);
+  t = 1100;
+  assert.equal(s.consultar().estado_sesion, 'vencida');
+  assert.equal(s.confirmar(ref(2)).ok, false);
+});
+test('reloj inválido, fallido o regresivo cierra sin posibilidad de reapertura', () => {
+  for (const falla of [NaN, Infinity, 999, '1050', null, new Error('reloj')]) {
+    let t = 1000;
+    const s = crearSesionRevision({ id: 'prueba', texto: pedido, reloj: () => {
+      if (t instanceof Error) throw t;
+      return t;
+    }, vigenciaMs: 100 });
+    t = falla;
+    assert.equal(s.confirmar(ref()).ok, false);
+    t = 1050;
+    assert.equal(s.consultar().estado_sesion, 'vencida');
+    assert.equal(s.consultar().puede_ejecutar, false);
+    assert.equal(s.consultar().puede_enviar, false);
+  }
+});
+test('cancelada conserva su estado terminal después del plazo', () => {
+  let t = 1000;
+  const s = crearSesionRevision({ id: 'prueba', texto: pedido, reloj: () => t, vigenciaMs: 100 });
+  s.cancelar(ref());
+  t = 2000;
+  assert.equal(s.consultar().estado_sesion, 'cancelada');
+  assert.equal(s.cancelar(ref()).motivo, 'ya_cancelada');
+});
+test('rechaza vigencias e instantes iniciales inválidos', () => {
+  for (const vigenciaMs of [0, -1, 1.5, Infinity, '100']) {
+    assert.throws(() => crearSesionRevision({ id: 'prueba', texto: pedido, vigenciaMs }), TypeError);
+  }
+  for (const instante of [NaN, Infinity, '1000', Number.MAX_SAFE_INTEGER]) {
+    assert.throws(() => crearSesionRevision({ id: 'prueba', texto: pedido, reloj: () => instante }), TypeError);
+  }
+});
+test('vigencia predeterminada de simulación es quince minutos', () => {
+  const s = crearSesionRevision({ id: 'prueba', texto: pedido, reloj: () => 1000 });
+  assert.equal(s.consultar().vence_en_ms, 901000);
+});

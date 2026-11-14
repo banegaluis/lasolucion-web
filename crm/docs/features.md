@@ -158,3 +158,6 @@ El nuevo módulo de sesión invalida la confirmación simulada ante correcciones
 
 ### Laso — cancelación interna en simulación (13/11/2026)
 Se puede cancelar un borrador con su identificador y versión vigentes. La cancelación revoca la confirmación simulada e impide nuevas correcciones o confirmaciones; repetirla no cambia el resultado. Cinco pruebas nuevas. Sin integración, persistencia ni efectos externos; vencimiento pendiente. Ver `laso-secretario-roadmap.md`.
+
+### Laso — vencimiento de borradores en simulación (14/11/2026)
+La sesión verifica un plazo configurable al consultar o actuar: vencida, revoca confirmación y bloquea cambios. Corregir no renueva el plazo. Incluye 6 pruebas nuevas; 15 minutos es el valor provisional de simulación. No implica integración, despliegue ni guardado real. Ver `laso-secretario-roadmap.md`.
