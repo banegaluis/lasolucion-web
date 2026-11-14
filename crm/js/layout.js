@@ -36,7 +36,8 @@ const navIcons = {
         { href: "usuarios.html", label: "Usuarios", icon: navIcons.usuarios, permission: "usuarios.ver" },
         { href: "mensajes.html", label: "Mensajes", icon: navIcons.mensajes, permission: "mensajes.ver" },
         { href: "estadisticas.html", label: "Estadísticas", icon: navIcons.estadisticas, permission: "estadisticas.verGenerales" },
-        { href: "configuracion.html", label: "Configuración", icon: navIcons.configuracion, permission: "configuracion.ver" }
+        { href: "configuracion.html", label: "Configuración", icon: navIcons.configuracion, permission: "configuracion.ver" },
+        { href: "bot-pruebas.html", label: "Laso · Pruebas", icon: navIcons.mensajes, permission: "configuracion.editar" }
     ];
 
     function userCan(permission) {

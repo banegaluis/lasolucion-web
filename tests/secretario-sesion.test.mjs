@@ -1,0 +1,179 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { crearSesionRevision } from '../supabase/functions/whatsapp-interno/secretario-sesion.mjs';
+const pedido = 'Agendá para Guille 15/11/2026 10:00 revisar calefón';
+const crear = (texto = pedido) => crearSesionRevision({ id: 'prueba', texto });
+const ref = (version = 1) => ({ id: 'prueba', version });
+
+test('corregir invalida la confirmación y rechaza el sí de la versión anterior', () => {
+  const s = crear();
+  assert.equal(s.confirmar(ref()).sesion.confirmacion_simulada, true);
+  const corregida = s.corregir(pedido.replace('10:00', '15:00'), ref());
+  assert.equal(corregida.sesion.version, 2);
+  assert.equal(corregida.sesion.confirmacion_simulada, false);
+  assert.equal(corregida.sesion.revision.resumen.hora, '15:00');
+  assert.equal(s.confirmar(ref()).ok, false);
+  assert.equal(s.confirmar(ref(2)).ok, true);
+});
+test('no confirma otro borrador ni versiones ausentes, futuras o coercionadas', () => {
+  const s = crear();
+  for (const r of [undefined, 'sí', { id: 'otro', version: 1 }, ref(2), ref('1'), ref(NaN)]) {
+    assert.equal(s.confirmar(r).ok, false);
+    assert.equal(s.consultar().confirmacion_simulada, false);
+  }
+});
+test('dos correcciones desde la misma versión no se pisan', () => {
+  const s = crear();
+  assert.equal(s.corregir(pedido.replace('10:00', '15:00'), ref()).ok, true);
+  assert.equal(s.corregir(pedido.replace('10:00', '17:00'), ref()).ok, false);
+  assert.equal(s.consultar().revision.resumen.hora, '15:00');
+});
+test('faltantes y pedidos fuera del circuito no se confirman', () => {
+  for (const texto of ['Agendá revisar calefón', 'Presupuestame un tanque', 'Sí, confirmo']) {
+    assert.equal(crear(texto).confirmar(ref()).motivo, 'revision_incompleta');
+  }
+});
+test('completar un pedido habilita solo confirmación simulada', () => {
+  const s = crear('Agendá revisar calefón');
+  s.corregir(pedido, ref());
+  const r = s.confirmar(ref(2));
+  assert.equal(r.ok, true);
+  assert.equal(r.sesion.puede_ejecutar, false);
+  assert.equal(r.sesion.puede_enviar, false);
+  assert.equal(r.sesion.requiere_confirmacion, true);
+});
+test('confirmación repetida es idempotente', () => {
+  const s = crear();
+  const primero = s.confirmar(ref());
+  const segundo = s.confirmar(ref());
+  assert.equal(segundo.motivo, 'ya_confirmado_en_simulacion');
+  assert.deepEqual(primero.sesion, segundo.sesion);
+});
+test('alterar una copia no altera el borrador vigente', () => {
+  const s = crear('Agendá revisar calefón');
+  const copia = s.consultar();
+  copia.revision.estado = 'pendiente_revision';
+  copia.revision.preguntas.length = 0;
+  copia.confirmacion_simulada = true;
+  assert.equal(s.confirmar(ref()).ok, false);
+  assert.equal(s.consultar().revision.preguntas.length, 3);
+});
+test('entrada inválida no borra ni cambia la revisión vigente', () => {
+  const s = crear();
+  const antes = s.consultar();
+  assert.equal(s.corregir('', ref()).ok, false);
+  assert.deepEqual(s.consultar(), antes);
+  assert.throws(() => crearSesionRevision({ id: '', texto: pedido }), TypeError);
+  assert.throws(() => crear(''), TypeError);
+});
+test('reloj de referencia no cambia al modificar el objeto externo', () => {
+  const ahora = new Date('2026-11-12T12:00:00Z');
+  const texto = 'Recordame mañana 10:00 comprar caños';
+  const s = crearSesionRevision({ id: 'prueba', texto, ahora });
+  ahora.setUTCDate(20);
+  const r = s.corregir(texto.replace('10:00', '11:00'), ref());
+  assert.equal(r.sesion.revision.resumen.fecha, '2026-11-13');
+});
+
+test('cancelar revoca la confirmación y bloquea nuevas acciones', () => {
+  const s = crear();
+  s.confirmar(ref());
+  const r = s.cancelar(ref());
+  assert.equal(r.ok, true);
+  assert.equal(r.sesion.estado_sesion, 'cancelada');
+  assert.equal(r.sesion.confirmacion_simulada, false);
+  assert.equal(s.confirmar(ref()).motivo, 'sesion_cancelada');
+  assert.equal(s.corregir(pedido.replace('10:00', '15:00'), ref()).motivo, 'sesion_cancelada');
+  assert.equal(s.consultar().revision.resumen.hora, '10:00');
+  assert.equal(s.consultar().puede_ejecutar, false);
+  assert.equal(s.consultar().puede_enviar, false);
+});
+test('reintentar cancelación es idempotente', () => {
+  const s = crear();
+  const primera = s.cancelar(ref());
+  const segunda = s.cancelar(ref());
+  assert.equal(segunda.motivo, 'ya_cancelada');
+  assert.deepEqual(primera.sesion, segunda.sesion);
+});
+test('cancelación vieja o de otro borrador no descarta la versión vigente', () => {
+  const s = crear();
+  s.corregir(pedido, ref());
+  for (const r of [ref(), { id: 'otro', version: 2 }, undefined, ref('2')]) {
+    assert.equal(s.cancelar(r).ok, false);
+    assert.equal(s.consultar().estado_sesion, 'activa');
+  }
+  assert.equal(s.cancelar(ref(2)).ok, true);
+});
+test('se puede descartar un pedido incompleto sin aprobarlo', () => {
+  const s = crear('Agendá revisar calefón');
+  assert.equal(s.cancelar(ref()).ok, true);
+  assert.equal(s.confirmar(ref()).ok, false);
+  assert.equal(s.consultar().confirmacion_simulada, false);
+});
+test('modificar la copia no reabre la sesión y no afecta otra sesión', () => {
+  const s = crear();
+  const otra = crearSesionRevision({ id: 'otro', texto: pedido });
+  s.cancelar(ref());
+  s.consultar().estado_sesion = 'activa';
+  assert.equal(s.confirmar(ref()).ok, false);
+  assert.equal(otra.consultar().estado_sesion, 'activa');
+  assert.equal(otra.confirmar({ id: 'otro', version: 1 }).ok, true);
+});
+
+test('vence exactamente al límite y revoca confirmación previa', () => {
+  let t = 1000;
+  const s = crearSesionRevision({ id: 'prueba', texto: pedido, reloj: () => t, vigenciaMs: 100 });
+  t = 1099;
+  assert.equal(s.confirmar(ref()).ok, true);
+  t = 1100;
+  assert.equal(s.confirmar(ref()).motivo, 'sesion_vencida');
+  assert.equal(s.consultar().confirmacion_simulada, false);
+  assert.equal(s.consultar().estado_sesion, 'vencida');
+  assert.equal(s.corregir(pedido, ref()).ok, false);
+  assert.equal(s.cancelar(ref()).ok, false);
+});
+test('corregir no extiende el vencimiento y consultar lo detecta', () => {
+  let t = 1000;
+  const s = crearSesionRevision({ id: 'prueba', texto: pedido, reloj: () => t, vigenciaMs: 100 });
+  t = 1090;
+  s.corregir(pedido, ref());
+  assert.equal(s.consultar().vence_en_ms, 1100);
+  t = 1100;
+  assert.equal(s.consultar().estado_sesion, 'vencida');
+  assert.equal(s.confirmar(ref(2)).ok, false);
+});
+test('reloj inválido, fallido o regresivo cierra sin posibilidad de reapertura', () => {
+  for (const falla of [NaN, Infinity, 999, '1050', null, new Error('reloj')]) {
+    let t = 1000;
+    const s = crearSesionRevision({ id: 'prueba', texto: pedido, reloj: () => {
+      if (t instanceof Error) throw t;
+      return t;
+    }, vigenciaMs: 100 });
+    t = falla;
+    assert.equal(s.confirmar(ref()).ok, false);
+    t = 1050;
+    assert.equal(s.consultar().estado_sesion, 'vencida');
+    assert.equal(s.consultar().puede_ejecutar, false);
+    assert.equal(s.consultar().puede_enviar, false);
+  }
+});
+test('cancelada conserva su estado terminal después del plazo', () => {
+  let t = 1000;
+  const s = crearSesionRevision({ id: 'prueba', texto: pedido, reloj: () => t, vigenciaMs: 100 });
+  s.cancelar(ref());
+  t = 2000;
+  assert.equal(s.consultar().estado_sesion, 'cancelada');
+  assert.equal(s.cancelar(ref()).motivo, 'ya_cancelada');
+});
+test('rechaza vigencias e instantes iniciales inválidos', () => {
+  for (const vigenciaMs of [0, -1, 1.5, Infinity, '100']) {
+    assert.throws(() => crearSesionRevision({ id: 'prueba', texto: pedido, vigenciaMs }), TypeError);
+  }
+  for (const instante of [NaN, Infinity, '1000', Number.MAX_SAFE_INTEGER]) {
+    assert.throws(() => crearSesionRevision({ id: 'prueba', texto: pedido, reloj: () => instante }), TypeError);
+  }
+});
+test('vigencia predeterminada de simulación es quince minutos', () => {
+  const s = crearSesionRevision({ id: 'prueba', texto: pedido, reloj: () => 1000 });
+  assert.equal(s.consultar().vence_en_ms, 901000);
+});

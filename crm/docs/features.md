@@ -143,3 +143,21 @@ Actualizado: 28/09/2026. Base de esta etapa: `5d49df9`.
 - Confirmación de cambios, revocación, protección frente a edición concurrente e historial automático.
 - Vista de actividad filtrada; sin actividad ficticia. La conexión WhatsApp sigue pendiente.
 - Base con RLS aplicada; pruebas de permisos e historial aprobadas. Ver [Accesos del bot](bot-accesos.md).
+
+### Laso — corrección de horarios en desarrollo (9/11/2026)
+El intérprete de borradores rechaza horarios numéricos inválidos y exige aclaración cuando encuentra horarios distintos. Evita convertir «10:75» en «10:00». Solo en rama de desarrollo; sin webhook, escrituras ni envíos. Ver `laso-secretario-roadmap.md`.
+
+### Laso — franjas horarias en desarrollo (10/11/2026)
+El intérprete convierte «3 de la tarde» a 15:00 y evita tomar «de la mañana» como el día siguiente. Pide aclaración en franjas ambiguas o contradictorias. Incluye 15 pruebas nuevas; continúa sin integración al webhook, sin ejecución ni envíos. Detalle y límites en `laso-secretario-roadmap.md`.
+
+### Laso — preparación de revisión interna (11/11/2026)
+Nuevo módulo puro que agrupa preguntas por datos faltantes y prepara un resumen de agenda/recordatorios. No acepta confirmaciones, no guarda ni envía mensajes. Incluye 8 pruebas nuevas; queda pendiente el circuito con estado y aprobación vinculada al borrador. Detalle en `laso-secretario-roadmap.md`.
+
+### Laso — sesión versionada de simulación (12/11/2026)
+El nuevo módulo de sesión invalida la confirmación simulada ante correcciones y rechaza referencias a versiones viejas u otros borradores. Incluye 9 pruebas nuevas; no autentica, persiste, guarda turnos ni envía mensajes. Confirmación real e integración siguen pendientes. Ver `laso-secretario-roadmap.md`.
+
+### Laso — cancelación interna en simulación (13/11/2026)
+Se puede cancelar un borrador con su identificador y versión vigentes. La cancelación revoca la confirmación simulada e impide nuevas correcciones o confirmaciones; repetirla no cambia el resultado. Cinco pruebas nuevas. Sin integración, persistencia ni efectos externos; vencimiento pendiente. Ver `laso-secretario-roadmap.md`.
+
+### Laso — vencimiento de borradores en simulación (14/11/2026)
+La sesión verifica un plazo configurable al consultar o actuar: vencida, revoca confirmación y bloquea cambios. Corregir no renueva el plazo. Incluye 6 pruebas nuevas; 15 minutos es el valor provisional de simulación. No implica integración, despliegue ni guardado real. Ver `laso-secretario-roadmap.md`.
