@@ -161,3 +161,6 @@ Se puede cancelar un borrador con su identificador y versión vigentes. La cance
 
 ### Laso — vencimiento de borradores en simulación (14/11/2026)
 La sesión verifica un plazo configurable al consultar o actuar: vencida, revoca confirmación y bloquea cambios. Corregir no renueva el plazo. Incluye 6 pruebas nuevas; 15 minutos es el valor provisional de simulación. No implica integración, despliegue ni guardado real. Ver `laso-secretario-roadmap.md`.
+
+### Laso — control de acceso aislado (15/11/2026)
+Nuevo adaptador que revalida permisos en cada operación sobre la sesión y bloquea otros remitentes, revocación, reasignación o cambio de versión, sin devolver el borrador denegado. Seis pruebas nuevas con autorizador simulado. No es autenticación desplegada ni integración con servicios reales. Ver `laso-secretario-roadmap.md`.
