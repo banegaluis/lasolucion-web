@@ -1,4 +1,5 @@
 // Núcleo puro, sin credenciales ni efectos laterales.
+import { esSolicitudAgenda } from './secretario-borradores.mjs';
 const REMITENTE=/^[1-9][0-9]{7,14}$/;
 const ID=/^[A-Za-z0-9_.:=-]{5,250}$/;
 export function remitenteE164(from){
@@ -6,7 +7,7 @@ export function remitenteE164(from){
  return REMITENTE.test(numero)?'+'+numero:null;
 }
 export function esComandoAgenda(texto){
- return /^(?:agend[áa]|agenda|agendar|turno|program[áa]|programar|nueva orden)(?=\s|$|[.,;:])/i.test(String(texto||'').trim());
+ return esSolicitudAgenda(texto);
 }
 export function extraerMensajes(payload,phoneId){
  if(payload?.object!=='whatsapp_business_account'||!phoneId)return [];

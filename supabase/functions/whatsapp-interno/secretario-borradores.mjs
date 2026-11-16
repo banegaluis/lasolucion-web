@@ -11,6 +11,10 @@ const RE_AGENDA = /^(?:agend(?:a|á|ar|ame|áme)|agenda|turno|program(?:a|á|ar|
 const RE_PRESUPUESTO = /^(?:presupuest(?:a|á|ar|ame|áme|o)|cotiz(?:a|á|ar|ame|áme))(?:\s|$|[.,;:])/i;
 const RE_RECORDATORIO = /^(?:record(?:a|á|ar|ame|áme|atorio)|recu[eé]rdame)(?=\s|$|[.,;:])/i;
 
+export function esSolicitudAgenda(texto) {
+  return typeof texto === 'string' && RE_AGENDA.test(texto.trim());
+}
+
 function fechaValida(d, m, a) {
   const fecha = new Date(Date.UTC(a, m - 1, d));
   return fecha.getUTCFullYear() === a && fecha.getUTCMonth() === m - 1 && fecha.getUTCDate() === d;
@@ -89,7 +93,7 @@ export function interpretarSolicitudInterna(texto, { ahora = null } = {}) {
   }
   const original = texto.trim();
   // Nunca interpretar instrucciones incluidas en el mensaje como autorización.
-  const tipo = RE_AGENDA.test(original) ? 'agenda'
+  const tipo = esSolicitudAgenda(original) ? 'agenda'
     : RE_PRESUPUESTO.test(original) ? 'presupuesto'
     : RE_RECORDATORIO.test(original) ? 'recordatorio' : 'nota';
   const { fecha, origen_fecha } = leerFecha(original, ahora);

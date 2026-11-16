@@ -164,3 +164,6 @@ La sesión verifica un plazo configurable al consultar o actuar: vencida, revoca
 
 ### Laso — control de acceso aislado (15/11/2026)
 Nuevo adaptador que revalida permisos en cada operación sobre la sesión y bloquea otros remitentes, revocación, reasignación o cambio de versión, sin devolver el borrador denegado. Seis pruebas nuevas con autorizador simulado. No es autenticación desplegada ni integración con servicios reales. Ver `laso-secretario-roadmap.md`.
+
+### Laso — filtro de entrada coherente (16/11/2026)
+Se corrige el descarte de «Agendame» y «Programame» (con o sin tilde), reutilizando la regla del intérprete. Siete pruebas nuevas incluyen recorrido local con firma, destino, permisos y borrador. No implica recepción real de WhatsApp ni despliegue; duplicados persistentes siguen pendientes. Ver `laso-secretario-roadmap.md`.
