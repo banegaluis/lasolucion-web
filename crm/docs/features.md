@@ -167,3 +167,6 @@ Nuevo adaptador que revalida permisos en cada operación sobre la sesión y bloq
 
 ### Laso — filtro de entrada coherente (16/11/2026)
 Se corrige el descarte de «Agendame» y «Programame» (con o sin tilde), reutilizando la regla del intérprete. Siete pruebas nuevas incluyen recorrido local con firma, destino, permisos y borrador. No implica recepción real de WhatsApp ni despliegue; duplicados persistentes siguen pendientes. Ver `laso-secretario-roadmap.md`.
+
+### Laso — deduplicación dentro del lote (17/11/2026)
+Se omiten eventos repetidos después de su primera inserción resuelta en el mismo lote. Prueba sintética: 50 copias producen 1 consulta de permiso y 1 intento de guardado, 98 % menos llamadas. Cinco pruebas nuevas. La unicidad entre solicitudes continúa dependiendo de la base y no se verificó en producción. Ver `laso-secretario-roadmap.md`.

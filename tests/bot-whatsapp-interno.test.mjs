@@ -55,3 +55,57 @@ test('operador autorizado se guarda como borrador, no orden ni envío',async()=>
  assert.equal(entrada.tipo,'texto');
  assert.ok(!('cliente_id' in entrada));
 });
+
+test('50 repeticiones del mismo evento generan una sola inserción por lote', async () => {
+ const [evento]=extraerMensajes(payload(),'ID_INTERNO');
+ let consultas=0,inserciones=0;
+ const r=await procesarMensajes(Array.from({length:50},()=>({...evento})),{
+  autorizar:async()=>{consultas++;return {acceso_id:'x',perfil_id:'y',version:1};},
+  insertar:async()=>{inserciones++;}
+ });
+ assert.deepEqual(r,{registrados:1,omitidos:49});
+ assert.equal(consultas,1);
+ assert.equal(inserciones,1);
+});
+test('dos eventos distintos con el mismo texto se conservan', async () => {
+ const [evento]=extraerMensajes(payload(),'ID_INTERNO');
+ const guardados=[];
+ const r=await procesarMensajes([evento,{...evento,evento_id:'wamid.distinto'}],{
+  autorizar:async()=>({acceso_id:'x',perfil_id:'y',version:1}),
+  insertar:async e=>{guardados.push(e.evento_id);}
+ });
+ assert.equal(r.registrados,2);
+ assert.deepEqual(guardados,[evento.evento_id,'wamid.distinto']);
+});
+test('un evento no autorizado no ocupa el identificador en el lote', async () => {
+ const [evento]=extraerMensajes(payload(),'ID_INTERNO');
+ let consultas=0,inserciones=0;
+ const r=await procesarMensajes([evento,evento],{
+  autorizar:async()=>++consultas===1?null:{acceso_id:'x',perfil_id:'y',version:1},
+  insertar:async()=>{inserciones++;}
+ });
+ assert.deepEqual(r,{registrados:1,omitidos:1});
+ assert.equal(inserciones,1);
+});
+test('fallo de inserción se propaga y otro intento puede guardar', async () => {
+ const [evento]=extraerMensajes(payload(),'ID_INTERNO');
+ let falla=true,inserciones=0;
+ const deps={autorizar:async()=>({acceso_id:'x',perfil_id:'y',version:1}),
+  insertar:async()=>{if(falla)throw Error('temporal');inserciones++;}};
+ await assert.rejects(procesarMensajes([evento,evento],deps),/temporal/);
+ falla=false;
+ assert.deepEqual(await procesarMensajes([evento,evento],deps),{registrados:1,omitidos:1});
+ assert.equal(inserciones,1);
+});
+test('lotes distintos vuelven a validar e insertar: requieren unicidad persistente', async () => {
+ const [evento]=extraerMensajes(payload(),'ID_INTERNO');
+ let consultas=0,intentos=0;
+ const filas=new Set(); // Doble de la restricción persistente, no prueba de Supabase.
+ const deps={autorizar:async()=>{consultas++;return {acceso_id:'x',perfil_id:'y',version:1};},
+  insertar:async e=>{intentos++;filas.add(e.evento_id);}};
+ await procesarMensajes([evento],deps);
+ await procesarMensajes([evento],deps);
+ assert.equal(consultas,2);
+ assert.equal(intentos,2);
+ assert.equal(filas.size,1);
+});

@@ -48,13 +48,17 @@ export async function firmaCorrecta(cuerpo,encabezado,clave,cripto=globalThis.cr
 }
 export async function procesarMensajes(mensajes,{autorizar,insertar}){
  let registrados=0,omitidos=0;
+ const procesados=new Set();
  for(const m of mensajes){
+   // Solo recordar inserciones resueltas en este lote; la base cubre otros reintentos.
+   if(procesados.has(m.evento_id)){omitidos++;continue;}
    // Nunca confiar en un rol, nombre o identidad declarados dentro del texto.
    const acceso=await autorizar(m.numero,'agenda.registrar');
    if(!acceso?.acceso_id||!acceso.perfil_id||!Number.isInteger(acceso.version)){
       omitidos++;continue;
    }
    await insertar({...m,acceso_id:acceso.acceso_id,perfil_id:acceso.perfil_id,version_acceso:acceso.version});
+   procesados.add(m.evento_id);
    registrados++;
  }
  return {registrados,omitidos};
