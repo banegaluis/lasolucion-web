@@ -170,3 +170,6 @@ Se corrige el descarte de «Agendame» y «Programame» (con o sin tilde), reuti
 
 ### Laso — deduplicación dentro del lote (17/11/2026)
 Se omiten eventos repetidos después de su primera inserción resuelta en el mismo lote. Prueba sintética: 50 copias producen 1 consulta de permiso y 1 intento de guardado, 98 % menos llamadas. Cinco pruebas nuevas. La unicidad entre solicitudes continúa dependiendo de la base y no se verificó en producción. Ver `laso-secretario-roadmap.md`.
+
+### Laso — regresión HTTP sin servicios reales (18/11/2026)
+Se agregan seis escenarios de prueba del manejador existente con almacenamiento simulado: apagado, firma inválida, permiso denegado, reintentos concurrentes, fallo temporal y revocación. No cambia el comportamiento funcional ni demuestra unicidad en PostgreSQL real. Ver `laso-secretario-roadmap.md`.
