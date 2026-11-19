@@ -1,7 +1,7 @@
 import { interpretarSolicitudInterna } from './secretario-borradores.mjs';
 
 const PREGUNTAS = {
-  fecha_explicita: '¿Qué día? Indicá la fecha en formato DD/MM/AAAA.',
+  fecha_explicita: '¿Qué día? Indicá una única fecha en formato DD/MM/AAAA.',
   hora_explicita: '¿A qué hora? Indicá un único horario en formato HH:MM de 24 horas.',
   cliente_o_ubicacion: '¿Para qué cliente o en qué dirección es el trabajo?'
 };

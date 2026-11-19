@@ -60,3 +60,40 @@ test('entradas inválidas o flags externos nunca habilitan acciones', () => {
     assert.equal(r.requiere_confirmacion, true);
   }
 });
+
+for (const fechas of [
+  '20/11/2026 o 21/11/2026',
+  'mañana o pasado mañana',
+  '20/11/2026 o mañana',
+  '20/11/2026, mejor 21/11/2026',
+  '31/11/2026 o 20/11/2026',
+  'hoy o mañana'
+]) {
+  test(`fechas múltiples requieren aclaración: ${fechas}`, () => {
+    const texto = `Agendame para Guille ${fechas} a las 10 revisar calefón`;
+    const r = revisar(texto, { ahora: new Date('2026-11-19T15:00:00Z') });
+    assert.equal(r.estado, 'necesita_aclaracion');
+    assert.equal(r.borrador.origen_fecha, fechas.includes('31/11') ? 'explicita_invalida' : 'ambigua');
+    assert.equal(r.resumen.fecha, null);
+    assert.equal(r.resumen.hora, '10:00');
+    assert.equal(r.resumen.pedido_original, texto);
+    assert.deepEqual(r.preguntas.map(p => p.campo), ['fecha_explicita']);
+    assert.match(r.preguntas[0].texto, /única fecha/);
+    assert.equal(r.puede_ejecutar, false);
+    assert.equal(r.puede_enviar, false);
+  });
+}
+
+test('una fecha con franja de mañana conserva su interpretación', () => {
+  for (const [fechas, fecha] of [
+    ['20/11/2026', '2026-11-20'],
+    ['mañana', '2026-11-20'],
+    ['pasado mañana', '2026-11-21']
+  ]) {
+    const r = revisar(`Agendame para Guille ${fechas} a las 10 de la mañana`,
+      { ahora: new Date('2026-11-19T15:00:00Z') });
+    assert.equal(r.estado, 'pendiente_revision');
+    assert.equal(r.resumen.fecha, fecha);
+    assert.equal(r.resumen.hora, '10:00');
+  }
+});

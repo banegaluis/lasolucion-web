@@ -35,15 +35,24 @@ function sumarDias(fecha, cantidad) {
   return isoFecha(d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate());
 }
 function leerFecha(texto, ahora) {
-  const explicita = texto.match(RE_FECHA);
+  // Más de una mención requiere aclaración, incluso si parecen equivalentes:
+  // no inferir alternativas, rangos ni correcciones a partir del orden textual.
+  const explicitas = [...texto.matchAll(new RegExp(RE_FECHA.source, 'g'))];
+  // «De la mañana» describe una franja, no el día siguiente.
+  const relativas = [...texto.replace(/\bde\s+la\s+ma[ñn]ana\b/gi, '')
+    .matchAll(new RegExp(RE_RELATIVA.source, 'gi'))];
+  if (explicitas.some(m => !fechaValida(Number(m[1]), Number(m[2]), Number(m[3])))) {
+    return { fecha: null, origen_fecha: 'explicita_invalida' };
+  }
+  if (explicitas.length + relativas.length > 1) {
+    return { fecha: null, origen_fecha: 'ambigua' };
+  }
+  const explicita = explicitas[0];
   if (explicita) {
     const d = Number(explicita[1]), m = Number(explicita[2]), a = Number(explicita[3]);
-    return fechaValida(d, m, a)
-      ? { fecha: isoFecha(a, m, d), origen_fecha: 'explicita' }
-      : { fecha: null, origen_fecha: 'explicita_invalida' };
+    return { fecha: isoFecha(a, m, d), origen_fecha: 'explicita' };
   }
-  // «De la mañana» describe una franja, no el día siguiente.
-  const relativa = texto.replace(/\bde\s+la\s+ma[ñn]ana\b/gi, '').match(RE_RELATIVA);
+  const relativa = relativas[0];
   if (!relativa) return { fecha: null, origen_fecha: null };
   const local = fechaLocalEnCordoba(ahora);
   if (!local) return { fecha: null, origen_fecha: 'relativa_sin_referencia' };
