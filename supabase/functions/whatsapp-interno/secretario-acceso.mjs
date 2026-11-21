@@ -21,7 +21,7 @@ export async function crearRevisionConAcceso({ numero, autorizar, ...opciones })
   return Object.freeze({ ok: true,
     async operar({ numero: remitente, accion, referencia, texto } = {}) {
       if (remitente !== numero) return denegado();
-      if (!['consultar', 'corregir', 'confirmar', 'cancelar'].includes(accion)) {
+      if (!['consultar', 'corregir', 'completarHora', 'confirmar', 'cancelar'].includes(accion)) {
         return { ok: false, motivo: 'accion_invalida' };
       }
       // Copiar la referencia antes del await evita cambios mientras se autoriza.
@@ -30,7 +30,7 @@ export async function crearRevisionConAcceso({ numero, autorizar, ...opciones })
       if (!acceso || acceso.acceso_id !== propietario.acceso_id
         || acceso.perfil_id !== propietario.perfil_id || acceso.version !== propietario.version) return denegado();
       if (accion === 'consultar') return { ok: true, sesion: sesion.consultar() };
-      if (accion === 'corregir') return sesion.corregir(texto, ref);
+      if (accion === 'corregir' || accion === 'completarHora') return sesion[accion](texto, ref);
       return sesion[accion](ref);
     }
   });

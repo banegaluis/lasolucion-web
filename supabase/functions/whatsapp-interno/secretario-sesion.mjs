@@ -55,6 +55,28 @@ export function crearSesionRevision({ id, texto, ahora = null, reloj = Date.now,
       confirmada = false;
       return resultado(true, 'corregido');
     },
+    completarHora(hora, referenciaVersion) {
+      actualizarVencimiento();
+      if (vencida) return resultado(false, 'sesion_vencida');
+      if (!coincide(referenciaVersion)) return resultado(false, 'referencia_desactualizada');
+      if (cancelada) return resultado(false, 'sesion_cancelada');
+      if (!revision.borrador.faltantes?.includes('hora_explicita')) {
+        return resultado(false, 'hora_no_pendiente');
+      }
+      if (typeof hora !== 'string' || !/^(?:[01][0-9]|2[0-3]):[0-5][0-9]$/.test(hora)) {
+        return resultado(false, 'hora_invalida');
+      }
+      // Reinterpretar el pedido entero: no sobrescribir horarios ambiguos o inválidos.
+      const nueva = prepararRevisionInterna(`${revision.borrador.texto_original} ${hora}`, { ahora: referencia });
+      if (nueva.estado === 'entrada_invalida' || nueva.borrador.hora !== hora) {
+        return resultado(false, 'requiere_correccion_completa');
+      }
+      if (version === Number.MAX_SAFE_INTEGER) return resultado(false, 'limite_versiones');
+      revision = nueva;
+      version += 1;
+      confirmada = false;
+      return resultado(true, 'hora_completada');
+    },
     confirmar(referenciaVersion) {
       actualizarVencimiento();
       if (vencida) return resultado(false, 'sesion_vencida');

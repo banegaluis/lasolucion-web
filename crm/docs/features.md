@@ -181,3 +181,7 @@ Se agregan seis escenarios de prueba del manejador existente con almacenamiento 
 ## Laso: recorrido de aclaración con permisos — 20/11/2026
 - Cuatro regresiones integradas cubren fechas ambiguas, corrección, confirmación versionada, revocación y vencimiento a través del adaptador de acceso aislado.
 - Suite local: 184/184 aprobadas. Solo pruebas y documentación; sin nuevos comportamientos operativos, persistencia, conexión Meta o cambios visuales.
+
+## Laso: completar hora pendiente — 21/11/2026
+- Sesión y adaptador aislados admiten `completarHora` con respuesta estricta HH:MM de 24 horas. Conserva el pedido, incrementa versión y exige confirmación; no renueva el vencimiento.
+- 191/191 pruebas locales aprobadas, 7 nuevas. En el ejemplo de prueba, respuesta de 5 caracteres frente a reenviar 53 (48 menos). No está conectado al webhook ni al CRM; sin medición de tiempo real.
