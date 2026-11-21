@@ -143,3 +143,45 @@ Actualizado: 28/09/2026. Base de esta etapa: `5d49df9`.
 - Confirmación de cambios, revocación, protección frente a edición concurrente e historial automático.
 - Vista de actividad filtrada; sin actividad ficticia. La conexión WhatsApp sigue pendiente.
 - Base con RLS aplicada; pruebas de permisos e historial aprobadas. Ver [Accesos del bot](bot-accesos.md).
+
+### Laso — corrección de horarios en desarrollo (9/11/2026)
+El intérprete de borradores rechaza horarios numéricos inválidos y exige aclaración cuando encuentra horarios distintos. Evita convertir «10:75» en «10:00». Solo en rama de desarrollo; sin webhook, escrituras ni envíos. Ver `laso-secretario-roadmap.md`.
+
+### Laso — franjas horarias en desarrollo (10/11/2026)
+El intérprete convierte «3 de la tarde» a 15:00 y evita tomar «de la mañana» como el día siguiente. Pide aclaración en franjas ambiguas o contradictorias. Incluye 15 pruebas nuevas; continúa sin integración al webhook, sin ejecución ni envíos. Detalle y límites en `laso-secretario-roadmap.md`.
+
+### Laso — preparación de revisión interna (11/11/2026)
+Nuevo módulo puro que agrupa preguntas por datos faltantes y prepara un resumen de agenda/recordatorios. No acepta confirmaciones, no guarda ni envía mensajes. Incluye 8 pruebas nuevas; queda pendiente el circuito con estado y aprobación vinculada al borrador. Detalle en `laso-secretario-roadmap.md`.
+
+### Laso — sesión versionada de simulación (12/11/2026)
+El nuevo módulo de sesión invalida la confirmación simulada ante correcciones y rechaza referencias a versiones viejas u otros borradores. Incluye 9 pruebas nuevas; no autentica, persiste, guarda turnos ni envía mensajes. Confirmación real e integración siguen pendientes. Ver `laso-secretario-roadmap.md`.
+
+### Laso — cancelación interna en simulación (13/11/2026)
+Se puede cancelar un borrador con su identificador y versión vigentes. La cancelación revoca la confirmación simulada e impide nuevas correcciones o confirmaciones; repetirla no cambia el resultado. Cinco pruebas nuevas. Sin integración, persistencia ni efectos externos; vencimiento pendiente. Ver `laso-secretario-roadmap.md`.
+
+### Laso — vencimiento de borradores en simulación (14/11/2026)
+La sesión verifica un plazo configurable al consultar o actuar: vencida, revoca confirmación y bloquea cambios. Corregir no renueva el plazo. Incluye 6 pruebas nuevas; 15 minutos es el valor provisional de simulación. No implica integración, despliegue ni guardado real. Ver `laso-secretario-roadmap.md`.
+
+### Laso — control de acceso aislado (15/11/2026)
+Nuevo adaptador que revalida permisos en cada operación sobre la sesión y bloquea otros remitentes, revocación, reasignación o cambio de versión, sin devolver el borrador denegado. Seis pruebas nuevas con autorizador simulado. No es autenticación desplegada ni integración con servicios reales. Ver `laso-secretario-roadmap.md`.
+
+### Laso — filtro de entrada coherente (16/11/2026)
+Se corrige el descarte de «Agendame» y «Programame» (con o sin tilde), reutilizando la regla del intérprete. Siete pruebas nuevas incluyen recorrido local con firma, destino, permisos y borrador. No implica recepción real de WhatsApp ni despliegue; duplicados persistentes siguen pendientes. Ver `laso-secretario-roadmap.md`.
+
+### Laso — deduplicación dentro del lote (17/11/2026)
+Se omiten eventos repetidos después de su primera inserción resuelta en el mismo lote. Prueba sintética: 50 copias producen 1 consulta de permiso y 1 intento de guardado, 98 % menos llamadas. Cinco pruebas nuevas. La unicidad entre solicitudes continúa dependiendo de la base y no se verificó en producción. Ver `laso-secretario-roadmap.md`.
+
+### Laso — regresión HTTP sin servicios reales (18/11/2026)
+Se agregan seis escenarios de prueba del manejador existente con almacenamiento simulado: apagado, firma inválida, permiso denegado, reintentos concurrentes, fallo temporal y revocación. No cambia el comportamiento funcional ni demuestra unicidad en PostgreSQL real. Ver `laso-secretario-roadmap.md`.
+
+## Laso: aclaración de fechas múltiples — 19/11/2026
+- El intérprete aislado pide una única fecha cuando reconoce varias menciones en un pedido; no elige automáticamente la primera. Mantiene rechazo de fechas imposibles y distingue «de la mañana» de una fecha relativa.
+- 180/180 pruebas locales aprobadas, 7 nuevas. No habilita guardado, envíos ni conexión con WhatsApp; sin cambios de dashboard. Alcance y límites en `laso-secretario-roadmap.md`.
+
+## Laso: recorrido de aclaración con permisos — 20/11/2026
+- Cuatro regresiones integradas cubren fechas ambiguas, corrección, confirmación versionada, revocación y vencimiento a través del adaptador de acceso aislado.
+- Suite local: 184/184 aprobadas. Solo pruebas y documentación; sin nuevos comportamientos operativos, persistencia, conexión Meta o cambios visuales.
+
+## Laso: completar hora pendiente — 21/11/2026
+- Sesión y adaptador aislados admiten `completarHora` con respuesta estricta HH:MM de 24 horas. Conserva el pedido, incrementa versión y exige confirmación; no renueva el vencimiento.
+- 191/191 pruebas locales aprobadas, 7 nuevas. En el ejemplo de prueba, respuesta de 5 caracteres frente a reenviar 53 (48 menos). No está conectado al webhook ni al CRM; sin medición de tiempo real.
