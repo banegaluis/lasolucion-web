@@ -185,3 +185,7 @@ Se agregan seis escenarios de prueba del manejador existente con almacenamiento 
 ## Laso: completar hora pendiente — 21/11/2026
 - Sesión y adaptador aislados admiten `completarHora` con respuesta estricta HH:MM de 24 horas. Conserva el pedido, incrementa versión y exige confirmación; no renueva el vencimiento.
 - 191/191 pruebas locales aprobadas, 7 nuevas. En el ejemplo de prueba, respuesta de 5 caracteres frente a reenviar 53 (48 menos). No está conectado al webhook ni al CRM; sin medición de tiempo real.
+
+## Laso: completar fecha pendiente — 22/11/2026
+- `completarFecha` acepta una fecha válida DD/MM/AAAA en el circuito aislado, conserva los demás datos y exige confirmar la versión nueva. Comparte protecciones con `completarHora`.
+- 199/199 pruebas locales aprobadas, 8 nuevas. Ejemplo: respuesta de 10 caracteres frente a reenviar 53. Sin conexión WhatsApp, guardado CRM ni cambios visuales.
