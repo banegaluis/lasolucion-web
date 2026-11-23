@@ -189,3 +189,7 @@ Se agregan seis escenarios de prueba del manejador existente con almacenamiento 
 ## Laso: completar fecha pendiente — 22/11/2026
 - `completarFecha` acepta una fecha válida DD/MM/AAAA en el circuito aislado, conserva los demás datos y exige confirmar la versión nueva. Comparte protecciones con `completarHora`.
 - 199/199 pruebas locales aprobadas, 8 nuevas. Ejemplo: respuesta de 10 caracteres frente a reenviar 53. Sin conexión WhatsApp, guardado CRM ni cambios visuales.
+
+## Laso: aislamiento de clientes — 23/11/2026
+- Prioridad explícita de Luis: secretario exclusivamente interno; no responder ni enviar recordatorios, presupuestos o mensajes automáticos a clientes. La atención automática/catálogo no forma parte de la activación de Laso.
+- Tres regresiones HTTP nuevas verifican clientes con comandos, suplantación textual y audio; lotes mixtos; saludos y consultas comerciales. 202/202 pruebas locales aprobadas. Sin nuevas funciones de envío ni cambios de producción.

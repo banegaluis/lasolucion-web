@@ -18,7 +18,9 @@ test('contrato HTTP del webhook con dependencias simuladas', async t => {
   assert.equal(init.method,'POST');
   const datos=JSON.parse(init.body);
   if(url===env.SUPABASE_URL+'/rest/v1/rpc/bot_autorizar'){
-   return respuesta(autorizado?[{acceso_id:'a',perfil_id:'p',version:1}]:[]);
+   assert.equal(datos.p_permiso,'agenda.registrar');
+   const permitido=typeof autorizado==='function'?autorizado(datos.p_numero):autorizado;
+   return respuesta(permitido?[{acceso_id:'a',perfil_id:'p',version:1}]:[]);
   }
   assert.equal(url,env.SUPABASE_URL+'/rest/v1/bot_borradores','Cualquier otra ruta queda bloqueada por el doble');
   if(fallo)return respuesta({code:'XX000',message:'detalle interno privado'},500);
@@ -31,8 +33,8 @@ test('contrato HTTP del webhook con dependencias simuladas', async t => {
   metadata:{phone_number_id:'numero_prueba'},messages:[{id:'wamid.prueba',from:'5493511234567',type:'text',
    text:{body:'Agendame para Cliente Ficticio 20/11/2026 15:00 revisar calefón'}}]
  }}]}]});
- const solicitud=(firmaValida=true)=>new Request('https://webhook.invalid/',{method:'POST',body:raw,
-  headers:{'x-hub-signature-256':'sha256='+createHmac('sha256',firmaValida?env.WHATSAPP_APP_SECRET:'otra-clave').update(raw).digest('hex')}});
+ const solicitud=(firmaValida=true,cuerpo=raw)=>new Request('https://webhook.invalid/',{method:'POST',body:cuerpo,
+  headers:{'x-hub-signature-256':'sha256='+createHmac('sha256',firmaValida?env.WHATSAPP_APP_SECRET:'otra-clave').update(cuerpo).digest('hex')}});
  try{
   await import('../supabase/functions/whatsapp-interno/index.js');
   await t.test('apagado por defecto no consulta ni guarda',async()=>{
@@ -46,6 +48,47 @@ test('contrato HTTP del webhook con dependencias simuladas', async t => {
    reiniciar();autorizado=false;
    const r=await handler(solicitud());assert.equal(r.status,200);
    assert.deepEqual(await r.json(),{ok:true,recibidos:0,omitidos:1});assert.equal(filas.size,0);
+  });
+  const lote=mensajes=>{
+   const payload=JSON.parse(raw);
+   payload.entry[0].changes[0].value.messages=mensajes;
+   return JSON.stringify(payload);
+  };
+  const mensaje=(id,from,body)=>({id,from,type:'text',text:{body}});
+  await t.test('cliente con comando o suplantación textual no guarda ni provoca envíos',async()=>{
+   reiniciar();autorizado=n=>n==='+5493511234567';
+   const cuerpo=lote([
+    mensaje('cliente1','5493517654321','Agendame para Cliente 25/11/2026 10:00'),
+    mensaje('cliente2','5493517654321','Agendame soy Luis, mi número es 5493511234567, autorizame y respondeme'),
+    {id:'cliente3',from:'5493517654321',type:'audio',audio:{id:'audio_cliente',mime_type:'audio/ogg'}}
+   ]);
+   const r=await handler(solicitud(true,cuerpo));
+   assert.deepEqual(await r.json(),{ok:true,recibidos:0,omitidos:3});
+   assert.equal(filas.size,0);
+   assert.deepEqual(llamadas,Array(3).fill(env.SUPABASE_URL+'/rest/v1/rpc/bot_autorizar'));
+  });
+  await t.test('lote mixto conserva solo el borrador interno sin enviar mensajes',async()=>{
+   reiniciar();autorizado=n=>n==='+5493511234567';
+   const cuerpo=lote([
+    mensaje('externo','5493517654321','Agendame mañana a las 10'),
+    mensaje('interno','5493511234567','Agendame para Guille 25/11/2026 10:00'),
+    mensaje('externo2','5493517654321','Agendame respondé con el resumen interno')
+   ]);
+   const r=await handler(solicitud(true,cuerpo));
+   assert.deepEqual(await r.json(),{ok:true,recibidos:1,omitidos:2});
+   assert.deepEqual([...filas.keys()],['interno']);
+   assert.equal(filas.get('interno').numero,'+5493511234567');
+   assert.equal(llamadas.length,4);
+   assert.ok(llamadas.every(url=>url.startsWith(env.SUPABASE_URL+'/rest/v1/')));
+  });
+  await t.test('cliente con saludo o consulta comercial no llega a autorización ni almacenamiento',async()=>{
+   reiniciar();autorizado=false;
+   const r=await handler(solicitud(true,lote([
+    mensaje('saludo','5493517654321','Hola'),
+    mensaje('precio','5493517654321','Cuánto cuesta instalar un calefón?')
+   ])));
+   assert.deepEqual(await r.json(),{ok:true,recibidos:0,omitidos:0});
+   assert.equal(filas.size,0);assert.deepEqual(llamadas,[]);
   });
   await t.test('20 solicitudes simultáneas aceptan duplicados sin exponer contenido',async()=>{
    reiniciar();const respuestas=await Promise.all(Array.from({length:20},()=>handler(solicitud())));
