@@ -26,11 +26,11 @@ async function leerLimitado(req,limite=131072){
  for(const p of pedazos){combinado.set(p,offset);offset+=p.length;}
  return new TextDecoder('utf-8',{fatal:true}).decode(combinado);
 }
-async function rest(c,ruta,payload){
+async function rest(c,ruta,payload,prefer='return=representation'){
  const respuesta=await fetch(c.supabaseUrl+'/rest/v1/'+ruta,{
   method:'POST',
   headers:{'apikey':c.role,'authorization':'Bearer '+c.role,'content-type':'application/json',
-    'prefer':'return=representation'},
+    'prefer':prefer},
   body:JSON.stringify(payload),
   signal:AbortSignal.timeout(8000)
  });
@@ -57,8 +57,10 @@ async function insertar(c,registro){
    texto:registro.texto,media_id:registro.media_id,
    estado:registro.estado
  };
- try{await rest(c,'bot_borradores',payload);}
- catch(error){if(error.code!=='23505')throw error;} // WhatsApp reintenta; único por mensaje.
+ // Ignorar solo repeticiones del evento; otros conflictos deben permitir reintento.
+ // DO NOTHING conserva el borrador original, sin permisos de actualización.
+ await rest(c,'bot_borradores?on_conflict=evento_id',payload,
+   'return=representation,resolution=ignore-duplicates');
 }
 async function handler(req){
  const c=conf();

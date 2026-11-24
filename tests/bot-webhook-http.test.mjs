@@ -22,10 +22,15 @@ test('contrato HTTP del webhook con dependencias simuladas', async t => {
    const permitido=typeof autorizado==='function'?autorizado(datos.p_numero):autorizado;
    return respuesta(permitido?[{acceso_id:'a',perfil_id:'p',version:1}]:[]);
   }
-  assert.equal(url,env.SUPABASE_URL+'/rest/v1/bot_borradores','Cualquier otra ruta queda bloqueada por el doble');
+  assert.equal(url,env.SUPABASE_URL+'/rest/v1/bot_borradores?on_conflict=evento_id','Cualquier otra ruta queda bloqueada por el doble');
+  assert.equal(init.headers.prefer,'return=representation,resolution=ignore-duplicates');
+  if(fallo==='unicidad')return respuesta({code:'23505',message:'conflicto en otra restricción privada'},409);
   if(fallo)return respuesta({code:'XX000',message:'detalle interno privado'},500);
   // Doble atómico de unicidad: NO demuestra la restricción real de PostgreSQL.
-  if(filas.has(datos.evento_id))return respuesta({code:'23505'},409);
+  if(filas.has(datos.evento_id)){
+   const ignorar=url.endsWith('?on_conflict=evento_id') && init.headers.prefer.includes('resolution=ignore-duplicates');
+   return ignorar?respuesta([],201):respuesta({code:'23505'},409);
+  }
   filas.set(datos.evento_id,datos);
   return respuesta([datos],201);
  };
@@ -101,6 +106,27 @@ test('contrato HTTP del webhook con dependencias simuladas', async t => {
    const r=await handler(solicitud());assert.equal(r.status,503);
    assert.deepEqual(await r.json(),{ok:false,error:'Error temporal'});assert.equal(filas.size,0);
    fallo=false;assert.equal((await handler(solicitud())).status,200);assert.equal(filas.size,1);
+  });
+  await t.test('conflicto de otra restricción no se confirma como mensaje guardado',async()=>{
+   reiniciar();fallo='unicidad';
+   const r=await handler(solicitud());
+   assert.equal(r.status,503);
+   assert.deepEqual(await r.json(),{ok:false,error:'Error temporal'});
+   assert.equal(filas.size,0);
+   fallo=false;
+   assert.equal((await handler(solicitud())).status,200);
+   assert.equal(filas.size,1);
+  });
+  await t.test('reintento con texto distinto no sobrescribe el borrador original',async()=>{
+   reiniciar();await handler(solicitud());
+   const original=structuredClone(filas.get('wamid.prueba'));
+   const cuerpo=lote([mensaje('wamid.prueba','5493511234567','Agendame para Otro 28/11/2026 18:00')]);
+   const r=await handler(solicitud(true,cuerpo));
+   assert.equal(r.status,200);
+   assert.equal(filas.size,1);
+   assert.deepEqual(filas.get('wamid.prueba'),original);
+   assert.equal(llamadas.length,4);
+   assert.equal(llamadas[3],env.SUPABASE_URL+'/rest/v1/bot_borradores?on_conflict=evento_id');
   });
   await t.test('permiso revocado se revalida incluso para un reintento',async()=>{
    reiniciar();await handler(solicitud());autorizado=false;
