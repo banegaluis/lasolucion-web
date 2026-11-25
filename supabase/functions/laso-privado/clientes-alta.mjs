@@ -1,3 +1,4 @@
+import {confirmacionExacta} from './confirmacion-exacta.mjs';
 import {fechaLocal} from './agenda-consulta.mjs';
 const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
 export function tipoCliente(texto){
@@ -43,7 +44,7 @@ export async function gestionarCliente(c,m,p,texto,rest){
  async function get(table,params){const r=await fetch(c.supabaseUrl+'/rest/v1/'+table+'?'+new URLSearchParams(params),{headers:{apikey:c.role,authorization:'Bearer '+c.role},redirect:'error',signal:AbortSignal.timeout(5000)});if(!r.ok)throw Error('read failed');return await r.json();}
  if(p.tipo==='listar'){const rows=await get('clientes',{select:'nombre_completo',activo:'eq.true',order:'nombre_completo.asc',limit:'21'});return rows.length?'Clientes activos del CRM:\n'+rows.slice(0,20).map(x=>'• '+String(x.nombre_completo||'Sin nombre').slice(0,100)).join('\n')+(rows.length>20?'\nHay más clientes en el CRM.':''):'No hay clientes activos.';}
  if(p.tipo==='confirmar'){
-  if(m.tipo!=='texto')return 'Para confirmar, escribí CONFIRMAR ALTA '+p.codigo+' en texto.';
+  if(!confirmacionExacta(m,p.codigo,true))return 'Para confirmar, escribí CONFIRMAR ALTA '+p.codigo+' en texto.';
   const r=await rest(c,'rpc/laso_confirmar_alta',{p_codigo:p.codigo,p_numero:m.numero,p_version:m.version_acceso,p_evento:m.evento_id});const z=Array.isArray(r)?r[0]:r;
   return z?.estado==='registrado'?'Cliente y turno registrados. Orden #'+z.numero+'. No envié mensajes al cliente.':({cliente_existente:'Ese cliente o teléfono ya figura en el CRM. No creé duplicados.',ocupado:'El horario está ocupado. No guardé el cliente ni el turno.',vencido:'El código venció o fue reemplazado.',incompleto:'Faltan datos para registrar el cliente y el turno.',horario_invalido:'El horario ya pasó o no es válido.'})[z?.estado]||'No pude confirmar el alta.';
  }

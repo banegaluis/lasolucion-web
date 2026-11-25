@@ -1,3 +1,4 @@
+import {confirmacionExacta} from './confirmacion-exacta.mjs';
 import {fechaLocal} from './agenda-consulta.mjs';
 export function pedidoTurno(raw,now=new Date()){
  const s=String(raw||'').trim();
@@ -23,7 +24,7 @@ export async function gestionarTurno(c,m,p,rest){
  const ayuda='Para preparar un turno enviame: Agendame; cliente: nombre completo; dirección: alias o dirección exacta; trabajo: descripción; fecha: mañana o DD/MM/AAAA; inicio: 10:00; fin: 12:00. Te mostraré un resumen antes de registrarlo.';
  if(p.tipo==='faltantes'||p.tipo==='invalido')return ayuda;
  if(p.tipo==='confirmar'){
-  if(m.tipo!=='texto')return 'Por seguridad, escribí CONFIRMAR '+p.codigo+' como mensaje de texto.';
+  if(!confirmacionExacta(m,p.codigo,false))return 'Por seguridad, escribí CONFIRMAR '+p.codigo+' como mensaje de texto.';
   const result=await rest(c,'rpc/laso_confirmar_turno',{p_codigo:p.codigo,p_numero:m.numero,p_version:m.version_acceso,p_evento:m.evento_id});
   const r=Array.isArray(result)?result[0]:result;
   if(r?.estado==='registrado')return 'Turno registrado correctamente. Orden #'+r.numero+'. No envié mensajes al cliente.';

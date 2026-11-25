@@ -207,3 +207,6 @@ La propuesta basada en v19 evita conservar fin/duración antiguos al corregir da
 
 ## Laso: frontera privada en recepción — 25/11/2026, 11 h
 El receptor desplegable descarta cualquier remitente distinto del operador personal antes de consultar autorización o insertar borradores, incluso si otro número recibiera permiso accidentalmente. Cinco pruebas nuevas: 219/219 aprobadas. Se conserva la corrección de fechas encontrada en v21. Ver `laso-frontera-privada.md`.
+
+## Laso: confirmar con texto exacto — 25/11/2026, 14 h
+Altas y turnos comprueban el texto escrito y su código antes de llamar a la confirmación SQL. Mensajes alterados reciben la instrucción exacta; audio no confirma. 225/225 pruebas locales aprobadas, seis nuevas. Ver `laso-confirmacion-exacta.md`.
