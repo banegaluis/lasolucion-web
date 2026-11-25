@@ -204,3 +204,6 @@ Se agregan seis escenarios de prueba del manejador existente con almacenamiento 
 
 ## Laso desplegado: corrección de horarios — 25/11/2026
 La propuesta basada en v19 evita conservar fin/duración antiguos al corregir datos inválidos y exige aclaración ante fin y duración simultáneos. Seis regresiones nuevas; 214 pruebas locales pasan. Fuente desplegable y rollback separados del receptor histórico del PR; ver `laso-v20.md`.
+
+## Laso: frontera privada en recepción — 25/11/2026, 11 h
+El receptor desplegable descarta cualquier remitente distinto del operador personal antes de consultar autorización o insertar borradores, incluso si otro número recibiera permiso accidentalmente. Cinco pruebas nuevas: 219/219 aprobadas. Se conserva la corrección de fechas encontrada en v21. Ver `laso-frontera-privada.md`.

@@ -50,6 +50,8 @@ export async function procesarMensajes(mensajes,{autorizar,insertar}){
  let registrados=0,omitidos=0;
  const procesados=new Set();
  for(const m of mensajes){
+   // Frontera privada adicional: ningún otro número entra aunque figure autorizado.
+   if(m.numero!=='+5493512143961'){omitidos++;continue;}
    // Solo recordar inserciones resueltas en este lote; la base cubre otros reintentos.
    if(procesados.has(m.evento_id)){omitidos++;continue;}
    // Nunca confiar en un rol, nombre o identidad declarados dentro del texto.

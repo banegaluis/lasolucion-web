@@ -25,7 +25,7 @@ export function extraerAlta(texto,base={},now=new Date()){
  if(nombre){const n=nombre[1].trim().split(/\s+/);d.nombre=n.shift();if(n.length)d.apellido=n.join(' ');}
  const dir=s.match(/\b(?:vive en|domicilio en|direcci[oó]n en)\s+(.+?)\s+(?:en el\s+)?(\d{1,8})(?=\s|[;,.]|$)/i);if(dir){d.calle=dir[1].trim();d.numero=dir[2];}
  const trabajo=s.match(/\b(?:necesita|quiere)\s+(.+?)(?=\s+(?:mañana|manana|hoy|el día|el dia|a las)\b|[;.]|$)/i);if(trabajo)d.trabajo=trabajo[1].trim();
- const dia=s.match(/\b(hoy|mañana|manana)\b/i);if(dia)d.fecha=fechaDe(dia[1],now);
+ const dias=[...s.replace(/\bde\s+la\s+ma[ñn]ana\b/gi,'').matchAll(/\b(pasado\s+ma[ñn]ana|hoy|ma[ñn]ana)\b/gi)];if(dias.length>1){delete d.fecha;}else if(dias.length===1){if(/^pasado/i.test(dias[0][1])){const f=new Date(fechaLocal(now).dia+'T00:00:00Z');f.setUTCDate(f.getUTCDate()+2);d.fecha=f.toISOString().slice(0,10);}else d.fecha=fechaDe(dias[0][1],now);}
  const hora=s.match(/\ba las\s+(\d{1,2}(?::\d{2})?)(?:\s+de la\s+(mañana|manana|tarde|noche))?/i);if(hora){let h=horaDe(hora[1]);if(h&&hora[2]&&/tarde|noche/i.test(hora[2])&&+h.slice(0,2)<12)h=String(+h.slice(0,2)+12).padStart(2,'0')+h.slice(2);if(h)d.inicio=h;}
  const tel=s.match(/\b(?:tel[eé]fono|celular)\s*(?::|es|del cliente)?\s*(\+?\d[\d ()-]{8,20}\d)/i);if(tel)d.telefono=tel[1].replace(/\D/g,'');
  for(const piece of s.split(/[;\n]/)){const m=piece.trim().match(/^(nombre|apellido|tel[eé]fono|direcci[oó]n|calle|n[uú]mero|ciudad|provincia|trabajo|fecha|inicio|fin|duraci[oó]n)\s*(?::|\s)\s*(.+)$/i);if(!m)continue;const k=norm(m[1]),v=m[2].trim().replace(/[.]$/,'');if(k==='direccion'){const a=v.match(/^(.+?)\s+(\d{1,8})$/);if(a){d.calle=a[1];d.numero=a[2];}}else if(k==='fecha')d.fecha=fechaDe(v,now);else if(k==='inicio'||k==='fin')d[k]=horaDe(v);else if(k==='telefono')d.telefono=v.replace(/\D/g,'');else if(k==='duracion'){const dur=norm(v).match(/^(\d+(?:[.,]\d+)?)\s*(?:horas?|h)$/);if(dur){const horas=Number(dur[1].replace(',','.'));if(Number.isFinite(horas)&&horas>0&&horas<24)d.duracion=horas;}}else d[k]=v.slice(0,180);}
@@ -61,4 +61,3 @@ export async function gestionarCliente(c,m,p,texto,rest){
  if(faltan.length)return resumen+'\nFalta: '+faltan.join(', ')+'. Podés completar o corregir con: apellido: ...; teléfono: ...; trabajo: ...; duración: 2 horas. Confirmá que el trabajo transcripto sea correcto.';
  return resumen+'\nRevisá todos los datos. Para guardar y comprobar disponibilidad escribí exactamente: CONFIRMAR ALTA '+codigo+' (válido 30 minutos).';
 }
-
