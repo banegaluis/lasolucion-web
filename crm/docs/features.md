@@ -201,3 +201,6 @@ Se agregan seis escenarios de prueba del manejador existente con almacenamiento 
 ## Laso: validación compartida de identidad — 25/11/2026
 - Receptor y adaptador de revisión rechazan identificadores vacíos/de tipo incorrecto y versiones fuera del entero positivo admitido por el almacenamiento. Validación reutilizada, sin nuevas llamadas de red.
 - 208/208 pruebas locales aprobadas (4 nuevas); matriz de 17 autorizaciones inválidas sin intentos de inserción. Sin cambios de CRM, dashboard ni configuración desplegada. Alcance y pendientes en `laso-secretario-roadmap.md`.
+
+## Laso desplegado: corrección de horarios — 25/11/2026
+La propuesta basada en v19 evita conservar fin/duración antiguos al corregir datos inválidos y exige aclaración ante fin y duración simultáneos. Seis regresiones nuevas; 214 pruebas locales pasan. Fuente desplegable y rollback separados del receptor histórico del PR; ver `laso-v20.md`.
