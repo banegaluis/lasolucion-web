@@ -1,4 +1,5 @@
 // Núcleo puro, sin credenciales ni efectos laterales.
+import { validarIdentidadAcceso } from './secretario-identidad.mjs';
 import { esSolicitudAgenda } from './secretario-borradores.mjs';
 const REMITENTE=/^[1-9][0-9]{7,14}$/;
 const ID=/^[A-Za-z0-9_.:=-]{5,250}$/;
@@ -53,8 +54,8 @@ export async function procesarMensajes(mensajes,{autorizar,insertar}){
    // Solo recordar inserciones resueltas en este lote; la base cubre otros reintentos.
    if(procesados.has(m.evento_id)){omitidos++;continue;}
    // Nunca confiar en un rol, nombre o identidad declarados dentro del texto.
-   const acceso=await autorizar(m.numero,'agenda.registrar');
-   if(!acceso?.acceso_id||!acceso.perfil_id||!Number.isInteger(acceso.version)){
+   const acceso=validarIdentidadAcceso(await autorizar(m.numero,'agenda.registrar'));
+   if(!acceso){
       omitidos++;continue;
    }
    await insertar({...m,acceso_id:acceso.acceso_id,perfil_id:acceso.perfil_id,version_acceso:acceso.version});

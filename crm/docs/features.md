@@ -197,3 +197,7 @@ Se agregan seis escenarios de prueba del manejador existente con almacenamiento 
 ## Laso: conflictos de guardado y reintentos — 24/11/2026
 - El receptor ignora duplicados solo por `evento_id`, conserva el borrador previo y deja de tratar cualquier error de unicidad como éxito. Otros conflictos devuelven 503 sin detalles privados.
 - 204/204 pruebas locales aprobadas (2 nuevas); mismo número de llamadas por intento. Contrato PostgREST verificado con un doble, pendiente de base aislada real. Sin activación, envíos a clientes, cambios visuales ni datos reales. Ver `laso-secretario-roadmap.md`.
+
+## Laso: validación compartida de identidad — 25/11/2026
+- Receptor y adaptador de revisión rechazan identificadores vacíos/de tipo incorrecto y versiones fuera del entero positivo admitido por el almacenamiento. Validación reutilizada, sin nuevas llamadas de red.
+- 208/208 pruebas locales aprobadas (4 nuevas); matriz de 17 autorizaciones inválidas sin intentos de inserción. Sin cambios de CRM, dashboard ni configuración desplegada. Alcance y pendientes en `laso-secretario-roadmap.md`.
