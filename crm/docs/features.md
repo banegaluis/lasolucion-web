@@ -216,3 +216,9 @@ Se agregó un arnés PostgreSQL en memoria: comprueba alta, idempotencia, rollba
 
 ## Laso: transacciones de turnos existentes — 25/11/2026
 Ocho escenarios SQL aislados nuevos verifican confirmación idempotente, rollback después de insertar la orden, reintento y rechazo de identidad/evento/datos inválidos; comprueban superposición y límites contiguos. Suite: 241/241 resultados aprobados, incluidos grupos padre. Sin cambios del despliegue v23 ni datos reales. Límites y reproducción: `laso-transacciones-aisladas.md` y `tests/sql-aislado/README.md`.
+
+## Laso: arnés de concurrencia preparado — 25/11/2026, 17 h
+Se agregó un ensayo PostgreSQL nativo con conexiones independientes para duplicados, superposición y revocación durante espera. Ejecución bloqueada por prohibición de sockets del entorno: cero escenarios concurrentes ejecutados. Suite anterior repetida: 241/241 aprobados. Sin cambios productivos a v23. Ver tests/concurrencia/README.md y laso-transacciones-aisladas.md.
+
+## Laso: autorización SQL real aislada — 25/11/2026, 20 h
+Se prueban identidad autorizada y seis denegaciones con bot_autorizar real: revocación, versión antigua, permiso retirado, perfil inactivo, rol cliente y suspensión. 249/249 resultados aprobados; no incluyen concurrencia. La versión productiva permanece v23, sin cambios. Ver laso-transacciones-aisladas.md.
