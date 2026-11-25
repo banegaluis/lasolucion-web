@@ -210,3 +210,6 @@ El receptor desplegable descarta cualquier remitente distinto del operador perso
 
 ## Laso: confirmar con texto exacto — 25/11/2026, 14 h
 Altas y turnos comprueban el texto escrito y su código antes de llamar a la confirmación SQL. Mensajes alterados reciben la instrucción exacta; audio no confirma. 225/225 pruebas locales aprobadas, seis nuevas. Ver `laso-confirmacion-exacta.md`.
+
+## Laso: ensayo SQL aislado de alta y rollback — 25/11/2026, 15 h
+Se agregó un arnés PostgreSQL en memoria: comprueba alta, idempotencia, rollback por error de orden y bloqueos de confirmación/vencimiento/ocupación. 232 resultados de prueba aprobados en total. Sin cambios a v23 ni datos productivos. Alcance y límites: `laso-transacciones-aisladas.md`.
