@@ -1,10 +1,10 @@
-# Pruebas de altas en PostgreSQL aislado
+# Pruebas de altas y turnos en PostgreSQL aislado
 
 Ejecutar desde la raíz del repositorio:
 
 ```sh
 npm ci --prefix tests/sql-aislado --ignore-scripts --no-audit --no-fund
-node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/alta.test.mjs
+node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs
 ```
 
 PGlite 0.6.0 fijado con lockfile, solo dependencia de pruebas. Ejecuta PostgreSQL WASM en memoria; no usa URLs, claves ni datos de Supabase. No requiere servidor, cuenta paga ni cambios en producción. No agregar node_modules al repositorio.
@@ -15,6 +15,8 @@ Se prueban: alta completa, repetición idempotente, rollback de cliente/direcci�
 
 La prueba de rollback comprueba cero clientes, direcciones, órdenes y confirmaciones después del error. No exige continuidad de secuencias: PostgreSQL puede consumir números incluso si revierte la transacción.
 
-No prueba concurrencia entre conexiones: PGlite serializa el acceso. Tampoco prueba Meta, WhatsApp, transporte HTTP/PostgREST, permisos reales ni la función de confirmar turnos existentes. La prueba de éxito SQL no implica que el flujo WhatsApp esté listo.
+No prueba concurrencia entre conexiones: PGlite serializa el acceso. Tampoco prueba Meta, WhatsApp, transporte HTTP/PostgREST, permisos reales ni el esquema completo del CRM. La prueba de éxito SQL no implica que el flujo WhatsApp esté listo.
 
 Fuentes del motor: https://pglite.dev/docs/api y https://pglite.dev/docs/about.
+
+`turno-desplegado.sql` copia sin cambios la definición de `laso_confirmar_turno` recuperada de Supabase el 25/11/2026. Ocho escenarios adicionales comprueban idempotencia y vinculación al cliente, rollback si falla la actualización del pendiente después de insertar la orden, reintento después del fallo, número/versión denegados, evento y texto exactos, identidad ajena, vencimiento, cliente/dirección inactivos o ajenos y superposición frente a horarios contiguos. El CHECK artificial `forzar_fallo` existe solo en la tabla local de pendientes. No se cambió la función productiva.

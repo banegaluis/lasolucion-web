@@ -9,3 +9,11 @@ Resultados: suite general 225 pruebas; ensayo SQL 7 resultados (grupo y seis esc
 Limitaciones: no reproduce todo el esquema productivo, RLS, triggers, roles o auditoría; no prueba concurrencia entre conexiones, guardar turnos para clientes existentes, audio real, Safari, PDF ni entrega WhatsApp. No se ejecutaron altas ficticias en producción, no se enviaron mensajes ni se modificaron secretos/datos reales.
 
 Próximo paso: ampliar el arnés a laso_confirmar_turno y luego verificar carreras de bloqueo/revocación con PostgreSQL de múltiples conexiones. Ver instrucciones reproducibles en tests/sql-aislado/README.md. No hay rollback de despliegue porque no se desplegó nada en esta ejecución.
+
+## Ampliación: turnos de clientes existentes — 25/11/2026
+
+Verificación fresca: whatsapp-interno v23 ACTIVE; PR #12 en addc50154cabdedd2e546fc843c5354244fae6b6 antes del cambio. Se agregó una copia exacta de laso_confirmar_turno y ocho escenarios SQL sobre tablas locales mínimas.
+
+La suite completa pasa 241/241 resultados (225 previos generales, siete del grupo alta y nueve del grupo turno, contando los grupos padre). La nueva cobertura prueba: una sola orden ante confirmación repetida; asociación correcta a cliente, dirección y autor; rollback de la orden cuando falla el marcado final del pendiente; reintento recuperable; rechazo por número/versión, evento/texto/audio/identidad incorrectos, vencimiento y cliente/dirección inválidos; bloqueo por superposición y aceptación de un horario contiguo.
+
+La mejora medible es ocho escenarios SQL adicionales, sin medir ahorro operativo ni latencia de producción. Autorización sustituida, tablas mínimas: no demuestra permisos productivos, RLS, triggers completos ni concurrencia. No hubo despliegue, mensajes, datos reales modificados, cambios de interfaz o pruebas nuevas de Safari/PDF/WhatsApp. Revertir este commit solo retira pruebas/documentación. Próxima prioridad: carreras entre confirmación, revocación y reservas con conexiones PostgreSQL independientes.

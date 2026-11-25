@@ -213,3 +213,6 @@ Altas y turnos comprueban el texto escrito y su código antes de llamar a la con
 
 ## Laso: ensayo SQL aislado de alta y rollback — 25/11/2026, 15 h
 Se agregó un arnés PostgreSQL en memoria: comprueba alta, idempotencia, rollback por error de orden y bloqueos de confirmación/vencimiento/ocupación. 232 resultados de prueba aprobados en total. Sin cambios a v23 ni datos productivos. Alcance y límites: `laso-transacciones-aisladas.md`.
+
+## Laso: transacciones de turnos existentes — 25/11/2026
+Ocho escenarios SQL aislados nuevos verifican confirmación idempotente, rollback después de insertar la orden, reintento y rechazo de identidad/evento/datos inválidos; comprueban superposición y límites contiguos. Suite: 241/241 resultados aprobados, incluidos grupos padre. Sin cambios del despliegue v23 ni datos reales. Límites y reproducción: `laso-transacciones-aisladas.md` y `tests/sql-aislado/README.md`.
