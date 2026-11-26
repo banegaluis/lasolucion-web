@@ -225,3 +225,6 @@ Se prueban identidad autorizada y seis denegaciones con bot_autorizar real: revo
 
 ## Laso: propuesta conversacional de reprogramación — 25/11/2026, 21 h
 Núcleo local para «Pasá la orden #42 para mañana a las 10» y «Mejor a las 11»: conserva duración/contexto, muestra antes/después y descarta propuestas ambiguas, vencidas, ajenas o superpuestas. Nueve escenarios nuevos; suite completa 258/258. No conectado al webhook ni al guardado: v23 permanece sin cambios. Alcance en laso-edicion-agenda.md.
+
+## Laso: confirmar la propuesta vigente de edición — 25/11/2026, 22 h
+Adaptador local de conversación: correcciones renuevan el código, confirmación exacta propia de edición, revalidación de contexto y descarte de sesión tras validar. Siete pruebas nuevas; 265/265 resultados. Devuelve intención, no guarda; persistencia atómica, RPC y conexión WhatsApp pendientes. v23 sin cambios. Ver laso-edicion-agenda.md.
