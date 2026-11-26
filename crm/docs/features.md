@@ -265,3 +265,5 @@ Función propuesta confirma texto exacto, compara orden original, verifica horar
 - **Laso / sesión y deduplicación (prototipo, 26/11/2026):** el guardado exige registrar evento y resultado; una omisión revierte la sesión. Tres regresiones nuevas de fallo y recuperación; 322 pruebas pasadas. No desplegado.
 
 - **Laso / respuestas de edición (prototipo, 26/11/2026):** ocho motivos SQL se traducen en explicaciones concretas y siguiente dato necesario; errores desconocidos conservan resultado incierto. 324 pruebas pasadas, incluida respuesta a cambio externo con SQL aislado. No desplegado.
+
+- **Laso / memoria privada (26/11/2026):** auditados esquema, RLS y ACL existentes; snapshot de RPC y cuatro escenarios aislados de parser→SQL, idempotencia, autorización y rollback. Suite: 329 pruebas pasadas. Receptor v23 sin memoria integrada; activación no verificada, bloqueo previo de despliegue sin eludir. Ver `docs/laso-memoria-auditoria.md`.
