@@ -1,0 +1,36 @@
+.vencimientos-page{padding:16px;gap:16px}
+.vencimientos-page .clientes-hero{flex-wrap:wrap}
+.vencimientos-page .dashboard-primary-action,.vencimientos-page .role-action-button{width:auto;min-height:42px}
+.v-estado{margin:0;color:var(--color-primary,#f5c518)}
+.v-nota,.vencimientos-page .clientes-detail-card{padding:18px}
+.v-nota{line-height:1.5;color:var(--color-text-muted,#ddd)}
+.v-nota strong{color:var(--color-primary,#f5c518)}
+.v-resumen{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:16px}
+.v-editor{margin-bottom:16px}
+.v-editor h2{margin:0 0 16px}
+.v-campos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.v-editor label,.v-barra label{display:flex;flex-direction:column;gap:6px;color:var(--color-text-muted,#bbb);font-size:13px}
+.v-editor input:not([type=checkbox]),.v-editor select,.v-editor textarea,.v-barra input{background:#08090b;color:#fff;border:1px solid #363b45;border-radius:10px;min-height:42px;padding:10px;width:100%;box-sizing:border-box;font:inherit}
+.v-ancho{grid-column:1/-1}
+.v-editor .v-check{flex-direction:row;align-items:center;margin-top:14px}
+.v-editor .v-check input{width:18px;height:18px}
+.v-opciones{border:1px solid #363b45;border-radius:12px;margin:16px 0;padding:12px;display:flex;flex-wrap:wrap;gap:16px}
+.v-opciones legend{padding:0 6px}
+.v-opciones label{flex-direction:row;align-items:center}
+.v-ayuda{color:var(--color-text-muted,#aeb5c0);line-height:1.45;font-size:13px}
+.v-acciones{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.v-barra{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.v-barra label{min-width:200px}
+.v-listado{display:grid;gap:12px;margin-top:16px}
+.v-item{padding:14px;border:1px solid #383e46;border-radius:14px;background:rgba(0,0,0,.14)}
+.v-item h3{margin:0 0 7px;font-size:17px;color:#fff}
+.v-item p{margin:4px 0;color:#c9ced4;font-size:14px}
+.v-item .v-meta{color:var(--color-primary,#f5c518);font-size:13px;font-weight:750}
+.v-item .v-acciones{margin-top:12px}
+.v-item button{cursor:pointer}
+.v-vencido{border-left:4px solid #fb8d83}
+.v-proximo{border-left:4px solid #f5c518}
+.v-inactivo{opacity:.7}
+.v-evento{border-bottom:1px solid #333;padding:10px 0;font-size:13px}
+.v-evento small{color:#aeb5c0}
+@media(max-width:760px){.vencimientos-page{padding:8px}.v-resumen{grid-template-columns:repeat(2,minmax(0,1fr))}.v-campos{grid-template-columns:1fr}.v-barra label{width:100%}.v-barra input{width:100%}.v-editor .v-ancho{grid-column:1}.v-opciones{flex-direction:column}}
