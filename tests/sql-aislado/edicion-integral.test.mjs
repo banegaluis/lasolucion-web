@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {PGlite} from '@electric-sql/pglite';
+import {ejecutarEdicion} from '../../supabase/functions/laso-privado/agenda-edicion-ejecucion.mjs';
 import {conversarEdicion} from '../../supabase/functions/laso-privado/agenda-edicion-conversacion.mjs';
 
 test('conversación de edición con persistencia JSONB y transacción SQL', async t=>{
@@ -40,7 +41,8 @@ test('conversación de edición con persistencia JSONB y transacción SQL', asyn
    const texto='CONFIRMAR CAMBIO '+c.sesion.codigo;
    const resultado=await conversar(texto,c.sesion);assert.equal(resultado.estado,'intencion_validada');
    await evento('confirmacion',texto);
-   assert.equal((await confirmar('confirmacion',resultado.intencion.codigo,c.revision)).estado,'editada');
+   const ejecutada=await ejecutarEdicion({entrada:{mensaje:{tipo:'texto',texto},ordenes:await ordenes(),sesion:c.sesion,operador},revision:c.revision,guardarSesion:async()=>{throw new Error('No consumir por separado');},confirmarCambio:({codigo,revision})=>confirmar('confirmacion',codigo,revision)});
+   assert.equal(ejecutada.estado,'editada');assert.match(ejecutada.mensaje,/quedó guardado/);
    assert.equal((await confirmar('confirmacion',resultado.intencion.codigo,c.revision)).repetido,true);
    assert.equal((await ordenes())[0].hora_inicio,'14:00:00');
    assert.equal((await contexto()).sesion,null);
