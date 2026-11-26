@@ -234,3 +234,6 @@ Prototipo SQL aislado con comparación de revisión: evita sobrescrituras atrasa
 
 ## Laso: invalidación de contexto incompleto o cambiado — 26/11/2026
 Edición conversacional descarta sesiones incompletas y detecta cambios de cliente, domicilio y título además del horario/estado. Tres regresiones reproducidas y corregidas; 275/275 pruebas. Solo prototipo, v23 sin cambios. Ver laso-edicion-agenda.md.
+
+## Laso: sesión de edición ligada al acceso — 26/11/2026, 01 h
+Prototipo SQL aislado exige permiso agenda.editar, único número privado, versión y evento de texto del mismo acceso. Cinco escenarios nuevos; 281/281 resultados contando grupos. No desplegado: consumo de eventos y guardado de orden pendientes. Ver laso-edicion-agenda.md.
