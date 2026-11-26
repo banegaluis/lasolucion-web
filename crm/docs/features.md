@@ -246,3 +246,6 @@ Prototipo SQL rechaza contexto vencido/futuro, código malformado y estructura i
 
 ## Laso: correcciones sin renovar vigencia — 26/11/2026, 04 h
 Prototipo SQL conserva creada y exige código nuevo al corregir contexto activo. Falla reproducida y corregida; dos escenarios nuevos, 288/288 resultados. No desplegado; v23 permanece sin cambios. Ver laso-edicion-agenda.md.
+
+## Laso: reprogramación transaccional aislada — 26/11/2026, 05 h
+Función propuesta confirma texto exacto, compara orden original, verifica horario y actualiza orden/auditoría/consumo juntos. Reintento no duplica; error de auditoría revierte todo. Seis escenarios nuevos; 295/295 resultados. No desplegado ni integrado a WhatsApp; concurrencia y esquema completo pendientes. Ver laso-edicion-agenda.md.
