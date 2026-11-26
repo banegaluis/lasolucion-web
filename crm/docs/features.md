@@ -279,3 +279,8 @@ Función propuesta confirma texto exacto, compara orden original, verifica horar
 - Adaptador puro en `laso-privado/memoria-conversacion.mjs`: creación/agregado por texto o transcripción, resumen completo, corrección con código nuevo, cancelación y vencimiento.
 - Confirmación escrita exacta vinculada a sesión e identidad; solo devuelve intención, sin RPC ni mensajes. Cambios por índice requieren contenido actual y siguen detenidos.
 - Pendientes persistencia/consumo atómico, revalidación SQL e integración al receptor y CRM. No activado. Detalles en `laso-memoria-auditoria.md`.
+
+### Laso: diagnóstico privado de envío (26/11/2026)
+- Clasificador de respuesta Meta y transporte conectado al código del receptor: solo estados y códigos numéricos, sin contenido ni secretos.
+- Distingue aceptación de entrega; 356 pruebas locales pasadas. No desplegado, producción v23.
+- Investigación de falta de respuesta y límites: `laso-diagnostico-respuestas.md`.

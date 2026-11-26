@@ -1,3 +1,4 @@
+import {diagnosticoRespuesta,diagnosticoTransporte} from './respuesta-diagnostico.mjs';
 import {tipoCliente,gestionarCliente} from './clientes-alta.mjs';
 import {pedidoTurno,gestionarTurno} from './turnos-confirmacion.mjs';
 import {transcribirAudio} from './audio-transcripcion.mjs';
@@ -123,14 +124,14 @@ async function responderPrivado(c,m){
  if(transcripcion&&tipo)body='Entendí: '+transcripcion.slice(0,500)+'\n\n'+body;
  const finalAccess=await autorizar(c,personal,'agenda.registrar');
  if(!finalAccess||finalAccess.acceso_id!==m.acceso_id||finalAccess.perfil_id!==m.perfil_id||finalAccess.version!==m.version_acceso)return;
- const resp=await fetch('https://graph.facebook.com/v27.0/'+testId+'/messages',{
+ let resp;
+ try{resp=await fetch('https://graph.facebook.com/v27.0/'+testId+'/messages',{
   method:'POST',redirect:'error',headers:{authorization:'Bearer '+token,'content-type':'application/json'},
   body:JSON.stringify({messaging_product:'whatsapp',recipient_type:'individual',to:'543512143961',type:'text',text:{preview_url:false,body}}),
   signal:AbortSignal.timeout(7000)
- });
+ });}catch(error){console.warn('LASO_REPLY '+JSON.stringify(diagnosticoTransporte(error)));return;}
  let data=null;try{data=await resp.json();}catch{}
- const code=Number.isInteger(data?.error?.code)?data.error.code:null;
- console.info('LASO_REPLY '+JSON.stringify({accepted:resp.ok&&!!data?.messages?.[0]?.id,status:resp.status,code}));
+ console.info('LASO_REPLY '+JSON.stringify(diagnosticoRespuesta(resp.status,data)));
 }
 async function handler(req){
  const c=conf();
