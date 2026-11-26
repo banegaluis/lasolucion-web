@@ -61,3 +61,11 @@ El prototipo guardar_autorizada exige creada numérica en milisegundos, código 
 Dos escenarios nuevos con matrices de datos: vencida/futura sin registros y datos incompletos/código inválido. Suite 286/286 resultados aprobados. No prueba contenido semántico de base/propuesta ni impide por sí solo que un adaptador privilegiado cambie creada; falta contrastar creación original y vincular la propuesta con el evento. Tampoco reemplaza la comprobación de vencimiento al confirmar. Estos límites impiden tratar el prototipo como listo para producción.
 
 Lecturas frescas: GitHub c835588369d2f6611f969fa390c6915cbd190378; Supabase v23 ACTIVE. Sin despliegue, datos reales modificados, envíos o medición operativa nueva. Siguiente etapa: cerrar vínculo de propuesta y confirmación con guardado/auditoría de orden atómicos. Reversión solo del commit de prototipo/tests, sin rollback productivo.
+
+## Correcciones sin renovar vigencia — 26/11/2026, 04 h
+
+Se reprodujo una falla del prototipo: guardar_autorizada aceptaba corregir una sesión cambiando su creada, renovando su vigencia, o conservando el código anterior. Ahora bloquea la fila de sesión y, cuando coincide la revisión solicitada, exige mantener creada y reemplazar el código. Un contexto inválido deja la sesión intacta y registra el rechazo por evento. Tras descartar explícitamente el contexto (NULL) se admite una conversación nueva con creación/código propios, conservando la progresión de revisión.
+
+Dos escenarios nuevos: corrección inválida/válida y reinicio tras descarte. La regresión de renovación falló antes del arreglo; suite final 288/288 resultados. PGlite prueba secuencias, no carreras multiconexión. Sigue siendo prototipo sin guardado de orden, auditoría de modificación ni conexión WhatsApp; no demuestra identidad semántica entre mensaje y propuesta.
+
+Verificación fresca: GitHub a4c426927a4c77ed4ad724526d10d92b9370ee7f y Supabase v23 ACTIVE. Sin despliegue, mensajes o datos reales modificados. Revertir el commit afecta solo prototipo/tests. Próxima etapa: transacción de edición de orden con confirmación exacta y auditoría; este control evita que la persistencia extienda la vigencia antes de esa integración.

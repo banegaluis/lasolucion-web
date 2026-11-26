@@ -243,3 +243,6 @@ Prototipo SQL guarda resultado por evento; reintentos idénticos no reemplazan s
 
 ## Laso: vencimiento de sesión al persistir — 26/11/2026, 03 h
 Prototipo SQL rechaza contexto vencido/futuro, código malformado y estructura incompleta antes de persistir. Dos escenarios nuevos; 286/286 resultados. No desplegado; v23 sin cambios. Ver laso-edicion-agenda.md.
+
+## Laso: correcciones sin renovar vigencia — 26/11/2026, 04 h
+Prototipo SQL conserva creada y exige código nuevo al corregir contexto activo. Falla reproducida y corregida; dos escenarios nuevos, 288/288 resultados. No desplegado; v23 permanece sin cambios. Ver laso-edicion-agenda.md.

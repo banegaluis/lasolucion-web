@@ -9,7 +9,7 @@ revoke all on laso_edicion_privada.eventos from public;
 create function laso_edicion_privada.guardar_autorizada(
  p_numero text,p_version integer,p_evento text,p_revision bigint,p_sesion jsonb
 ) returns jsonb language plpgsql security invoker set search_path='' as $$
-declare a record; nueva bigint; solicitud jsonb; previo record; respuesta jsonb; ahora_ms numeric;
+declare a record; nueva bigint; solicitud jsonb; previo record; respuesta jsonb; ahora_ms numeric; actual record;
 begin
  if p_numero is distinct from '+5493512143961' or p_version is null or p_version<1 then
   return jsonb_build_object('estado','denegado');
@@ -46,6 +46,16 @@ begin
  select e.solicitud,e.resultado into previo from laso_edicion_privada.eventos e where e.evento_id=p_evento for update;
  if previo.solicitud is distinct from solicitud then return jsonb_build_object('estado','evento_reutilizado'); end if;
  if previo.resultado is not null then return previo.resultado||jsonb_build_object('repetido',true); end if;
+ select s.sesion,s.revision into actual from laso_edicion_privada.sesiones s
+ where s.acceso_id=a.acceso_id and s.version_acceso=a.version for update;
+ if found and actual.revision=p_revision and actual.sesion is not null and p_sesion is not null then
+  if actual.sesion->'creada' is distinct from p_sesion->'creada'
+   or actual.sesion->>'codigo' is not distinct from p_sesion->>'codigo' then
+   respuesta:=jsonb_build_object('estado','contexto_invalido');
+   update laso_edicion_privada.eventos set resultado=respuesta where evento_id=p_evento;
+   return respuesta;
+  end if;
+ end if;
  nueva:=laso_edicion_privada.reemplazar(a.acceso_id,a.version,p_revision,p_sesion);
  respuesta:=case when nueva is null then jsonb_build_object('estado','conflicto') else jsonb_build_object('estado','guardada','revision',nueva) end;
  update laso_edicion_privada.eventos set resultado=respuesta where evento_id=p_evento;

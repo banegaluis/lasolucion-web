@@ -65,5 +65,21 @@ test('persistencia de edición con autorización y evento locales',async t=>{
     await preparar();assert.equal((await guardar({sesion:{...contexto,...cambio}})).estado,'sesion_invalida');assert.equal(await cantidad(),0);
    }
   });
+  await t.test('corregir conserva creación original y exige código nuevo',async()=>{
+   await preparar();await guardar();
+   for(const [evento,cambio] of [['reloj',{creada:contexto.creada+1,codigo:'b'.repeat(32)}],['codigo',{propuesta:{inicio:'11:00'}}]]){
+    await db.query("insert into bot_borradores select $1,acceso_id,perfil_id,version_acceso,numero,tipo,texto from bot_borradores where evento_id='evento'",[evento]);
+    assert.equal((await guardar({evento,revision:1,sesion:{...contexto,...cambio}})).estado,'contexto_invalido');
+   }
+   assert.deepEqual((await db.query('select revision,sesion from laso_edicion_privada.sesiones')).rows[0],{revision:1,sesion:contexto});
+   await db.exec("insert into bot_borradores select 'correccion',acceso_id,perfil_id,version_acceso,numero,tipo,texto from bot_borradores where evento_id='evento'");
+   assert.deepEqual(await guardar({evento:'correccion',revision:1,sesion:{...contexto,codigo:'b'.repeat(32)}}),{estado:'guardada',revision:2});
+  });
+  await t.test('después de descartar admite conversación nueva con creación propia',async()=>{
+   await preparar();await guardar();
+   for(const evento of ['cancelacion','nueva'])await db.query("insert into bot_borradores select $1,acceso_id,perfil_id,version_acceso,numero,tipo,texto from bot_borradores where evento_id='evento'",[evento]);
+   await guardar({evento:'cancelacion',revision:1,sesion:null});
+   assert.deepEqual(await guardar({evento:'nueva',revision:2,sesion:{...contexto,creada:contexto.creada+1,codigo:'c'.repeat(32)}}),{estado:'guardada',revision:3});
+  });
  }finally{await db.close();}
 });
