@@ -251,3 +251,5 @@ Prototipo SQL conserva creada y exige código nuevo al corregir contexto activo.
 Función propuesta confirma texto exacto, compara orden original, verifica horario y actualiza orden/auditoría/consumo juntos. Reintento no duplica; error de auditoría revierte todo. Seis escenarios nuevos; 295/295 resultados. No desplegado ni integrado a WhatsApp; concurrencia y esquema completo pendientes. Ver laso-edicion-agenda.md.
 
 - **Laso / edición de agenda (prototipo, 26/11/2026):** corregida comparación de contexto recuperado desde JSONB; prueba integrada de conversación, corrección de horario, sesión autorizada y confirmación SQL con reintento sin duplicados. Suite local: 298 pruebas pasadas. No desplegado; edición por WhatsApp y concurrencia real pendientes. Ver `docs/laso-edicion-agenda.md`.
+
+- **Laso / regresión integrada de edición (26/11/2026):** tres escenarios adicionales verifican cancelación persistida, bloqueo de correcciones atrasadas, cambios externos y revocación entre conversación y guardado. Suite: 301 pruebas pasadas. Solo pruebas/documentación; edición todavía no desplegada y concurrencia multiconexión pendiente.

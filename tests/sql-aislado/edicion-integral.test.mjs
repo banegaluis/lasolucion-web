@@ -17,7 +17,7 @@ test('conversación de edición con persistencia JSONB y transacción SQL', asyn
   async function evento(id,texto){await db.query("insert into bot_borradores values($1,$2,$3,1,'+5493512143961','texto',$4)",[id,operador,perfil,texto]);}
   async function guardar(id,texto,revision,sesion){
    await evento(id,texto);
-   return (await db.query("select laso_edicion_privada.guardar_autorizada('+5493512143961',1,$1,$2,$3::jsonb) r",[id,revision,JSON.stringify(sesion)])).rows[0].r;
+   return (await db.query("select laso_edicion_privada.guardar_autorizada('+5493512143961',1,$1,$2,$3::jsonb) r",[id,revision,sesion===null?null:JSON.stringify(sesion)])).rows[0].r;
   }
   const conversar=async(texto,sesion=null)=>conversarEdicion({mensaje:{tipo:'texto',texto},ordenes:await ordenes(),sesion,operador});
   const confirmar=async(id,codigo,revision)=>(await db.query("select laso_edicion_privada.confirmar('+5493512143961',1,$1,$2,$3) r",[id,codigo,revision])).rows[0].r;
@@ -44,6 +44,51 @@ test('conversación de edición con persistencia JSONB y transacción SQL', asyn
    assert.equal((await confirmar('confirmacion',resultado.intencion.codigo,c.revision)).repetido,true);
    assert.equal((await ordenes())[0].hora_inicio,'14:00:00');
    assert.equal((await contexto()).sesion,null);
+   assert.equal((await db.query('select count(*)::int n from laso_edicion_privada.cambios')).rows[0].n,1);
+  });
+  async function prepararNueva(nombre){
+   const c=await contexto();
+   const texto='Pasá la orden #1 para pasado mañana a las 10:00';
+   const r=await conversar(texto);assert.equal(r.estado,'propuesta');
+   assert.equal((await guardar(nombre,texto,c.revision,r.sesion)).estado,'guardada');
+   return contexto();
+  }
+  await t.test('cancelación persistida invalida código y bloquea corrección atrasada',async()=>{
+   const c=await prepararNueva('pedido-cancelable');
+   const atrasada=await conversar('Mejor a las 11:00',c.sesion);
+   const cancelacion=await conversar('Cancelar cambio',c.sesion);
+   assert.equal(cancelacion.estado,'cancelado');
+   assert.equal((await guardar('cancelar','Cancelar cambio',c.revision,cancelacion.sesion)).estado,'guardada');
+   const cancelado=await contexto();assert.equal(cancelado.sesion,null);
+   assert.equal((await guardar('atrasada','Mejor a las 11:00',c.revision,atrasada.sesion)).estado,'conflicto');
+   await evento('confirmar-cancelado','CONFIRMAR CAMBIO '+c.sesion.codigo);
+   assert.equal((await confirmar('confirmar-cancelado',c.sesion.codigo,c.revision)).estado,'propuesta_invalida');
+   assert.deepEqual(await contexto(),cancelado);
+   assert.equal((await ordenes())[0].hora_inicio,'14:00:00');
+  });
+  await t.test('cambio externo después de validar conversación se detecta en SQL',async()=>{
+   const c=await prepararNueva('pedido-cambio-externo');
+   const texto='CONFIRMAR CAMBIO '+c.sesion.codigo;
+   assert.equal((await conversar(texto,c.sesion)).estado,'intencion_validada');
+   // Intercalado secuencial deliberado: no acredita concurrencia multiconexión.
+   await db.exec("update ordenes set titulo='Modificado desde CRM aislado'");
+   await evento('confirmar-cambio-externo',texto);
+   assert.equal((await confirmar('confirmar-cambio-externo',c.sesion.codigo,c.revision)).estado,'orden_cambiada');
+   assert.equal((await ordenes())[0].hora_inicio,'14:00:00');
+   assert.deepEqual(await contexto(),c);
+   assert.equal((await db.query('select count(*)::int n from laso_edicion_privada.cambios')).rows[0].n,1);
+  });
+  await t.test('revocación posterior a conversación impide edición y consumo de sesión',async()=>{
+   const c=await contexto();
+   // Restaurar solamente el dato local que cambió en el escenario anterior.
+   await db.query('update ordenes set titulo=$1',[c.sesion.base.titulo]);
+   const texto='CONFIRMAR CAMBIO '+c.sesion.codigo;
+   assert.equal((await conversar(texto,c.sesion)).estado,'intencion_validada');
+   await evento('confirmar-revocado',texto);
+   await db.exec('update bot_accesos set activo=false');
+   assert.equal((await confirmar('confirmar-revocado',c.sesion.codigo,c.revision)).estado,'denegado');
+   assert.deepEqual(await contexto(),c);
+   assert.equal((await ordenes())[0].hora_inicio,'14:00:00');
    assert.equal((await db.query('select count(*)::int n from laso_edicion_privada.cambios')).rows[0].n,1);
   });
  }finally{await db.close();}
