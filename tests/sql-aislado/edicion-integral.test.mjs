@@ -31,6 +31,12 @@ test('conversación de edición con persistencia JSONB y transacción SQL', asyn
    actual=await conversar('Mejor a las 14:00',c.sesion);assert.equal(actual.estado,'propuesta');
    assert.equal(actual.sesion.creada,original.sesion.creada);assert.notEqual(actual.sesion.codigo,original.sesion.codigo);
    assert.equal((await guardar('correccion','Mejor a las 14:00',c.revision,actual.sesion)).estado,'guardada');
+   const guardada=await contexto();
+   const fechaCorregida=await conversar('Mejor para mañana',guardada.sesion);
+   assert.equal(fechaCorregida.estado,'propuesta');
+   assert.equal(fechaCorregida.sesion.propuesta.inicio,'14:00');
+   assert.notEqual(fechaCorregida.sesion.propuesta.fecha,guardada.sesion.propuesta.fecha);
+   assert.equal((await guardar('correccion-fecha','Mejor para mañana',guardada.revision,fechaCorregida.sesion)).estado,'guardada');
    assert.equal((await ordenes())[0].hora_inicio,'09:00:00');
   });
   await t.test('código anterior no escribe; código actual atraviesa conversación y SQL una sola vez',async()=>{

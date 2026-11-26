@@ -39,3 +39,25 @@ test('repetir confirmación con la sesión consumida no genera otra intención',
  const {sesion}=preparar();const r=hablar(confirmar(sesion),{sesion});
  assert.equal(hablar(confirmar(sesion),{sesion:r.sesion}).intencion,undefined);
 });
+test('corregir solo fecha conserva horario, duración y vencimiento; renueva código',()=>{
+ const a=preparar();
+ for(const texto of ['Mejor pasado mañana','Mejor para pasado mañana','Mejor para el 27/11/2026']){
+  const b=hablar(texto,{sesion:a.sesion});assert.equal(b.estado,'propuesta');
+  assert.deepEqual(b.sesion.propuesta,{fecha:'2026-11-27',inicio:'10:00',fin:'12:00'});
+  assert.equal(b.sesion.creada,a.sesion.creada);assert.notEqual(b.sesion.codigo,a.sesion.codigo);
+  assert.equal(hablar(confirmar(a.sesion),{sesion:b.sesion}).estado,'aclarar');
+  assert.equal(hablar(confirmar(b.sesion),{sesion:b.sesion}).estado,'intencion_validada');
+ }
+});
+test('corrección de fecha requiere contexto y no admite fechas ambiguas o imposibles',()=>{
+ const {sesion}=preparar();
+ assert.equal(hablar('Mejor para mañana').estado,'aclarar');
+ for(const texto of ['Mejor para el viernes','Mejor mañana o pasado mañana','Mejor para el 31/02/2027','Mejor hoy'])assert.equal(hablar(texto,{sesion}).estado,'aclarar');
+ for(const extra of [{operador:'ajeno'},{ahora:new Date(ahora.getTime()+1800000)}])assert.equal(hablar('Mejor pasado mañana',{sesion,...extra}).estado,'aclarar');
+});
+test('cambiar solo fecha revalida superposición y datos de la orden',()=>{
+ const {sesion}=preparar();
+ const ocupada={...orden,id:'otra',numero_orden:43,fecha_programada:'2026-11-27',hora_inicio:'10:00:00',hora_fin:'12:00:00'};
+ assert.equal(hablar('Mejor pasado mañana',{sesion,ordenes:[orden,ocupada]}).estado,'aclarar');
+ assert.equal(hablar('Mejor pasado mañana',{sesion,ordenes:[{...orden,titulo:'Modificada'}]}).estado,'aclarar');
+});

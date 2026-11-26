@@ -34,6 +34,12 @@ export function proponerEdicion({texto,ordenes,sesion=null,operador,ahora=new Da
  if(typeof o.id!=='string'||!o.id||inicioOriginal===null||finOriginal===null||finOriginal<=inicioOriginal)return aclarar('La orden necesita un horario completo antes de reprogramarla.');
  const base={id:o.id,fecha:o.fecha_programada,inicio:o.hora_inicio,fin:o.hora_fin,estado:o.estado,cliente_id:o.cliente_id??null,direccion_cliente_id:o.direccion_cliente_id??null,titulo:o.titulo??null};
  if(anterior&&!mismosCampos(anterior.base,base))return aclarar('La orden cambió desde la propuesta anterior. Volvé a indicarme el cambio.');
+ // Una corrección solo de fecha conserva la hora explícita de la propuesta vigente.
+ // Se expande a la misma gramática para reutilizar todas las validaciones posteriores.
+ if(anterior){
+  const soloFecha=cambio.match(/^(?:para (?:el )?)?(hoy|manana|pasado manana|\d{2}\/\d{2}\/\d{4})$/);
+  if(soloFecha)cambio=`${soloFecha[1]} a las ${hhmm(hora(anterior.propuesta.inicio))}`;
+ }
  const m=cambio.match(/^(?:(hoy|manana|pasado manana|\d{2}\/\d{2}\/\d{4}) )?a las (\d{1,2})(?::(\d{2}))?$/);
  if(!m||(!m[1]&&!anterior))return aclarar('Necesito una fecha y una hora claras, por ejemplo: mañana a las 10:00.');
  const local=fechaLocal(ahora);
