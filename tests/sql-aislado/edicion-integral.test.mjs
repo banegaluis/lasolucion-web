@@ -81,7 +81,8 @@ test('conversación de edición con persistencia JSONB y transacción SQL', asyn
    // Intercalado secuencial deliberado: no acredita concurrencia multiconexión.
    await db.exec("update ordenes set titulo='Modificado desde CRM aislado'");
    await evento('confirmar-cambio-externo',texto);
-   assert.equal((await confirmar('confirmar-cambio-externo',c.sesion.codigo,c.revision)).estado,'orden_cambiada');
+   const salida=await ejecutarEdicion({entrada:{mensaje:{tipo:'texto',texto},ordenes:[{...(await ordenes())[0],titulo:c.sesion.base.titulo}],sesion:c.sesion,operador},revision:c.revision,guardarSesion:async()=>{throw new Error('No borrar sesión');},confirmarCambio:({codigo,revision})=>confirmar('confirmar-cambio-externo',codigo,revision)});
+   assert.equal(salida.estado,'rechazado');assert.match(salida.mensaje,/orden cambió/);
    assert.equal((await ordenes())[0].hora_inicio,'14:00:00');
    assert.deepEqual(await contexto(),c);
    assert.equal((await db.query('select count(*)::int n from laso_edicion_privada.cambios')).rows[0].n,1);

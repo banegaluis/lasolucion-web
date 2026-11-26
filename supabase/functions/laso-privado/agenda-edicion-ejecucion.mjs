@@ -1,7 +1,17 @@
 import {conversarEdicion} from './agenda-edicion-conversacion.mjs';
 
 const incierto=()=>({estado:'resultado_desconocido',mensaje:'No pude comprobar el resultado. Necesito revisar el estado guardado antes de continuar.',releer:true});
-const rechazado=()=>({estado:'rechazado',mensaje:'El cambio no fue confirmado. Necesito revisar la agenda y preparar una propuesta nueva.',releer:true});
+const motivos=new Map([
+ ['ocupado','Ese horario se superpone con otro trabajo. Indicame otra fecha y hora para preparar el cambio.'],
+ ['orden_cambiada','La orden cambió desde que preparamos la propuesta. Necesito revisar sus datos antes de proponer otro cambio.'],
+ ['orden_inexistente','Ya no encuentro esa orden. Indicame el número de orden que querés reprogramar.'],
+ ['vencida','La propuesta venció. Indicame nuevamente la orden, la fecha y la hora.'],
+ ['sesion_vencida','La propuesta venció. Indicame nuevamente la orden, la fecha y la hora.'],
+ ['horario_invalido','Ese horario ya pasó o no es válido. Indicame una fecha y hora futuras.'],
+ ['duracion_invalida','La duración no coincide con la orden. Necesito revisar el turno antes de preparar otro cambio.'],
+ ['conflicto','La conversación cambió mientras procesaba el pedido. Necesito recuperar la propuesta vigente antes de continuar.']
+]);
+const rechazado=motivo=>({estado:'rechazado',mensaje:'El cambio no fue confirmado. '+(motivos.get(motivo)||'Necesito revisar la agenda y preparar una propuesta nueva.'),releer:true});
 // Coordinador aún no conectado al webhook. No autentica ni envía mensajes.
 // El receptor debe validar HMAC/identidad y registrar el evento antes de invocarlo.
 // Los puertos deben ejecutar RPC autorizadas con ese mismo evento, acceso y revisión.
@@ -27,7 +37,7 @@ export async function ejecutarEdicion({entrada,revision,guardarSesion,confirmarC
    return {estado:conversacion.estado,mensaje:conversacion.mensaje,revision:resultado.revision,releer:true};
   }
   const rechazos=['conflicto','evento_reutilizado','evento_invalido','sesion_invalida','sesion_vencida','contexto_invalido','confirmacion_invalida','propuesta_invalida','vencida','orden_inexistente','orden_cambiada','horario_invalido','duracion_invalida','ocupado'];
-  return rechazos.includes(resultado.estado)?rechazado():incierto();
+  return rechazos.includes(resultado.estado)?rechazado(resultado.estado):incierto();
  }catch{
   // Puede haber commit seguido de pérdida de respuesta. No afirmar rollback ni reintentar.
   return incierto();

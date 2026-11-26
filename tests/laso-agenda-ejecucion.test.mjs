@@ -39,3 +39,18 @@ test('respuesta inconsistente no acredita guardado',async()=>{
 test('conflicto SQL pide releer sin anunciar edición',async()=>{
  const r=await ejecutarEdicion({entrada:confirmacion,revision:1,guardarSesion:prohibido,confirmarCambio:async()=>({estado:'orden_cambiada'})});assert.equal(r.estado,'rechazado');assert.equal(r.releer,true);
 });
+
+test('rechazo informa motivo útil sin reenviar detalles internos ni reintentar',async()=>{
+ for(const [estado,patron] of [['ocupado',/superpone/],['orden_cambiada',/orden cambió/],['orden_inexistente',/número de orden/],['vencida',/venció/],['sesion_vencida',/venció/],['horario_invalido',/futuras/],['duracion_invalida',/duración/],['conflicto',/propuesta vigente/]]){
+  let llamadas=0;
+  const r=await ejecutarEdicion({entrada:confirmacion,revision:1,guardarSesion:prohibido,confirmarCambio:async()=>{llamadas++;return {estado,mensaje:'dato privado no reenviable'};}});
+  assert.equal(llamadas,1);assert.equal(r.estado,'rechazado');assert.equal(r.releer,true);
+  assert.match(r.mensaje,patron);assert.match(r.mensaje,/no fue confirmado/);assert.doesNotMatch(r.mensaje,/dato privado|quedó guardado/);
+ }
+});
+test('error desconocido no se presenta como rechazo confirmado por la base',async()=>{
+ for(const estado of ['toString','constructor','fallo_nuevo']){
+  const r=await ejecutarEdicion({entrada:confirmacion,revision:1,guardarSesion:prohibido,confirmarCambio:async()=>({estado})});
+  assert.equal(r.estado,'resultado_desconocido');assert.doesNotMatch(r.mensaje,/no fue confirmado/);
+ }
+});
