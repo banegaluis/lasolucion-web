@@ -267,3 +267,5 @@ Función propuesta confirma texto exacto, compara orden original, verifica horar
 - **Laso / respuestas de edición (prototipo, 26/11/2026):** ocho motivos SQL se traducen en explicaciones concretas y siguiente dato necesario; errores desconocidos conservan resultado incierto. 324 pruebas pasadas, incluida respuesta a cambio externo con SQL aislado. No desplegado.
 
 - **Laso / memoria privada (26/11/2026):** auditados esquema, RLS y ACL existentes; snapshot de RPC y cuatro escenarios aislados de parser→SQL, idempotencia, autorización y rollback. Suite: 329 pruebas pasadas. Receptor v23 sin memoria integrada; activación no verificada, bloqueo previo de despliegue sin eludir. Ver `docs/laso-memoria-auditoria.md`.
+
+- **Laso / privacidad de memoria (26/11/2026):** políticas SELECT reales ensayadas con roles locales; comprobado aislamiento entre administradores y rechazo de escritura/RPC para roles de aplicación. Suite: 331 pruebas pasadas. No acredita JWT/PostgREST productivo ni activa WhatsApp.

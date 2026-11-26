@@ -45,5 +45,35 @@ test('memoria desplegada: comandos, deduplicación y rollback aislados',async t=
    assert.equal((await llamar('quitar','Quitar item 1 de lista materiales')).error,'evento_repetido');
    assert.equal((await db.query('select count(*)::int n from laso_listas_historial')).rows[0].n,2);
   });
+  await t.test('RLS limita lista e historial al administrador activo propietario',async()=>{
+   await preparar();await crear();
+   const ajeno='00000000-0000-0000-0000-000000000099';
+   await db.query("insert into perfiles values($1,true,'activo','admin')",[ajeno]);
+   await db.exec("create role authenticated; create role anon; create schema auth; create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$; grant usage on schema auth to authenticated; grant execute on function auth.uid() to authenticated; grant select on perfiles,laso_listas,laso_listas_historial to authenticated; revoke all on function public.laso_memoria(text,uuid,uuid,integer,text,text,text,text,jsonb,integer) from public;");
+   await db.exec(await readFile(new URL('./memoria-politicas.sql',import.meta.url),'utf8'));
+   async function visibles(usuario){
+    await db.query("select set_config('request.jwt.claim.sub',$1,false)",[usuario]);
+    await db.exec('set role authenticated');
+    try{return (await db.query('select (select count(*)::int from laso_listas) listas,(select count(*)::int from laso_listas_historial) historial')).rows[0];}
+    finally{await db.exec('reset role');}
+   }
+   assert.deepEqual(await visibles(perfil),{listas:1,historial:1});
+   assert.deepEqual(await visibles(ajeno),{listas:0,historial:0});
+   assert.deepEqual(await visibles(''),{listas:0,historial:0});
+   await db.exec('update perfiles set activo=false');assert.deepEqual(await visibles(perfil),{listas:0,historial:0});
+   await db.exec("update perfiles set activo=true,rol='tecnico'");assert.deepEqual(await visibles(perfil),{listas:0,historial:0});
+   await db.exec("update perfiles set rol='admin',estado='inactivo'");assert.deepEqual(await visibles(perfil),{listas:0,historial:0});
+  });
+  await t.test('roles de aplicación no escriben listas ni ejecutan RPC',async()=>{
+   for(const rol of ['authenticated','anon']){
+    await db.exec('set role '+rol);
+    try{
+     await assert.rejects(()=>db.exec("insert into laso_listas(perfil_id,nombre,clave) values('00000000-0000-0000-0000-000000000002','Inyección local','inyeccion')"),e=>e.code==='42501');
+     await assert.rejects(()=>db.exec("update laso_listas set nombre='Alterada'"),e=>e.code==='42501');
+     await assert.rejects(crear,e=>e.code==='42501');
+    }finally{await db.exec('reset role');}
+   }
+   assert.equal((await db.query('select count(*)::int n from laso_listas')).rows[0].n,1);
+  });
  }finally{await db.close();}
 });
