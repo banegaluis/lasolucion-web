@@ -222,3 +222,6 @@ Se agregó un ensayo PostgreSQL nativo con conexiones independientes para duplic
 
 ## Laso: autorización SQL real aislada — 25/11/2026, 20 h
 Se prueban identidad autorizada y seis denegaciones con bot_autorizar real: revocación, versión antigua, permiso retirado, perfil inactivo, rol cliente y suspensión. 249/249 resultados aprobados; no incluyen concurrencia. La versión productiva permanece v23, sin cambios. Ver laso-transacciones-aisladas.md.
+
+## Laso: propuesta conversacional de reprogramación — 25/11/2026, 21 h
+Núcleo local para «Pasá la orden #42 para mañana a las 10» y «Mejor a las 11»: conserva duración/contexto, muestra antes/después y descarta propuestas ambiguas, vencidas, ajenas o superpuestas. Nueve escenarios nuevos; suite completa 258/258. No conectado al webhook ni al guardado: v23 permanece sin cambios. Alcance en laso-edicion-agenda.md.
