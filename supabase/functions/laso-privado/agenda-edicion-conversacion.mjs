@@ -1,4 +1,4 @@
-import {proponerEdicion} from './agenda-edicion.mjs';
+import {proponerEdicion,mismosCampos} from './agenda-edicion.mjs';
 
 const descartar=mensaje=>({estado:'aclarar',mensaje,sesion:null});
 // Adaptador puro: devuelve una intención validada, nunca guarda ni envía mensajes.
@@ -13,7 +13,7 @@ export function conversarEdicion({mensaje,ordenes,sesion=null,operador,ahora=new
   // Reutiliza validaciones de dueño, vencimiento, base original y disponibilidad.
   const revision=proponerEdicion({texto:`Mejor a las ${sesion.propuesta.inicio}`,ordenes,sesion,operador,ahora});
   if(revision.estado!=='propuesta')return revision;
-  if(JSON.stringify(revision.sesion.propuesta)!==JSON.stringify(sesion.propuesta))return descartar('La propuesta cambió. Prepará el cambio nuevamente.');
+  if(!mismosCampos(revision.sesion.propuesta,sesion.propuesta))return descartar('La propuesta cambió. Prepará el cambio nuevamente.');
   return {estado:'intencion_validada',mensaje:'Confirmación validada para revisar el guardado. La agenda todavía no fue modificada.',sesion:null,intencion:{codigo,operador,orden_id:sesion.base.id,base:{...sesion.base},propuesta:{...sesion.propuesta}}};
  }
  const r=proponerEdicion({texto,ordenes,sesion,operador,ahora});

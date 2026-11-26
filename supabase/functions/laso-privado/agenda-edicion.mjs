@@ -1,6 +1,8 @@
 import {fechaLocal} from './agenda-consulta.mjs';
 
 const normalizar=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+// JSONB no conserva el orden de las claves. Comparar valores y esquema plano.
+export const mismosCampos=(a,b)=>!!a&&!!b&&typeof a==='object'&&typeof b==='object'&&!Array.isArray(a)&&!Array.isArray(b)&&Object.keys(a).length===Object.keys(b).length&&Object.keys(b).every(k=>Object.hasOwn(a,k)&&a[k]===b[k]);
 const aclarar=mensaje=>({estado:'aclarar',mensaje,sesion:null});
 const hora=s=>{const m=String(s??'').match(/^(\d{2}):(\d{2})(?::00)?$/);return m&&+m[1]<24&&+m[2]<60?+m[1]*60 + +m[2]:null;};
 const fechaValida=s=>typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&Number.isFinite(Date.parse(s+'T00:00:00Z'))&&new Date(s+'T00:00:00Z').toISOString().slice(0,10)===s;
@@ -31,7 +33,7 @@ export function proponerEdicion({texto,ordenes,sesion=null,operador,ahora=new Da
  const inicioOriginal=hora(o.hora_inicio),finOriginal=hora(o.hora_fin);
  if(typeof o.id!=='string'||!o.id||inicioOriginal===null||finOriginal===null||finOriginal<=inicioOriginal)return aclarar('La orden necesita un horario completo antes de reprogramarla.');
  const base={id:o.id,fecha:o.fecha_programada,inicio:o.hora_inicio,fin:o.hora_fin,estado:o.estado,cliente_id:o.cliente_id??null,direccion_cliente_id:o.direccion_cliente_id??null,titulo:o.titulo??null};
- if(anterior&&JSON.stringify(anterior.base)!==JSON.stringify(base))return aclarar('La orden cambió desde la propuesta anterior. Volvé a indicarme el cambio.');
+ if(anterior&&!mismosCampos(anterior.base,base))return aclarar('La orden cambió desde la propuesta anterior. Volvé a indicarme el cambio.');
  const m=cambio.match(/^(?:(hoy|manana|pasado manana|\d{2}\/\d{2}\/\d{4}) )?a las (\d{1,2})(?::(\d{2}))?$/);
  if(!m||(!m[1]&&!anterior))return aclarar('Necesito una fecha y una hora claras, por ejemplo: mañana a las 10:00.');
  const local=fechaLocal(ahora);
