@@ -257,3 +257,5 @@ Función propuesta confirma texto exacto, compara orden original, verifica horar
 - **Laso / coordinador de edición (prototipo, 26/11/2026):** respuestas de propuesta, cancelación y edición condicionadas al resultado SQL; errores de transporte sin éxito ficticio ni reintento automático; duplicados sin mensaje. 308 pruebas pasadas, incluida integración SQL aislada. No conectado al webhook ni desplegado.
 
 - **Laso / conversación de agenda (prototipo, 26/11/2026):** permite corregir solo la fecha conservando la hora de una propuesta vigente, con código renovado y validación de conflictos. 311 pruebas pasadas e integración SQL aislada actualizada. No desplegado; no habilita edición por WhatsApp todavía.
+
+- **Laso / permisos de edición (prototipo, 26/11/2026):** cierre explícito de permisos PUBLIC/anon/authenticated que contempla concesiones directas por defecto. Pruebas con SET ROLE y rechazo 42501; suite completa 315 pasadas. No aplicado a producción ni concedido acceso al bot.

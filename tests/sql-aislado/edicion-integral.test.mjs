@@ -9,7 +9,7 @@ test('conversación de edición con persistencia JSONB y transacción SQL', asyn
  const db=new PGlite();
  const operador='00000000-0000-0000-0000-000000000001',perfil='00000000-0000-0000-0000-000000000002';
  try {
-  for(const p of ['../concurrencia/esquema.sql','../concurrencia/autorizacion-desplegada.sql','../../supabase/propuestas/edicion-sesion.sql','../../supabase/propuestas/edicion-sesion-autorizada.sql','../../supabase/propuestas/edicion-confirmar.sql'])await db.exec(await readFile(new URL(p,import.meta.url),'utf8'));
+  for(const p of ['../concurrencia/esquema.sql','../concurrencia/autorizacion-desplegada.sql','../../supabase/propuestas/edicion-sesion.sql','../../supabase/propuestas/edicion-sesion-autorizada.sql','../../supabase/propuestas/edicion-confirmar.sql','../../supabase/propuestas/edicion-permisos.sql'])await db.exec(await readFile(new URL(p,import.meta.url),'utf8'));
   await db.query("insert into perfiles values($1,true,'activo','admin')",[perfil]);
   await db.query("insert into bot_accesos values($1,$2,'+5493512143961',true,ARRAY['agenda.editar'],1)",[operador,perfil]);
   await db.exec("insert into ordenes(titulo,fecha_programada,hora_inicio,hora_fin,estado) values('Trabajo aislado',current_date+2,'09:00','11:00','pendiente')");
