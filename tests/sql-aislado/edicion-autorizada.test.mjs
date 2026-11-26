@@ -81,5 +81,28 @@ test('persistencia de edición con autorización y evento locales',async t=>{
    await guardar({evento:'cancelacion',revision:1,sesion:null});
    assert.deepEqual(await guardar({evento:'nueva',revision:2,sesion:{...contexto,creada:contexto.creada+1,codigo:'c'.repeat(32)}}),{estado:'guardada',revision:3});
   });
+  for(const operacion of ['insert','update']){
+   await t.test('evento omitido en '+operacion+' revierte sesión y permite reintento',async()=>{
+    await preparar();
+    await db.exec('create or replace function public.omitir_evento_local() returns trigger language plpgsql as $$ begin return null; end $$');
+    await db.exec('create trigger omitir_evento before '+operacion+' on laso_edicion_privada.eventos for each row execute function public.omitir_evento_local()');
+    try{await assert.rejects(guardar(),e=>e.code==='P0001');}
+    finally{await db.exec('drop trigger omitir_evento on laso_edicion_privada.eventos');}
+    assert.equal(await cantidad(),0);
+    assert.equal((await db.query('select count(*)::int n from laso_edicion_privada.eventos')).rows[0].n,0);
+    assert.deepEqual(await guardar(),{estado:'guardada',revision:1});
+    assert.equal((await guardar()).repetido,true);
+   });
+  }
+  await t.test('fallo al registrar resultado de cancelación conserva propuesta y revisión',async()=>{
+   await preparar();await guardar();
+   await db.exec("insert into bot_borradores select 'cancelacion',acceso_id,perfil_id,version_acceso,numero,tipo,texto from bot_borradores where evento_id='evento'");
+   await db.exec("alter table laso_edicion_privada.eventos add constraint fallo_resultado check(evento_id<>'cancelacion' or resultado is null)");
+   try{await assert.rejects(guardar({evento:'cancelacion',revision:1,sesion:null}),e=>e.code==='23514');}
+   finally{await db.exec('alter table laso_edicion_privada.eventos drop constraint fallo_resultado');}
+   assert.deepEqual((await db.query('select revision,sesion from laso_edicion_privada.sesiones')).rows[0],{revision:1,sesion:contexto});
+   assert.equal((await db.query("select count(*)::int n from laso_edicion_privada.eventos where evento_id='cancelacion'")).rows[0].n,0);
+   assert.deepEqual(await guardar({evento:'cancelacion',revision:1,sesion:null}),{estado:'guardada',revision:2});
+  });
  }finally{await db.close();}
 });

@@ -9,7 +9,7 @@ revoke all on laso_edicion_privada.eventos from public;
 create function laso_edicion_privada.guardar_autorizada(
  p_numero text,p_version integer,p_evento text,p_revision bigint,p_sesion jsonb
 ) returns jsonb language plpgsql security invoker set search_path='' as $$
-declare a record; nueva bigint; solicitud jsonb; previo record; respuesta jsonb; ahora_ms numeric; actual record;
+declare a record; nueva bigint; solicitud jsonb; previo record; respuesta jsonb; ahora_ms numeric; actual record; filas integer;
 begin
  if p_numero is distinct from '+5493512143961' or p_version is null or p_version<1 then
   return jsonb_build_object('estado','denegado');
@@ -44,6 +44,7 @@ begin
  insert into laso_edicion_privada.eventos(evento_id,solicitud) values(p_evento,solicitud)
  on conflict(evento_id) do nothing;
  select e.solicitud,e.resultado into previo from laso_edicion_privada.eventos e where e.evento_id=p_evento for update;
+ if not found then raise exception 'evento no registrado' using errcode='P0001'; end if;
  if previo.solicitud is distinct from solicitud then return jsonb_build_object('estado','evento_reutilizado'); end if;
  if previo.resultado is not null then return previo.resultado||jsonb_build_object('repetido',true); end if;
  select s.sesion,s.revision into actual from laso_edicion_privada.sesiones s
@@ -53,12 +54,16 @@ begin
    or actual.sesion->>'codigo' is not distinct from p_sesion->>'codigo' then
    respuesta:=jsonb_build_object('estado','contexto_invalido');
    update laso_edicion_privada.eventos set resultado=respuesta where evento_id=p_evento;
+ get diagnostics filas = row_count;
+ if filas<>1 then raise exception 'resultado de evento no registrado' using errcode='P0001'; end if;
    return respuesta;
   end if;
  end if;
  nueva:=laso_edicion_privada.reemplazar(a.acceso_id,a.version,p_revision,p_sesion);
  respuesta:=case when nueva is null then jsonb_build_object('estado','conflicto') else jsonb_build_object('estado','guardada','revision',nueva) end;
  update laso_edicion_privada.eventos set resultado=respuesta where evento_id=p_evento;
+ get diagnostics filas = row_count;
+ if filas<>1 then raise exception 'resultado de evento no registrado' using errcode='P0001'; end if;
  return respuesta;
 end $$;
 revoke all on function laso_edicion_privada.guardar_autorizada(text,integer,text,bigint,jsonb) from public;

@@ -123,3 +123,11 @@ Se reprodujo en el prototipo un falso éxito si un trigger BEFORE omitía silenc
 Cuatro escenarios nuevos: fallo CHECK al consumir sesión y omisión por trigger en cada una de las tres escrituras. Se verifica horario original, auditoría vacía, sesión disponible y, al retirar el fallo local, confirmación exitosa única. En el fallo de consumo también se compara el contexto y revisión completos. Las tres omisiones fallaron antes de la corrección. Son fallos inyectados únicamente en PGlite, no hallazgos de triggers productivos.
 
 Validación: suite completa de 319 pruebas pasadas (`node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs`). Supabase whatsapp-interno sigue v23 ACTIVE verificado; no se aplicó este SQL ni se modificaron datos reales. Quedan pendientes receptor de edición, privilegios mínimos de ejecución y concurrencia multiconexión. Estas pruebas no acreditan recuperación de entrega WhatsApp ni funcionamiento integral en móvil.
+
+### Registro de evento y sesión inseparables (26/11/2026)
+
+Se reprodujo una omisión silenciosa del resultado del evento que permitía devolver `guardada` sin completar el registro de deduplicación. `guardar_autorizada` ahora exige encontrar el evento después del INSERT y afectar una fila al registrar cada resultado; de lo contrario lanza P0001 para revertir sesión y evento juntos. También se cubre la rama de contexto inválido. No agrega reintentos automáticos.
+
+Tres escenarios nuevos en PGlite: trigger que omite INSERT del evento, trigger que omite UPDATE del resultado y fallo CHECK al registrar una cancelación. Se comprueba ausencia de sesión/evento parciales, conservación de propuesta y revisión al fallar cancelación, y recuperación con deduplicación después de retirar el fallo local. Las dos omisiones se reprodujeron antes del cambio. Suite completa: 322 pruebas pasadas, cero fallos, ejecutando `node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs`.
+
+Supabase verificado en v23 ACTIVE. Corrección del prototipo no desplegada; sin datos reales ni mensajes modificados. No se acreditan concurrencia multiconexión, funcionamiento de edición por WhatsApp ni presencia de esos triggers en producción. Próximo paso pendiente: integración del receptor y rol mínimo de ejecución.
