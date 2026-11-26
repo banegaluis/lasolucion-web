@@ -237,3 +237,6 @@ Edición conversacional descarta sesiones incompletas y detecta cambios de clien
 
 ## Laso: sesión de edición ligada al acceso — 26/11/2026, 01 h
 Prototipo SQL aislado exige permiso agenda.editar, único número privado, versión y evento de texto del mismo acceso. Cinco escenarios nuevos; 281/281 resultados contando grupos. No desplegado: consumo de eventos y guardado de orden pendientes. Ver laso-edicion-agenda.md.
+
+## Laso: eventos idempotentes para sesión de edición — 26/11/2026, 02 h
+Prototipo SQL guarda resultado por evento; reintentos idénticos no reemplazan sesión, reutilización con otro contenido se rechaza y un error revierte también el evento. Tres escenarios nuevos; 284/284 resultados. No desplegado ni conectado a edición real. Ver laso-edicion-agenda.md.
