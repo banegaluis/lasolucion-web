@@ -228,3 +228,6 @@ Núcleo local para «Pasá la orden #42 para mañana a las 10» y «Mejor a las 
 
 ## Laso: confirmar la propuesta vigente de edición — 25/11/2026, 22 h
 Adaptador local de conversación: correcciones renuevan el código, confirmación exacta propia de edición, revalidación de contexto y descarte de sesión tras validar. Siete pruebas nuevas; 265/265 resultados. Devuelve intención, no guarda; persistencia atómica, RPC y conexión WhatsApp pendientes. v23 sin cambios. Ver laso-edicion-agenda.md.
+
+## Laso: persistencia propuesta de edición — 25/11/2026, 22:56 h
+Prototipo SQL aislado con comparación de revisión: evita sobrescrituras atrasadas y conserva una revisión al cancelar. Seis escenarios nuevos, suite 272/272 contando grupos. Autorización/integración/consumo transaccional pendientes; no es una migración desplegada. v23 sin cambios. Ver laso-edicion-agenda.md.
