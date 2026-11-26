@@ -284,3 +284,8 @@ Función propuesta confirma texto exacto, compara orden original, verifica horar
 - Clasificador de respuesta Meta y transporte conectado al código del receptor: solo estados y códigos numéricos, sin contenido ni secretos.
 - Distingue aceptación de entrega; 356 pruebas locales pasadas. No desplegado, producción v23.
 - Investigación de falta de respuesta y límites: `laso-diagnostico-respuestas.md`.
+
+### Laso: prueba aislada del webhook completo (26/11/2026)
+- Request con HMAC real contra el handler de la rama, red completamente sustituida: autorización, destino fijo, duplicados, revocación, fallos de guardado/envío y modo apagado.
+- Documenta que un envío fallido después de guardar evento no se reintenta automáticamente; no es una corrección ni diagnóstico confirmado de producción.
+- Sin cambios de runtime ni despliegue. Ver `laso-diagnostico-respuestas.md`.
