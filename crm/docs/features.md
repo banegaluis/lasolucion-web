@@ -274,3 +274,8 @@ Función propuesta confirma texto exacto, compara orden original, verifica horar
 - Propuesta SQL `supabase/propuestas/memoria-atomica.sql`: exige una fila en creación/actualización de lista e historial; revierte operaciones incompletas.
 - Reproducción local del defecto en snapshot productivo y pruebas de rollback/reintento con regresiones de comandos y RLS para ambas versiones.
 - No desplegada; receptor sigue v23. No implica activación de memoria ni resolución de respuesta WhatsApp. Ver `laso-memoria-auditoria.md`.
+
+### Memoria: propuesta y confirmación escrita (26/11/2026)
+- Adaptador puro en `laso-privado/memoria-conversacion.mjs`: creación/agregado por texto o transcripción, resumen completo, corrección con código nuevo, cancelación y vencimiento.
+- Confirmación escrita exacta vinculada a sesión e identidad; solo devuelve intención, sin RPC ni mensajes. Cambios por índice requieren contenido actual y siguen detenidos.
+- Pendientes persistencia/consumo atómico, revalidación SQL e integración al receptor y CRM. No activado. Detalles en `laso-memoria-auditoria.md`.
