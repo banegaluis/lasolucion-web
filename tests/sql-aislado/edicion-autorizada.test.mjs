@@ -4,15 +4,17 @@ import {readFile} from 'node:fs/promises';
 import {PGlite} from '@electric-sql/pglite';
 test('persistencia de edición con autorización y evento locales',async t=>{
  const db=new PGlite();const id='00000000-0000-0000-0000-000000000001',perfil='00000000-0000-0000-0000-000000000002';
+ let contexto;
  try{
   for(const path of ['../concurrencia/esquema.sql','../concurrencia/autorizacion-desplegada.sql','../../supabase/propuestas/edicion-sesion.sql','../../supabase/propuestas/edicion-sesion-autorizada.sql'])await db.exec(await readFile(new URL(path,import.meta.url),'utf8'));
   async function preparar(){
+   contexto={operador:id,creada:Date.now()-1000,codigo:'a'.repeat(32),base:{},propuesta:{}};
    await db.exec('truncate laso_edicion_privada.eventos,bot_accesos,perfiles,bot_borradores,laso_edicion_privada.sesiones');
    await db.query("insert into perfiles values($1,true,'activo','admin')",[perfil]);
    await db.query("insert into bot_accesos values($1,$2,'+5493512143961',true,ARRAY['agenda.editar'],1)",[id,perfil]);
    await db.query("insert into bot_borradores values('evento',$1,$2,1,'+5493512143961','texto','Mejor a las 11')",[id,perfil]);
   }
-  const guardar=async({numero='+5493512143961',version=1,evento='evento',revision=0,sesion={operador:id}}={})=>(await db.query('select laso_edicion_privada.guardar_autorizada($1,$2,$3,$4,$5) as r',[numero,version,evento,revision,sesion===null?null:JSON.stringify(sesion)])).rows[0].r;
+  const guardar=async({numero='+5493512143961',version=1,evento='evento',revision=0,sesion=contexto}={})=>(await db.query('select laso_edicion_privada.guardar_autorizada($1,$2,$3,$4,$5) as r',[numero,version,evento,revision,sesion===null?null:JSON.stringify(sesion)])).rows[0].r;
   const cantidad=async()=>(await db.query('select count(*)::int as n from laso_edicion_privada.sesiones')).rows[0].n;
   await t.test('guarda sesión autorizada, rechaza revisión vieja y permite descarte',async()=>{
    await preparar();assert.deepEqual(await guardar(),{estado:'guardada',revision:1});assert.deepEqual(await guardar(),{estado:'guardada',revision:1,repetido:true});
@@ -37,9 +39,9 @@ test('persistencia de edición con autorización y evento locales',async t=>{
   });
   await t.test('un evento no puede reemplazar otra propuesta ni revision',async()=>{
    await preparar();await guardar();
-   assert.equal((await guardar({revision:1,sesion:{operador:id,codigo:'otro'}})).estado,'evento_reutilizado');
+   assert.equal((await guardar({revision:1,sesion:{...contexto,codigo:'b'.repeat(32)}})).estado,'evento_reutilizado');
    const row=(await db.query('select revision,sesion from laso_edicion_privada.sesiones')).rows[0];
-   assert.deepEqual(row,{revision:1,sesion:{operador:id}});
+   assert.deepEqual(row,{revision:1,sesion:contexto});
   });
   await t.test('reintento viejo no resucita contexto descartado',async()=>{
    await preparar();await guardar();
@@ -51,6 +53,17 @@ test('persistencia de edición con autorización y evento locales',async t=>{
    await preparar();await assert.rejects(guardar({revision:-1}),e=>e.code==='22023');
    assert.equal((await db.query('select count(*)::int as n from laso_edicion_privada.eventos')).rows[0].n,0);
    assert.equal((await guardar()).estado,'guardada');
+  });
+  await t.test('vencimiento y creación futura no dejan sesión ni evento',async()=>{
+   for(const creada of [Date.now()-1800001,Date.now()+60000]){
+    await preparar();assert.equal((await guardar({sesion:{...contexto,creada}})).estado,'sesion_vencida');
+    assert.equal(await cantidad(),0);assert.equal((await db.query('select count(*)::int as n from laso_edicion_privada.eventos')).rows[0].n,0);
+   }
+  });
+  await t.test('contexto incompleto o código malformado no se persisten',async()=>{
+   for(const cambio of [{creada:null},{creada:'ayer'},{codigo:'abc'},{base:null},{propuesta:[]}]){
+    await preparar();assert.equal((await guardar({sesion:{...contexto,...cambio}})).estado,'sesion_invalida');assert.equal(await cantidad(),0);
+   }
   });
  }finally{await db.close();}
 });

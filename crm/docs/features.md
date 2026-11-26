@@ -240,3 +240,6 @@ Prototipo SQL aislado exige permiso agenda.editar, único número privado, versi
 
 ## Laso: eventos idempotentes para sesión de edición — 26/11/2026, 02 h
 Prototipo SQL guarda resultado por evento; reintentos idénticos no reemplazan sesión, reutilización con otro contenido se rechaza y un error revierte también el evento. Tres escenarios nuevos; 284/284 resultados. No desplegado ni conectado a edición real. Ver laso-edicion-agenda.md.
+
+## Laso: vencimiento de sesión al persistir — 26/11/2026, 03 h
+Prototipo SQL rechaza contexto vencido/futuro, código malformado y estructura incompleta antes de persistir. Dos escenarios nuevos; 286/286 resultados. No desplegado; v23 sin cambios. Ver laso-edicion-agenda.md.

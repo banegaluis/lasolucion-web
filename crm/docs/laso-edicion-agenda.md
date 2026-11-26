@@ -53,3 +53,11 @@ El prototipo guardar_autorizada registra solicitud y resultado por evento en la 
 Se agregaron tres escenarios y se ajustó el contrato del reintento en la prueba anterior. 284/284 resultados aprobados: reutilización rechazada, reintento viejo sin resurrección y rollback del registro de evento cuando falla el reemplazo. PGlite serializa el ensayo: no acredita concurrencia real. No se implementó todavía la edición atómica de órdenes; este avance cierra la deduplicación de la persistencia que aquella necesita. Falta retención/limpieza de eventos, esquema/expiración de sesión, vínculo semántico con el mensaje y consumo con la escritura de orden/auditoría.
 
 Lecturas frescas: rama 6b74d3d3b502aa663076812b9e9890d63dca4d08; Supabase v23 ACTIVE. Sin despliegues, datos reales modificados, secretos ni mensajes. No hay medición de eficiencia operativa; el caso local evita un segundo reemplazo y aumento de revisión por reintento. Revertir el commit solo afecta el prototipo y sus pruebas, sin rollback productivo.
+
+## Vencimiento al persistir — 26/11/2026, 03 h
+
+El prototipo guardar_autorizada exige creada numérica en milisegundos, código hexadecimal de 32 caracteres y objetos base/propuesta. Rechaza creación futura y antigüedad mayor o igual a 30 minutos según clock_timestamp del servidor, antes de registrar el evento o la sesión. Un reintento después del vencimiento devuelve sesion_vencida, aunque antes hubiera resultado guardada. NULL sigue permitiendo descartar contexto.
+
+Dos escenarios nuevos con matrices de datos: vencida/futura sin registros y datos incompletos/código inválido. Suite 286/286 resultados aprobados. No prueba contenido semántico de base/propuesta ni impide por sí solo que un adaptador privilegiado cambie creada; falta contrastar creación original y vincular la propuesta con el evento. Tampoco reemplaza la comprobación de vencimiento al confirmar. Estos límites impiden tratar el prototipo como listo para producción.
+
+Lecturas frescas: GitHub c835588369d2f6611f969fa390c6915cbd190378; Supabase v23 ACTIVE. Sin despliegue, datos reales modificados, envíos o medición operativa nueva. Siguiente etapa: cerrar vínculo de propuesta y confirmación con guardado/auditoría de orden atómicos. Reversión solo del commit de prototipo/tests, sin rollback productivo.

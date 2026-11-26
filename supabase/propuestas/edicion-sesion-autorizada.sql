@@ -9,7 +9,7 @@ revoke all on laso_edicion_privada.eventos from public;
 create function laso_edicion_privada.guardar_autorizada(
  p_numero text,p_version integer,p_evento text,p_revision bigint,p_sesion jsonb
 ) returns jsonb language plpgsql security invoker set search_path='' as $$
-declare a record; nueva bigint; solicitud jsonb; previo record; respuesta jsonb;
+declare a record; nueva bigint; solicitud jsonb; previo record; respuesta jsonb; ahora_ms numeric;
 begin
  if p_numero is distinct from '+5493512143961' or p_version is null or p_version<1 then
   return jsonb_build_object('estado','denegado');
@@ -27,6 +27,18 @@ begin
  if p_sesion is not null and (jsonb_typeof(p_sesion) is distinct from 'object'
   or p_sesion->>'operador' is distinct from a.acceso_id::text) then
   return jsonb_build_object('estado','sesion_invalida');
+ end if;
+ if p_sesion is not null then
+  if jsonb_typeof(p_sesion->'creada') is distinct from 'number'
+   or coalesce(p_sesion->>'codigo','') !~ '^[0-9a-f]{32}$'
+   or jsonb_typeof(p_sesion->'base') is distinct from 'object'
+   or jsonb_typeof(p_sesion->'propuesta') is distinct from 'object' then
+   return jsonb_build_object('estado','sesion_invalida');
+  end if;
+  ahora_ms:=extract(epoch from clock_timestamp())*1000;
+  if (p_sesion->>'creada')::numeric>ahora_ms or (p_sesion->>'creada')::numeric<=ahora_ms-1800000 then
+   return jsonb_build_object('estado','sesion_vencida');
+  end if;
  end if;
  solicitud:=jsonb_build_object('acceso',a.acceso_id,'version',a.version,'revision',p_revision,'sesion',p_sesion);
  insert into laso_edicion_privada.eventos(evento_id,solicitud) values(p_evento,solicitud)
