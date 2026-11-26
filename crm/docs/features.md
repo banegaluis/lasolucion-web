@@ -231,3 +231,6 @@ Adaptador local de conversación: correcciones renuevan el código, confirmació
 
 ## Laso: persistencia propuesta de edición — 25/11/2026, 22:56 h
 Prototipo SQL aislado con comparación de revisión: evita sobrescrituras atrasadas y conserva una revisión al cancelar. Seis escenarios nuevos, suite 272/272 contando grupos. Autorización/integración/consumo transaccional pendientes; no es una migración desplegada. v23 sin cambios. Ver laso-edicion-agenda.md.
+
+## Laso: invalidación de contexto incompleto o cambiado — 26/11/2026
+Edición conversacional descarta sesiones incompletas y detecta cambios de cliente, domicilio y título además del horario/estado. Tres regresiones reproducidas y corregidas; 275/275 pruebas. Solo prototipo, v23 sin cambios. Ver laso-edicion-agenda.md.

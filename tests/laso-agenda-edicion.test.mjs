@@ -38,3 +38,19 @@ test('pasado mañana usa el día de Córdoba y no el día UTC',()=>{
  const r=pedir('Pasá la orden #42 para pasado mañana a las 10',{ahora:new Date('2026-11-26T01:00:00Z')});
  assert.equal(r.sesion.propuesta.fecha,'2026-11-27');
 });
+test('sesión incompleta se descarta sin interrumpir conversación',()=>{
+ const s=pedir('Pasá la orden #42 para mañana a las 10').sesion;
+ for(const propuesta of [undefined,null,{}, {fecha:'fecha-rota'}]){
+  const r=pedir('Mejor a las 11',{sesion:{...s,propuesta}});assert.equal(r.estado,'aclarar');assert.equal(r.sesion,null);
+ }
+});
+test('cambio de cliente, domicilio o trabajo invalida la propuesta',()=>{
+ const completa={...orden,cliente_id:'cliente-a',direccion_cliente_id:'domicilio-a',titulo:'Revisar calefón'};
+ const s=pedir('Pasá la orden #42 para mañana a las 10',{ordenes:[completa]}).sesion;
+ for(const cambio of [{cliente_id:'cliente-b'},{direccion_cliente_id:'domicilio-b'},{titulo:'Otro trabajo'}]){
+  assert.equal(pedir('Mejor a las 11',{sesion:s,ordenes:[{...completa,...cambio}]}).estado,'aclarar');
+ }
+});
+test('reloj inválido y filas nulas se rechazan sin excepción',()=>{
+ for(const extra of [{ahora:null},{ahora:'2026-11-25'},{ordenes:[orden,null]}])assert.equal(pedir('Pasá la orden #42 para mañana a las 10',extra).estado,'aclarar');
+});
