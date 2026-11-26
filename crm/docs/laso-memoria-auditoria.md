@@ -32,3 +32,13 @@ Se incorporó snapshot actualizado de las dos políticas SELECT (`memoria-politi
 El entorno local simula auth.uid mediante una configuración de sesión y permite leer perfiles para aislar la política de listas. No reproduce JWT, PostgREST ni las políticas productivas de perfiles. Por eso acredita estas condiciones de propiedad/rol, no una prueba integral de acceso al CRM productivo. No se modificaron permisos ni datos reales.
 
 Revisión operativa: receptor v23 ACTIVE; último borrador del número personal sigue siendo 25/11/2026 09:39 Argentina, cero en la última hora consultada. No se da por resuelta la falta de respuesta. Acceso al panel Meta y bloqueo previo de publicación siguen pendientes; no se reintentó despliegue ni se utilizó una vía alternativa. La integración con confirmaciones, audio y vista CRM continúa sin activar.
+
+## Escrituras incompletas y rollback — 26/11/2026
+
+Se volvió a leer la RPC productiva y se verificó el receptor v23 ACTIVE. La definición no comprueba filas afectadas. Se reprodujo localmente una supresión silenciosa del INSERT de historial con un trigger de prueba: la función actual devuelve dos ítems guardados aunque no exista historial. **El trigger se inyectó solo en PGlite; no se afirma que exista en producción ni que explique la falta de respuesta de WhatsApp.**
+
+`supabase/propuestas/memoria-atomica.sql` añade comprobación ROW_COUNT = 1 después de crear lista, actualizarla y registrar historial. Si alguna escritura no ocurre, lanza P0001 y revierte la llamada. Conserva interfaz y controles actuales. Es una propuesta, no una migración aplicada ni una solución completa de autorización/confirmación; no ejecutar aisladamente en un entorno nuevo con permisos predeterminados.
+
+Las mismas regresiones de comandos, propiedad/RLS y permisos se ejecutan sobre snapshot y propuesta. Tres casos inyectan supresión en cada escritura y comprueban igualdad de lista, fecha e historial anteriores, más reintento exitoso sin evento consumido. No hay pruebas de concurrencia nativa multiconexión, JWT ni WhatsApp real. Siguen pendientes confirmación exacta vinculada al contenido, revalidación tras esperas y mínimo privilegio antes de integrar memoria al receptor o CRM. Publicación continúa sujeta a resolver el bloqueo por la vía autorizada; no se reintentó desplegar.
+
+Validación de esta entrega: **343 pruebas pasadas, cero fallos**, con `node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs` (incluye agenda y clientes). La suite específica de memoria contiene 19 pruebas contando sus dos grupos; son 12 adicionales respecto del total anterior de 331. No se midió latencia productiva ni ahorro de tiempo del usuario.

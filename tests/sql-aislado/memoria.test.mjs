@@ -3,13 +3,13 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {PGlite} from '@electric-sql/pglite';
 import {interpretarLista} from '../../supabase/functions/whatsapp-interno/memoria-listas-parser.mjs';
-test('memoria desplegada: comandos, deduplicación y rollback aislados',async t=>{
+for(const corregida of [false,true]) test(`memoria ${corregida?'propuesta':'desplegada'}: comandos, deduplicación y rollback aislados`,async t=>{
  const db=new PGlite(),id='00000000-0000-0000-0000-000000000001',perfil='00000000-0000-0000-0000-000000000002';
  try{
   for(const p of ['../concurrencia/esquema.sql','../concurrencia/autorizacion-desplegada.sql'])await db.exec(await readFile(new URL(p,import.meta.url),'utf8'));
   await db.exec(`create table laso_listas(id uuid primary key default gen_random_uuid(),perfil_id uuid not null references perfiles,nombre text not null check(char_length(nombre) between 1 and 120),clave text not null check(char_length(clave) between 1 and 120),items jsonb not null default '[]' check(jsonb_typeof(items)='array' and jsonb_array_length(items)<=150),created_at timestamptz not null default now(),updated_at timestamptz not null default now(),unique(perfil_id,clave));
   create table laso_listas_historial(evento_id text primary key,perfil_id uuid not null references perfiles,lista_id uuid not null references laso_listas,accion text not null check(accion in ('crear','agregar','comprado','pendiente','quitar')),antes jsonb not null,despues jsonb not null,created_at timestamptz not null default now());`);
-  await db.exec(await readFile(new URL('./memoria-desplegada.sql',import.meta.url),'utf8'));
+  await db.exec(await readFile(new URL(corregida?'../../supabase/propuestas/memoria-atomica.sql':'./memoria-desplegada.sql',import.meta.url),'utf8'));
   async function preparar(){
    await db.exec('truncate laso_listas_historial,laso_listas,bot_borradores,bot_accesos,perfiles cascade');
    await db.query("insert into perfiles values($1,true,'activo','admin')",[perfil]);
@@ -45,6 +45,38 @@ test('memoria desplegada: comandos, deduplicación y rollback aislados',async t=
    assert.equal((await llamar('quitar','Quitar item 1 de lista materiales')).error,'evento_repetido');
    assert.equal((await db.query('select count(*)::int n from laso_listas_historial')).rows[0].n,2);
   });
+  await t.test('supresión silenciosa de historial: reproducción y corrección',async()=>{
+   await preparar();
+   await db.exec("create function omitir_memoria() returns trigger language plpgsql as $$ begin return null; end $$; create trigger omitir_historial before insert on laso_listas_historial for each row execute function omitir_memoria()");
+   try{
+    if(corregida){
+     await assert.rejects(crear,e=>e.code==='P0001' && /incompleta/.test(e.message));
+     assert.equal((await db.query('select count(*)::int n from laso_listas')).rows[0].n,0);
+    }else{
+     // Reproduce el defecto de la definición actual sin tocar producción.
+     assert.equal((await crear()).items.length,2);
+     assert.equal((await db.query('select count(*)::int n from laso_listas')).rows[0].n,1);
+    }
+    assert.equal((await db.query('select count(*)::int n from laso_listas_historial')).rows[0].n,0);
+   }finally{await db.exec('drop trigger omitir_historial on laso_listas_historial');}
+  });
+  if(corregida)for(const [tabla,operacion] of [['laso_listas','insert'],['laso_listas','update'],['laso_listas_historial','insert']]){
+   await t.test(`rollback y reintento cuando se omite ${operacion} en ${tabla}`,async()=>{
+    await preparar();
+    // UPDATE e historial prueban una lista existente; INSERT prueba creación.
+    if(operacion!=='insert'||tabla!=='laso_listas')await crear();
+    const accion=operacion==='insert'&&tabla==='laso_listas'?crear:()=>llamar('agregar','Agregá a lista materiales: 3 uniones');
+    const antes=(await db.query('select id,items,updated_at from laso_listas')).rows;
+    const historial=(await db.query('select * from laso_listas_historial')).rows;
+    await db.exec(`create trigger omitir_escritura before ${operacion} on ${tabla} for each row execute function omitir_memoria()`);
+    try{await assert.rejects(accion,e=>e.code==='P0001' && /incompleta/.test(e.message));}
+    finally{await db.exec(`drop trigger omitir_escritura on ${tabla}`);}
+    assert.deepEqual((await db.query('select id,items,updated_at from laso_listas')).rows,antes);
+    assert.deepEqual((await db.query('select * from laso_listas_historial')).rows,historial);
+    assert.equal((await accion()).items.length,antes.length?3:2);
+    assert.equal((await db.query('select count(*)::int n from laso_listas_historial')).rows[0].n,historial.length+1);
+   });
+  }
   await t.test('RLS limita lista e historial al administrador activo propietario',async()=>{
    await preparar();await crear();
    const ajeno='00000000-0000-0000-0000-000000000099';

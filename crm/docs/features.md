@@ -269,3 +269,8 @@ Función propuesta confirma texto exacto, compara orden original, verifica horar
 - **Laso / memoria privada (26/11/2026):** auditados esquema, RLS y ACL existentes; snapshot de RPC y cuatro escenarios aislados de parser→SQL, idempotencia, autorización y rollback. Suite: 329 pruebas pasadas. Receptor v23 sin memoria integrada; activación no verificada, bloqueo previo de despliegue sin eludir. Ver `docs/laso-memoria-auditoria.md`.
 
 - **Laso / privacidad de memoria (26/11/2026):** políticas SELECT reales ensayadas con roles locales; comprobado aislamiento entre administradores y rechazo de escritura/RPC para roles de aplicación. Suite: 331 pruebas pasadas. No acredita JWT/PostgREST productivo ni activa WhatsApp.
+
+### Memoria privada: rollback ante escrituras omitidas (26/11/2026)
+- Propuesta SQL `supabase/propuestas/memoria-atomica.sql`: exige una fila en creación/actualización de lista e historial; revierte operaciones incompletas.
+- Reproducción local del defecto en snapshot productivo y pruebas de rollback/reintento con regresiones de comandos y RLS para ambas versiones.
+- No desplegada; receptor sigue v23. No implica activación de memoria ni resolución de respuesta WhatsApp. Ver `laso-memoria-auditoria.md`.
