@@ -9,7 +9,7 @@ revoke all on laso_edicion_privada.cambios from public;
 create function laso_edicion_privada.confirmar(
  p_numero text,p_version integer,p_evento text,p_codigo text,p_revision bigint
 ) returns jsonb language plpgsql security invoker set search_path='' as $$
-declare a record;s record;o record;anterior jsonb;d date;inicio time;fin time;creada numeric;ahora_ms numeric;previo uuid;
+declare a record;s record;o record;anterior jsonb;d date;inicio time;fin time;creada numeric;ahora_ms numeric;previo uuid; filas integer;
 begin
  if p_numero is distinct from '+5493512143961' or p_version is null or p_version<1 then return jsonb_build_object('estado','denegado'); end if;
  if p_codigo is null or p_codigo!~'^[0-9a-f]{32}$' or p_revision is null or p_revision<1 then return jsonb_build_object('estado','confirmacion_invalida'); end if;
@@ -41,8 +41,14 @@ begin
  if o.hora_inicio is null or o.hora_fin is null or fin-inicio<>o.hora_fin-o.hora_inicio then return jsonb_build_object('estado','duracion_invalida'); end if;
  if exists(select 1 from public.ordenes x where x.id<>o.id and x.estado in ('pendiente','en_proceso') and x.fecha_programada=d and (x.hora_inicio is null or x.hora_fin is null or x.hora_fin<=x.hora_inicio or (x.hora_inicio<fin and x.hora_fin>inicio))) then return jsonb_build_object('estado','ocupado'); end if;
  update public.ordenes set fecha_programada=d,hora_inicio=inicio,hora_fin=fin where id=o.id;
+ get diagnostics filas = row_count;
+ if filas<>1 then raise exception 'edicion incompleta: escritura no aplicada' using errcode='P0001'; end if;
  insert into laso_edicion_privada.cambios(acceso_id,codigo,evento_id,orden_id,antes,despues) values(a.acceso_id,p_codigo,p_evento,o.id,anterior,s.sesion->'propuesta');
+ get diagnostics filas = row_count;
+ if filas<>1 then raise exception 'edicion incompleta: escritura no aplicada' using errcode='P0001'; end if;
  update laso_edicion_privada.sesiones set sesion=null,revision=revision+1 where acceso_id=a.acceso_id;
+ get diagnostics filas = row_count;
+ if filas<>1 then raise exception 'edicion incompleta: escritura no aplicada' using errcode='P0001'; end if;
  return jsonb_build_object('estado','editada','orden_id',o.id);
 end $$;
 revoke all on function laso_edicion_privada.confirmar(text,integer,text,text,bigint) from public;

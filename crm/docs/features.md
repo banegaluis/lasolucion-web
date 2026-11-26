@@ -259,3 +259,5 @@ Función propuesta confirma texto exacto, compara orden original, verifica horar
 - **Laso / conversación de agenda (prototipo, 26/11/2026):** permite corregir solo la fecha conservando la hora de una propuesta vigente, con código renovado y validación de conflictos. 311 pruebas pasadas e integración SQL aislada actualizada. No desplegado; no habilita edición por WhatsApp todavía.
 
 - **Laso / permisos de edición (prototipo, 26/11/2026):** cierre explícito de permisos PUBLIC/anon/authenticated que contempla concesiones directas por defecto. Pruebas con SET ROLE y rechazo 42501; suite completa 315 pasadas. No aplicado a producción ni concedido acceso al bot.
+
+- **Laso / atomicidad de edición (prototipo, 26/11/2026):** exige una fila afectada en orden, auditoría y consumo de sesión; una escritura omitida provoca rollback completo. Cuatro escenarios nuevos; suite de 319 pruebas pasadas. No desplegado.

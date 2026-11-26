@@ -40,5 +40,27 @@ test('reprogramación, auditoría y consumo atómicos aislados',async t=>{
   await t.test('duración alterada no se guarda',async()=>{
    await preparar();await db.exec(`update laso_edicion_privada.sesiones set sesion=jsonb_set(sesion,'{propuesta,fin}','"15:00"'::jsonb)`);assert.equal((await confirmar()).estado,'duracion_invalida');assert.deepEqual(await estado(),{inicio:'09:00:00',cambios:0,consumida:false});
   });
+  await t.test('fallo al consumir sesión revierte también orden y auditoría',async()=>{
+   await preparar();
+   const antes=(await db.query('select revision,sesion from laso_edicion_privada.sesiones')).rows[0];
+   await db.exec('alter table laso_edicion_privada.sesiones add constraint fallo_consumo check(sesion is not null)');
+   try{await assert.rejects(confirmar(),e=>e.code==='23514');}
+   finally{await db.exec('alter table laso_edicion_privada.sesiones drop constraint fallo_consumo');}
+   assert.deepEqual(await estado(),{inicio:'09:00:00',cambios:0,consumida:false});
+   assert.deepEqual((await db.query('select revision,sesion from laso_edicion_privada.sesiones')).rows[0],antes);
+   assert.equal((await confirmar()).estado,'editada');
+  });
+  for(const [tabla,operacion] of [['public.ordenes','update'],['laso_edicion_privada.cambios','insert'],['laso_edicion_privada.sesiones','update']]){
+   await t.test('escritura suprimida en '+tabla+' no informa éxito parcial',async()=>{
+    await preparar();
+    await db.exec('create or replace function public.omitir_escritura_local() returns trigger language plpgsql as $$ begin return null; end $$');
+    await db.exec('create trigger omitir_local before '+operacion+' on '+tabla+' for each row execute function public.omitir_escritura_local()');
+    try{await assert.rejects(confirmar(),e=>e.code==='P0001');}
+    finally{await db.exec('drop trigger omitir_local on '+tabla);}
+    assert.deepEqual(await estado(),{inicio:'09:00:00',cambios:0,consumida:false});
+    assert.equal((await confirmar()).estado,'editada');
+    assert.deepEqual(await estado(),{inicio:'12:00:00',cambios:1,consumida:true});
+   });
+  }
  }finally{await db.close();}
 });

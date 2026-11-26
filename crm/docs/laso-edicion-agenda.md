@@ -115,3 +115,11 @@ Se agregó `supabase/propuestas/edicion-permisos.sql`, obligatorio al final de l
 La prueba aislada configura privilegios por defecto deliberadamente permisivos: demuestra que REVOKE FROM PUBLIC no elimina concesiones directas a los roles, aplica el cierre y comprueba ACL efectivas y llamadas reales con SET ROLE rechazadas con SQLSTATE 42501. Verifica las tres funciones SECURITY INVOKER, ausencia de permisos de tablas y repetibilidad sin quitar el acceso del propietario. La integración conversacional también carga el cierre sin roles de aplicación presentes.
 
 Suite completa: 315 pruebas pasadas, cero fallos (`node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs`). Después de incorporar el cierre al ensayo integral, se repitieron ambas suites afectadas. Esto no acredita privilegios productivos ni membresías heredadas de otros roles; esa inspección y el diseño del rol de ejecución mínimo siguen pendientes. Supabase verificado en v23 ACTIVE; sin despliegues ni cambios reales. Concurrencia multiconexión y receptor de edición aún pendientes.
+
+### Escrituras omitidas y rollback final (26/11/2026)
+
+Se reprodujo en el prototipo un falso éxito si un trigger BEFORE omitía silenciosamente el UPDATE de orden, INSERT de auditoría o UPDATE de sesión. `confirmar` ahora exige ROW_COUNT=1 después de cada escritura; cualquier omisión lanza P0001 y revierte toda la transacción. No cambia el contrato de confirmación ni incorpora reintentos automáticos.
+
+Cuatro escenarios nuevos: fallo CHECK al consumir sesión y omisión por trigger en cada una de las tres escrituras. Se verifica horario original, auditoría vacía, sesión disponible y, al retirar el fallo local, confirmación exitosa única. En el fallo de consumo también se compara el contexto y revisión completos. Las tres omisiones fallaron antes de la corrección. Son fallos inyectados únicamente en PGlite, no hallazgos de triggers productivos.
+
+Validación: suite completa de 319 pruebas pasadas (`node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs`). Supabase whatsapp-interno sigue v23 ACTIVE verificado; no se aplicó este SQL ni se modificaron datos reales. Quedan pendientes receptor de edición, privilegios mínimos de ejecución y concurrencia multiconexión. Estas pruebas no acreditan recuperación de entrega WhatsApp ni funcionamiento integral en móvil.
