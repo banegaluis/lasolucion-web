@@ -329,3 +329,8 @@ Función propuesta confirma texto exacto, compara orden original, verifica horar
 - Script SQL propuesto fija explícitamente EXECUTE: denegado a PUBLIC/anon/authenticated, concedido a service_role. Requiere aplicar definición y permisos en una transacción autorizada.
 - Dos regresiones nuevas para instalación limpia y reemplazo con grants previos; 395 pruebas locales pasadas.
 - Producción ya restringe esos roles; sin despliegue ni cambio de CRM. Receptor observado v23 ACTIVE.
+
+## Laso: corregir ítems sin cambiar el nombre — 27/11/2026
+
+- Corrección breve de listas conserva el encabezado original y evita renombrar por normalización repetida. Mantiene confirmación escrita, código renovado y vencimiento original.
+- Dos regresiones nuevas; 401 pruebas locales pasadas. Adaptador aún aislado, sin despliegue ni cambios visuales.

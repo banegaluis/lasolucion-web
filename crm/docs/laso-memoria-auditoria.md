@@ -110,3 +110,11 @@ Auditoría de idempotencia sin cambio funcional: cuatro regresiones adicionales 
 Los casos pasan con la definición anterior: no se presenta como corrección de un defecto. Esta deduplicación posterior no vincula la primera ejecución a una confirmación exacta; esa protección y el consumo atómico de sesión siguen pendientes. Tampoco acredita concurrencia multiconexión.
 
 Suite completa: **399 pruebas pasadas, cero fallos**, con `node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs`. No se midió ahorro de tiempo productivo. Receptor inspeccionado el 27/11: v23 ACTIVE. Sin despliegue, mensajes ni cambios de datos reales; recuperación de WhatsApp y memoria integrada siguen sin acreditar.
+
+## Corrección de ítems sin renombrar la lista — 27/11/2026
+
+La corrección breve reconstruía el pedido desde el nombre ya normalizado y lo analizaba de nuevo. Ejemplo reproducible: `Creá lista materiales para para cocina: caño` generaba nombre `Materiales para cocina`; después de `Mejor: 4 codos` cambiaba a `Materiales cocina`. Ahora conserva el encabezado textual original, quitando únicamente el vocativo inicial Laso, y reemplaza el segmento de ítems. La corrección conserva acción, nombre y clave incluso tras varias correcciones.
+
+Dos regresiones nuevas fallaban antes y pasan después. Incluyen nombre con `de`, normalización repetida de `materiales para`, prefijo `Laso:`, lista inicialmente vacía y agregado transcrito. Se verifica confirmación escrita del resultado. Suite completa: **401 pruebas pasadas, cero fallos**, ejecutando `node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs`. No se midió eficiencia productiva.
+
+Cambio del adaptador aislado, no importado por el receptor productivo: sin escritura, despliegue ni envío de mensajes. Receptor observado v23 ACTIVE. Persistencia transaccional de sesión y confirmación vinculada siguen pendientes; no se afirma recuperación de WhatsApp ni integración CRM.

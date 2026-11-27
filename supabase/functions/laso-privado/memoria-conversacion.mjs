@@ -33,7 +33,9 @@ export function conversarMemoria({mensaje,operador,sesion=null,ahora=new Date()}
   if(!pedido.trim()||!sesion||!mismo(sesion.operador,operador)||!Number.isFinite(sesion.creada)||tiempo<sesion.creada||tiempo-sesion.creada>=TTL||typeof sesion.texto!=='string'||sesion.texto.length>12000||typeof sesion.codigo!=='string'||!/^[0-9a-f]{32}$/.test(sesion.codigo))return aclarar('Necesito una propuesta vigente para corregir los ítems. Decime el pedido completo nuevamente.');
   const base=interpretarLista(sesion.texto);
   if(!base||!['crear','agregar'].includes(base.accion)||firma(base)!==firma(sesion.propuesta??{}))return aclarar('No pude recuperar la propuesta. Decime el pedido completo nuevamente.');
-  pedido=`${base.accion==='crear'?'Creá lista':'Agregá a lista'} ${base.nombre}: ${pedido}`;
+  // Conservar el encabezado original: normalizar otra vez el nombre puede cambiar la lista.
+  const original=sesion.texto.trim().replace(/^laso[,:]?\s+/i,'');
+  pedido=`${original.split(':',1)[0]}: ${pedido}`;
   p=interpretarLista(pedido);
  }
 

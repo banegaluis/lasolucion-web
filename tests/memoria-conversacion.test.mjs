@@ -92,3 +92,20 @@ test('corrección breve sin contexto válido no inventa lista',()=>{
  }
  assert.equal(pedir('Mejor:','texto',s).estado,'aclarar');
 });
+
+test('corregir ítems conserva nombres que no admiten normalización repetida',()=>{
+ for(const texto of ['Creá lista de de compras: caño','Creá lista materiales para para cocina: caño','Laso: Creá lista de de compras: caño','Creá lista de de compras']){
+  const a=pedir(texto);assert.equal(a.estado,'propuesta');
+  const b=pedir('Mejor: 4 codos','texto',a.sesion);
+  assert.equal(b.estado,'propuesta');assert.equal(b.sesion.propuesta.nombre,a.sesion.propuesta.nombre);assert.equal(b.sesion.propuesta.clave,a.sesion.propuesta.clave);
+  assert.deepEqual(b.sesion.propuesta.items,['4 codos']);assert.equal(confirmar(b.sesion).estado,'intencion_validada');
+  const c=pedir('Mejor: 2 caños','texto',b.sesion);
+  assert.equal(c.sesion.propuesta.nombre,a.sesion.propuesta.nombre);assert.equal(confirmar(c.sesion).estado,'intencion_validada');
+ }
+});
+test('corrección breve de agregado preserva nombre y acción con prefijo Laso',()=>{
+ const a=pedir('Laso: Agregá a lista materiales para para cocina: caño');
+ const b=pedir('Mejor: 2 codos','transcripcion',a.sesion);
+ assert.equal(b.estado,'propuesta');assert.equal(b.sesion.propuesta.accion,'agregar');assert.equal(b.sesion.propuesta.nombre,a.sesion.propuesta.nombre);assert.equal(b.sesion.propuesta.clave,a.sesion.propuesta.clave);
+ assert.deepEqual(b.sesion.propuesta.items,['2 codos']);assert.equal(confirmar(b.sesion).estado,'intencion_validada');
+});
