@@ -10,12 +10,18 @@ begin
  if p_numero is distinct from '+5493512143961' or not exists(select 1 from public.bot_autorizar(p_numero,'agenda.registrar',p_version) a join public.perfiles p on p.id=a.perfil_id where a.acceso_id=p_acceso and a.perfil_id=p_perfil and p.rol='admin') then raise exception 'No autorizado'; end if;
  if not exists(select 1 from public.bot_borradores b where b.evento_id=p_evento and b.perfil_id=p_perfil and b.acceso_id=p_acceso and b.version_acceso=p_version and b.numero=p_numero) then raise exception 'Evento no autorizado'; end if;
  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(p_perfil::text,0));
+ -- Revalidar tras una posible espera; no reutilizar la autorización anterior.
+ if p_numero is distinct from '+5493512143961' or not exists(select 1 from public.bot_autorizar(p_numero,'agenda.registrar',p_version) a join public.perfiles p on p.id=a.perfil_id where a.acceso_id=p_acceso and a.perfil_id=p_perfil and p.rol='admin') then raise exception 'No autorizado'; end if;
+ if not exists(select 1 from public.bot_borradores b where b.evento_id=p_evento and b.perfil_id=p_perfil and b.acceso_id=p_acceso and b.version_acceso=p_version and b.numero=p_numero) then raise exception 'Evento no autorizado'; end if;
  if p_accion='listar' then
   select coalesce(jsonb_agg(jsonb_build_object('nombre',x.nombre,'cantidad',jsonb_array_length(x.items))),'[]'::jsonb) into respuesta from (select nombre,items from public.laso_listas where perfil_id=p_perfil order by updated_at desc limit 40) x;
   return jsonb_build_object('listas',respuesta);
  end if;
  if p_clave is null or char_length(p_clave) not between 1 and 120 or p_nombre is null or char_length(p_nombre) not between 1 and 120 then raise exception 'Nombre invalido'; end if;
  select * into l from public.laso_listas where perfil_id=p_perfil and clave=p_clave for update;
+ -- Revalidar tras una posible espera; no reutilizar la autorización anterior.
+ if p_numero is distinct from '+5493512143961' or not exists(select 1 from public.bot_autorizar(p_numero,'agenda.registrar',p_version) a join public.perfiles p on p.id=a.perfil_id where a.acceso_id=p_acceso and a.perfil_id=p_perfil and p.rol='admin') then raise exception 'No autorizado'; end if;
+ if not exists(select 1 from public.bot_borradores b where b.evento_id=p_evento and b.perfil_id=p_perfil and b.acceso_id=p_acceso and b.version_acceso=p_version and b.numero=p_numero) then raise exception 'Evento no autorizado'; end if;
  if p_accion='ver' then
   if l.id is null then return jsonb_build_object('error','no_existe'); end if;
   return jsonb_build_object('nombre',l.nombre,'items',l.items);

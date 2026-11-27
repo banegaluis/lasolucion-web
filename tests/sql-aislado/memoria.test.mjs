@@ -21,6 +21,28 @@ for(const corregida of [false,true]) test(`memoria ${corregida?'propuesta':'desp
    return (await db.query('select public.laso_memoria($1,$2,$3,1,$4,$5,$6,$7,$8::jsonb,$9) r',[numero,id,perfil,evento,p.accion,p.nombre??null,p.clave??null,JSON.stringify(p.items??[]),p.indice??null])).rows[0].r;
   };
   const crear=()=>llamar('crear','Creá lista materiales: 2 codos; 1 caño');
+  // Intercalado determinista local: no equivale a concurrencia multiconexión.
+  for(const punto of ['advisory','fila'])for(const [cambio,sql] of [
+   ['perfil revocado','update public.perfiles set activo=false'],
+   ['versión cambiada','update public.bot_accesos set version=2'],
+   ['evento retirado',"delete from public.bot_borradores where evento_id='crear'"]
+  ])await t.test(`revalidación tras ${punto}: ${cambio}`,async()=>{
+   await preparar();
+   const ruta=corregida?'../../supabase/propuestas/memoria-atomica.sql':'./memoria-desplegada.sql';
+   const original=await readFile(new URL(ruta,import.meta.url),'utf8');
+   const puntoSQL=punto==='advisory'?'perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(p_perfil::text,0));':'select * into l from public.laso_listas where perfil_id=p_perfil and clave=p_clave for update;';
+   assert.ok(original.includes(puntoSQL));
+   await db.exec(original.replace(puntoSQL,puntoSQL+'\n '+sql+';'));
+   try{
+    if(corregida){
+     await assert.rejects(crear,/No autorizado|Evento no autorizado/);
+     assert.equal((await db.query('select count(*)::int n from laso_listas')).rows[0].n,0);
+     assert.equal((await db.query('select count(*)::int n from laso_listas_historial')).rows[0].n,0);
+    }else assert.equal((await crear()).items.length,2);
+   }finally{await db.exec(original);}
+   await db.exec("update perfiles set activo=true; update bot_accesos set version=1");
+   if(corregida)assert.equal((await crear()).items.length,2);
+  });
   await t.test('parser a SQL conserva items y evita duplicar evento',async()=>{
    await preparar();assert.equal((await crear()).items.length,2);
    assert.deepEqual(await llamar('agregar','Agregá a lista materiales: 3 uniones'),{nombre:'materiales',items:[{texto:'2 codos',estado:'pendiente'},{texto:'1 caño',estado:'pendiente'},{texto:'3 uniones',estado:'pendiente'}]});

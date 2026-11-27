@@ -317,3 +317,9 @@ Función propuesta confirma texto exacto, compara orden original, verifica horar
 - Parser de memoria en desarrollo rechaza controles bidireccionales invisibles en nombres, ítems y consultas, sin borrar contenido. También invalida sesiones anteriores que los contengan.
 - Cuatro regresiones nuevas; 381 pruebas locales pasadas. Acentos, decimales y emojis compuestos conservados.
 - Sin despliegue ni cambios de interfaz. Receptor verificado v23 ACTIVE; WhatsApp real y memoria integrada siguen sin verificar.
+
+## Laso: revalidación de memoria tras esperas — 27/11/2026
+
+- Propuesta SQL de memoria revalida acceso y evento después de ambos bloqueos, evitando reutilizar la autorización anterior a la espera.
+- 393 pruebas locales pasadas: doce casos nuevos comparan snapshot/propuesta con cambios de autorización inyectados. No equivalen a concurrencia multiconexión.
+- Sin despliegue ni cambios de CRM; receptor v23 ACTIVE. Confirmaciones vinculadas y consumo atómico siguen pendientes.

@@ -84,3 +84,13 @@ El parser ahora rechaza explícitamente los doce controles Unicode de dirección
 Cuatro pruebas nuevas: antes del cambio fallaban tres y pasaba la de compatibilidad; después pasan las cuatro. Suite completa: **381 pruebas pasadas, cero fallos**, mediante `node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs`. No hubo pruebas de renderizado en WhatsApp/Safari ni de concurrencia PostgreSQL multiconexión.
 
 Inspección de producción del 27/11: receptor `whatsapp-interno` v23 ACTIVE; RPC `laso_memoria` SECURITY INVOKER, search_path vacío y EXECUTE denegado a anon/authenticated, permitido a service_role. Esto no acredita confirmaciones atómicas ni mínimo privilegio completo. El código de conversación sigue sin integrar al receptor activo o CRM. No se intentó desplegar, no se enviaron mensajes y no se modificaron datos reales; continúa pendiente la revisión autorizada del bloqueo anterior.
+
+## Revalidación después de bloqueos — 27/11/2026
+
+La propuesta `supabase/propuestas/memoria-atomica.sql` vuelve a comprobar identidad/permisos y correspondencia del evento después del advisory lock por perfil y después de SELECT FOR UPDATE sobre la lista. Antes solo se comprobaban al entrar. Se conserva SECURITY INVOKER, interfaz, deduplicación y comprobación de filas escritas. No es una migración aplicada.
+
+Se agregaron doce casos locales: seis sobre el snapshot desplegado reproducen aceptación con autorización obsoleta; seis sobre la propuesta rechazan perfil revocado, versión cambiada o evento retirado en ambos puntos. Inyectan el cambio de estado determinísticamente justo después del punto de espera: no son pruebas multiconexión. El rechazo revierte listas/historial y permite reintentar con autorización válida. Al ser inyección dentro de la misma transacción, también se revierte el cambio de autorización de la prueba; no representa el commit de otra conexión.
+
+Suite completa: **393 pruebas pasadas, cero fallos**, comando `node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs`. Continúan pendientes confirmación exacta ligada al contenido, consumo atómico de sesión y pruebas PostgreSQL multiconexión. Estas relecturas no garantizan por sí solas serialización con revocaciones posteriores a la última comprobación. No se midió rendimiento productivo.
+
+Consulta de metadatos real del 27/11: RPC de producción conserva una llamada a `public.bot_autorizar` y SECURITY INVOKER; receptor v23 ACTIVE. No se desplegó, no se modificaron datos reales ni se enviaron mensajes. El bloqueo previo requiere revisión por vía autorizada.
