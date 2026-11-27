@@ -33,7 +33,7 @@ async function leerLimitado(req,limite=131072){
 }
 async function rest(c,ruta,payload,prefer='return=representation'){
  const respuesta=await fetch(c.supabaseUrl+'/rest/v1/'+ruta,{
-  method:'POST',
+  method:'POST',redirect:'error',
   headers:{'apikey':c.role,'authorization':'Bearer '+c.role,'content-type':'application/json',
     'prefer':prefer},
   body:JSON.stringify(payload),

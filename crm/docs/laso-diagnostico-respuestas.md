@@ -27,3 +27,13 @@ Se reproduce una limitación funcional existente: tras guardar el evento, un rec
 La lectura actual del despliegue mantiene v23 ACTIVE. Estos tests acreditan el circuito del código de la rama con dependencias sustituidas, no credenciales, suscripción Meta, entrega WhatsApp ni runtime Deno productivo. No se publicó código. Continúan pendientes acceso a Meta para revisar entregas y aprobación normal del despliegue previamente bloqueado.
 
 Validación completa de esta entrega: **365 pruebas pasadas, cero fallos**, comando `node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs`; incluye regresiones de agenda, clientes y memoria. No hay una mejora medida de latencia ni entrega productiva.
+
+## Prohibir redirecciones REST — 27/11/2026
+
+La función compartida `rest` del receptor ahora envía `redirect: 'error'` en las llamadas POST a Supabase, igual que las consultas y envíos que ya lo especificaban. Evita seguir una redirección desde el endpoint configurado en solicitudes con cabeceras de servicio. No se observó una redirección real ni exposición de credenciales; es una corrección preventiva, no la causa identificada de la falta de respuesta.
+
+Dos escenarios nuevos del handler aislado comprueban que sus cinco solicitudes del saludo (tres autorizaciones, un guardado y un envío) llevan la política, y que un error de redirección durante autorización devuelve 503 sin guardar ni enviar. El doble local lanza TypeError; no se probó una redirección HTTP real ni se contactó un destino externo. Las pruebas cubren integración de opciones y manejo del error, no la implementación de fetch de Deno.
+
+Sin despliegue: versión productiva observada v23 ACTIVE. Siguen pendientes la revisión de entrega en Meta y la aprobación del despliegue por la vía normal; no se reintentó ni se eludió el bloqueo. Se mantienen HMAC, número autorizado y destino fijo.
+
+Validación: **372 pruebas pasadas, cero fallos**, con `node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs`, incluidas regresiones de memoria, agenda y clientes. Sin medición de rendimiento productivo.

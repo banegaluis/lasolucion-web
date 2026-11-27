@@ -297,3 +297,7 @@ Función propuesta confirma texto exacto, compara orden original, verifica horar
 ### Memoria: rechazo seguro de sesiones incompletas (26/11/2026)
 - Valida texto/propuesta recuperados antes de confirmar y vuelve a aplicar el presupuesto de resumen a sesiones antiguas.
 - Reutiliza formato de propuesta; rechaza datos inválidos sin producir intención de escritura. Adaptador no conectado a producción.
+
+### Laso: llamadas REST sin redirecciones (27/11/2026)
+- La función REST compartida prohíbe seguir redirecciones en solicitudes a Supabase con credenciales de servicio.
+- Dos regresiones del handler prueban política de red y corte sin guardado/envío ante error de redirección. No desplegado; no implica recuperación de WhatsApp.

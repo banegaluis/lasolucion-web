@@ -13,8 +13,9 @@ test('receptor completo con red sustituida y secretos exclusivamente locales',as
  console.info=console.warn=(...args)=>logs.push(args.join(' '));
  // Lista cerrada de rutas: no existe fallback a fetch real.
  globalThis.fetch=async(url,op={})=>{
-  const u=new URL(url);llamadas.push({url:u.href,metodo:op.method,payload:op.body?JSON.parse(op.body):null});
+  const u=new URL(url);llamadas.push({url:u.href,metodo:op.method,redirect:op.redirect,payload:op.body?JSON.parse(op.body):null});
   if(u.origin==='https://prueba-local.supabase.co'&&u.pathname==='/rest/v1/rpc/bot_autorizar'){
+   if(escenario.redireccionAutorizacion)throw new TypeError('Redirección rechazada localmente');
    autorizaciones++;return respuesta(escenario.sinPermiso||autorizaciones===escenario.revocarEn?[]:[identidad]);
   }
   if(u.origin==='https://prueba-local.supabase.co'&&u.pathname==='/rest/v1/bot_borradores'){
@@ -63,6 +64,14 @@ test('receptor completo con red sustituida y secretos exclusivamente locales',as
   });
   await t.test('fallo de guardado devuelve 503 y no intenta responder',async()=>{
    reset({falloDB:true});assert.equal((await enviar()).status,503);assert.equal(envios().length,0);assert.equal(eventos.size,0);
+  });
+  await t.test('todas las llamadas del saludo prohíben redirecciones, incluidas RPC y guardado',async()=>{
+   reset();await enviar();assert.equal(llamadas.length,5);
+   for(const llamada of llamadas)assert.equal(llamada.redirect,'error',llamada.url);
+  });
+  await t.test('redirección rechazada durante autorización corta antes de guardar o enviar',async()=>{
+   reset({redireccionAutorizacion:true});const r=await enviar();assert.equal(r.status,503);
+   assert.equal(llamadas.length,1);assert.equal(llamadas[0].redirect,'error');assert.equal(eventos.size,0);assert.equal(envios().length,0);
   });
   await t.test('apagado por defecto impide consultas y respuestas',async()=>{
    reset();delete env.WHATSAPP_BOT_MODO;assert.equal((await enviar()).status,503);assert.equal(llamadas.length,0);
