@@ -305,3 +305,9 @@ Función propuesta confirma texto exacto, compara orden original, verifica horar
 ### Laso: tolerancia a elementos nulos en webhook (27/11/2026)
 - Entradas/cambios nulos se ignoran sin interrumpir mensajes válidos del lote firmado.
 - Dos pruebas integradas aisladas verifican lote mixto y vacío. Corrección no desplegada; causa de la falta de respuesta aún sin confirmar.
+
+## Laso: corrección breve de listas — 27/11/2026
+
+- El adaptador de memoria admite `Mejor: 4 codos; 1 caño` sobre una propuesta vigente, conservando nombre y acción; renueva el código sin extender el vencimiento. Confirmación escrita obligatoria.
+- 377 pruebas locales pasadas, incluidas regresiones de agenda, clientes, SQL y webhook aislado.
+- Preparado en desarrollo, sin conexión al receptor activo ni vista CRM. Producción observada v23; no se declara recuperación de WhatsApp. Detalles: `laso-memoria-auditoria.md`.

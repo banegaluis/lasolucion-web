@@ -68,3 +68,11 @@ La confirmación ahora valida el tipo y longitud del texto de sesión antes de l
 Dos regresiones adicionales prueban sesiones JSON incompletas/tipos inválidos y una sesión antigua extensa. Esto endurece el adaptador aún no conectado: no implica persistencia implementada, integridad criptográfica ni consumo atómico. La futura integración debe persistir la invalidación. Producción verificada v23 ACTIVE; sin despliegue ni datos reales modificados. Sigue pendiente la aprobación normal del despliegue y verificar entregas en Meta.
 
 Validación completa: **370 pruebas pasadas, cero fallos**, con `node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs`; incluye agenda, clientes, memoria SQL y receptor aislado. No se midió rendimiento ni funcionamiento de WhatsApp productivo.
+
+## Correcciones breves de ítems — 27/11/2026
+
+Una propuesta vigente de crear/agregar lista admite `Mejor: 4 codos; 1 caño`, por texto o transcripción. Reemplaza los ítems propuestos conservando acción y nombre. Requiere identidad coincidente, contenido de sesión coherente, código válido y vigencia de 15 minutos; no prolonga el vencimiento. Genera un código nuevo y mantiene la confirmación exclusivamente escrita. Sin propuesta válida solicita repetir el pedido completo.
+
+Tres regresiones nuevas verifican reemplazo, conservación de acción/nombre, rechazo del código anterior, transcripción, vencimiento, identidad ajena, sesión alterada y corrección vacía. Suite completa: **377 pruebas pasadas, cero fallos**, ejecutando `node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs`. La mejora reduce la información que se debe repetir; no se midió ahorro de tiempo ni latencia productiva.
+
+El módulo continúa aislado del receptor y del CRM. No guarda listas ni consume confirmaciones atómicamente; sigue pendiente la integración con sesión persistida, deduplicación y revalidación de permisos. Producción observada v23 ACTIVE; no hubo despliegue, mensajes ni modificaciones de datos reales. No se verificaron WhatsApp real, Safari ni concurrencia nativa multiconexión.

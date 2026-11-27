@@ -27,8 +27,16 @@ export function conversarMemoria({mensaje,operador,sesion=null,ahora=new Date()}
   if(resumir(p,sesion.codigo).length>LIMITE_PROPUESTA_MEMORIA)return aclarar('La propuesta supera el tamaño permitido. Volvé a prepararla en grupos menores.');
   return {estado:'intencion_validada',mensaje:'Confirmación recibida. El guardado todavía está pendiente.',sesion:null,intencion:{codigo:sesion.codigo,operador:{...operador},propuesta:structuredClone(p)}};
  }
- const pedido=texto.replace(/^mejor:\s*/i,'');
- const p=interpretarLista(pedido);
+ let pedido=texto.replace(/^mejor:\s*/i,'');
+ let p=interpretarLista(pedido);
+ if(!p&&/^mejor:/i.test(texto)){
+  if(!pedido.trim()||!sesion||!mismo(sesion.operador,operador)||!Number.isFinite(sesion.creada)||tiempo<sesion.creada||tiempo-sesion.creada>=TTL||typeof sesion.texto!=='string'||sesion.texto.length>12000||typeof sesion.codigo!=='string'||!/^[0-9a-f]{32}$/.test(sesion.codigo))return aclarar('Necesito una propuesta vigente para corregir los ítems. Decime el pedido completo nuevamente.');
+  const base=interpretarLista(sesion.texto);
+  if(!base||!['crear','agregar'].includes(base.accion)||firma(base)!==firma(sesion.propuesta??{}))return aclarar('No pude recuperar la propuesta. Decime el pedido completo nuevamente.');
+  pedido=`${base.accion==='crear'?'Creá lista':'Agregá a lista'} ${base.nombre}: ${pedido}`;
+  p=interpretarLista(pedido);
+ }
+
  if(!p||p.accion==='invalido')return aclarar('Decime, por ejemplo: Creá lista materiales: 2 codos; 1 caño. No guardé cambios.');
  if(['listar','ver','ayuda'].includes(p.accion))return {estado:'consulta',consulta:p,sesion:null};
  if(!['crear','agregar'].includes(p.accion))return aclarar('Para cambiar un ítem primero necesito mostrarte su contenido actual. No guardé cambios.');

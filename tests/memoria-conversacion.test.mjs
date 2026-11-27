@@ -75,3 +75,20 @@ test('sesión antigua con lista extensa no evita el presupuesto al confirmar',as
  const s=crear().sesion;s.texto='Creá lista materiales: '+Array(40).fill('x'.repeat(240)).join('; ');s.propuesta=interpretarLista(s.texto);
  const r=confirmar(s);assert.equal(r.estado,'aclarar');assert.equal(r.intencion,undefined);assert.equal(r.sesion,null);
 });
+
+test('corrección breve reemplaza ítems de creación conservando nombre y vencimiento',()=>{
+ const a=crear(),b=pedir('Mejor: 4 codos; 1 caño','texto',a.sesion,{ahora:new Date(+ahora+60000)});
+ assert.equal(b.estado,'propuesta');assert.equal(b.sesion.propuesta.nombre,'materiales');assert.deepEqual(b.sesion.propuesta.items,['4 codos','1 caño']);assert.equal(b.sesion.creada,a.sesion.creada);assert.notEqual(b.sesion.codigo,a.sesion.codigo);
+ assert.equal(pedir(`CONFIRMAR LISTA ${a.sesion.codigo}`,'texto',b.sesion).estado,'aclarar');assert.equal(confirmar(b.sesion).estado,'intencion_validada');
+});
+test('corrección transcrita de agregado conserva acción y exige confirmación escrita',()=>{
+ const a=pedir('Agregá a lista compras: caño'),b=pedir('Mejor: 2 uniones','transcripcion',a.sesion);
+ assert.equal(b.estado,'propuesta');assert.equal(b.sesion.propuesta.accion,'agregar');assert.equal(b.sesion.propuesta.nombre,'compras');assert.deepEqual(b.sesion.propuesta.items,['2 uniones']);assert.equal(confirmar(b.sesion,'transcripcion').estado,'aclarar');
+});
+test('corrección breve sin contexto válido no inventa lista',()=>{
+ const s=crear().sesion;
+ for(const sesion of [null,{...s,creada:+ahora-900000},{...s,operador:{...operador,version_acceso:2}},{...s,texto:null},{...s,codigo:'incorrecto'}]){
+  const r=pedir('Mejor: 4 codos','texto',sesion);assert.equal(r.estado,'aclarar');assert.equal(r.sesion,null);
+ }
+ assert.equal(pedir('Mejor:','texto',s).estado,'aclarar');
+});
