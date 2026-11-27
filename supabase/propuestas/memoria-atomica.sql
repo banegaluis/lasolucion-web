@@ -57,5 +57,8 @@ begin
  get diagnostics filas = row_count;
  if filas <> 1 then raise exception 'Escritura de memoria incompleta' using errcode='P0001'; end if;
  return jsonb_build_object('nombre',l.nombre,'items',nuevo);
-end; $function$
+end; $function$;
 
+-- No depender de los grants heredados al crear o reemplazar la función.
+REVOKE ALL ON FUNCTION public.laso_memoria(text,uuid,uuid,integer,text,text,text,text,jsonb,integer) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.laso_memoria(text,uuid,uuid,integer,text,text,text,text,jsonb,integer) TO service_role;

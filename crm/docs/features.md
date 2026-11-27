@@ -323,3 +323,9 @@ Función propuesta confirma texto exacto, compara orden original, verifica horar
 - Propuesta SQL de memoria revalida acceso y evento después de ambos bloqueos, evitando reutilizar la autorización anterior a la espera.
 - 393 pruebas locales pasadas: doce casos nuevos comparan snapshot/propuesta con cambios de autorización inyectados. No equivalen a concurrencia multiconexión.
 - Sin despliegue ni cambios de CRM; receptor v23 ACTIVE. Confirmaciones vinculadas y consumo atómico siguen pendientes.
+
+## Laso: permisos reproducibles de memoria — 27/11/2026
+
+- Script SQL propuesto fija explícitamente EXECUTE: denegado a PUBLIC/anon/authenticated, concedido a service_role. Requiere aplicar definición y permisos en una transacción autorizada.
+- Dos regresiones nuevas para instalación limpia y reemplazo con grants previos; 395 pruebas locales pasadas.
+- Producción ya restringe esos roles; sin despliegue ni cambio de CRM. Receptor observado v23 ACTIVE.

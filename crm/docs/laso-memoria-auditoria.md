@@ -94,3 +94,11 @@ Se agregaron doce casos locales: seis sobre el snapshot desplegado reproducen ac
 Suite completa: **393 pruebas pasadas, cero fallos**, comando `node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs`. Continúan pendientes confirmación exacta ligada al contenido, consumo atómico de sesión y pruebas PostgreSQL multiconexión. Estas relecturas no garantizan por sí solas serialización con revocaciones posteriores a la última comprobación. No se midió rendimiento productivo.
 
 Consulta de metadatos real del 27/11: RPC de producción conserva una llamada a `public.bot_autorizar` y SECURITY INVOKER; receptor v23 ACTIVE. No se desplegó, no se modificaron datos reales ni se enviaron mensajes. El bloqueo previo requiere revisión por vía autorizada.
+
+## Permisos explícitos del script propuesto — 27/11/2026
+
+`memoria-atomica.sql` ahora revoca privilegios de función a PUBLIC, anon y authenticated, y otorga EXECUTE a service_role. Evita depender de permisos previos: una creación limpia heredaba EXECUTE público y CREATE OR REPLACE conserva grants existentes. Debe aplicarse definición y ACL dentro de una misma transacción por la vía de despliegue autorizada; no ejecutar solo la definición. El propietario conserva sus facultades y no se eliminan grants de otros roles personalizados. No constituye un mínimo privilegio completo para service_role ni sustituye controles internos.
+
+Dos regresiones nuevas verifican instalación limpia y reemplazo con grants demasiado amplios: has_function_privilege deniega anon/authenticated, permite service_role y las llamadas directas de roles de aplicación fallan con 42501. Antes del cambio ambas regresiones fallaban. La suite crea roles locales antes de instalar la propuesta para que la prueba no dependa del endurecimiento posterior de la fixture RLS.
+
+Validación completa: **395 pruebas pasadas, cero fallos**, mediante `node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs`. Producción inspeccionada el 27/11 ya tiene EXECUTE denegado a anon/authenticated y permitido a service_role, SECURITY INVOKER; no se informa una exposición productiva. Receptor v23 ACTIVE. No hubo despliegue, mensajes ni cambios reales. Confirmación vinculada, consumo atómico e integración CRM siguen pendientes, al igual que pruebas multiconexión y WhatsApp real.

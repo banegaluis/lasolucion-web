@@ -9,7 +9,24 @@ for(const corregida of [false,true]) test(`memoria ${corregida?'propuesta':'desp
   for(const p of ['../concurrencia/esquema.sql','../concurrencia/autorizacion-desplegada.sql'])await db.exec(await readFile(new URL(p,import.meta.url),'utf8'));
   await db.exec(`create table laso_listas(id uuid primary key default gen_random_uuid(),perfil_id uuid not null references perfiles,nombre text not null check(char_length(nombre) between 1 and 120),clave text not null check(char_length(clave) between 1 and 120),items jsonb not null default '[]' check(jsonb_typeof(items)='array' and jsonb_array_length(items)<=150),created_at timestamptz not null default now(),updated_at timestamptz not null default now(),unique(perfil_id,clave));
   create table laso_listas_historial(evento_id text primary key,perfil_id uuid not null references perfiles,lista_id uuid not null references laso_listas,accion text not null check(accion in ('crear','agregar','comprado','pendiente','quitar')),antes jsonb not null,despues jsonb not null,created_at timestamptz not null default now());`);
+  await db.exec('create role authenticated; create role anon; create role service_role;');
   await db.exec(await readFile(new URL(corregida?'../../supabase/propuestas/memoria-atomica.sql':'./memoria-desplegada.sql',import.meta.url),'utf8'));
+  if(corregida)for(const reinstalar of [false,true])await t.test(`permisos explícitos: ${reinstalar?'reemplazo con grants previos':'instalación limpia'}`,async()=>{
+   const firma='public.laso_memoria(text,uuid,uuid,integer,text,text,text,text,jsonb,integer)';
+   if(reinstalar){
+    await db.exec(`grant execute on function ${firma} to public,anon,authenticated`);
+    await db.exec(await readFile(new URL('../../supabase/propuestas/memoria-atomica.sql',import.meta.url),'utf8'));
+   }
+   for(const rol of ['anon','authenticated','service_role']){
+    const permiso=(await db.query('select has_function_privilege($1,$2,\'EXECUTE\') ok',[rol,firma])).rows[0].ok;
+    assert.equal(permiso,rol==='service_role');
+    if(rol!=='service_role'){
+     await db.exec('set role '+rol);
+     try{await assert.rejects(()=>db.exec("select public.laso_memoria(null,null,null,null,null,null,null,null,null,null)"),e=>e.code==='42501');}
+     finally{await db.exec('reset role');}
+    }
+   }
+  });
   async function preparar(){
    await db.exec('truncate laso_listas_historial,laso_listas,bot_borradores,bot_accesos,perfiles cascade');
    await db.query("insert into perfiles values($1,true,'activo','admin')",[perfil]);
@@ -103,7 +120,7 @@ for(const corregida of [false,true]) test(`memoria ${corregida?'propuesta':'desp
    await preparar();await crear();
    const ajeno='00000000-0000-0000-0000-000000000099';
    await db.query("insert into perfiles values($1,true,'activo','admin')",[ajeno]);
-   await db.exec("create role authenticated; create role anon; create schema auth; create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$; grant usage on schema auth to authenticated; grant execute on function auth.uid() to authenticated; grant select on perfiles,laso_listas,laso_listas_historial to authenticated; revoke all on function public.laso_memoria(text,uuid,uuid,integer,text,text,text,text,jsonb,integer) from public;");
+   await db.exec("create schema auth; create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$; grant usage on schema auth to authenticated; grant execute on function auth.uid() to authenticated; grant select on perfiles,laso_listas,laso_listas_historial to authenticated; revoke all on function public.laso_memoria(text,uuid,uuid,integer,text,text,text,text,jsonb,integer) from public;");
    await db.exec(await readFile(new URL('./memoria-politicas.sql',import.meta.url),'utf8'));
    async function visibles(usuario){
     await db.query("select set_config('request.jwt.claim.sub',$1,false)",[usuario]);
