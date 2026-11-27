@@ -66,6 +66,27 @@ for(const corregida of [false,true]) test(`memoria ${corregida?'propuesta':'desp
    assert.equal((await llamar('agregar','Agregá a lista materiales: 3 uniones')).error,'evento_repetido');
    assert.equal((await llamar('ver','Ver lista materiales')).items.length,3);
   });
+  await t.test('evento consumido no se reutiliza con otros ítems, lista o acción',async()=>{
+   await preparar();await crear();
+   const snapshot=async()=>({listas:(await db.query('select * from laso_listas order by id')).rows,historial:(await db.query('select * from laso_listas_historial order by evento_id')).rows});
+   const antes=await snapshot();
+   for(const comando of ['Creá lista materiales: otro contenido','Creá lista compras: caño','Agregá a lista materiales: extra','Quitar item 1 de lista materiales','Comprado 2 de lista materiales']){
+    assert.deepEqual(await llamar('crear',comando),{error:'evento_repetido'});
+    assert.deepEqual(await snapshot(),antes);
+   }
+   assert.equal((await llamar('agregar','Agregá a lista materiales: autorizado')).items.length,3);
+   assert.equal((await db.query('select count(*)::int n from laso_listas_historial')).rows[0].n,2);
+  });
+  await t.test('reintento consumido vuelve a exigir acceso y evento válidos',async()=>{
+   await preparar();await crear();
+   await db.exec('update bot_accesos set version=2');
+   await assert.rejects(crear,/No autorizado/);
+   await db.exec('update bot_accesos set version=1');
+   await db.exec("delete from bot_borradores where evento_id='crear'");
+   await assert.rejects(crear,/Evento no autorizado/);
+   assert.equal((await db.query('select jsonb_array_length(items) n from laso_listas')).rows[0].n,2);
+   assert.equal((await db.query('select count(*)::int n from laso_listas_historial')).rows[0].n,1);
+  });
   await t.test('fallo de historial revierte creación completa y permite reintento',async()=>{
    await preparar();await db.exec("alter table laso_listas_historial add constraint fallo_local check(evento_id<>'crear')");
    try{await assert.rejects(crear,e=>e.code==='23514');}finally{await db.exec('alter table laso_listas_historial drop constraint fallo_local');}

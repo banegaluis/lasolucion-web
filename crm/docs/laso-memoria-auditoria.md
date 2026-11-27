@@ -102,3 +102,11 @@ Consulta de metadatos real del 27/11: RPC de producción conserva una llamada a 
 Dos regresiones nuevas verifican instalación limpia y reemplazo con grants demasiado amplios: has_function_privilege deniega anon/authenticated, permite service_role y las llamadas directas de roles de aplicación fallan con 42501. Antes del cambio ambas regresiones fallaban. La suite crea roles locales antes de instalar la propuesta para que la prueba no dependa del endurecimiento posterior de la fixture RLS.
 
 Validación completa: **395 pruebas pasadas, cero fallos**, mediante `node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs`. Producción inspeccionada el 27/11 ya tiene EXECUTE denegado a anon/authenticated y permitido a service_role, SECURITY INVOKER; no se informa una exposición productiva. Receptor v23 ACTIVE. No hubo despliegue, mensajes ni cambios reales. Confirmación vinculada, consumo atómico e integración CRM siguen pendientes, al igual que pruebas multiconexión y WhatsApp real.
+
+## Reintentos con contenido diferente — 27/11/2026
+
+Auditoría de idempotencia sin cambio funcional: cuatro regresiones adicionales (dos sobre snapshot y dos sobre propuesta) comprueban que un evento consumido no admite nuevos ítems, otra lista ni otra acción. Tras cada uno de cinco intentos se compara el contenido completo de listas e historial, incluidas fechas, contra el estado anterior. Un evento distinto y autorizado sigue funcionando. También se verifica rechazo por versión de acceso revocada y por borrador retirado aun cuando el evento ya fue consumido.
+
+Los casos pasan con la definición anterior: no se presenta como corrección de un defecto. Esta deduplicación posterior no vincula la primera ejecución a una confirmación exacta; esa protección y el consumo atómico de sesión siguen pendientes. Tampoco acredita concurrencia multiconexión.
+
+Suite completa: **399 pruebas pasadas, cero fallos**, con `node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs`. No se midió ahorro de tiempo productivo. Receptor inspeccionado el 27/11: v23 ACTIVE. Sin despliegue, mensajes ni cambios de datos reales; recuperación de WhatsApp y memoria integrada siguen sin acreditar.
