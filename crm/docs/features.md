@@ -311,3 +311,9 @@ Función propuesta confirma texto exacto, compara orden original, verifica horar
 - El adaptador de memoria admite `Mejor: 4 codos; 1 caño` sobre una propuesta vigente, conservando nombre y acción; renueva el código sin extender el vencimiento. Confirmación escrita obligatoria.
 - 377 pruebas locales pasadas, incluidas regresiones de agenda, clientes, SQL y webhook aislado.
 - Preparado en desarrollo, sin conexión al receptor activo ni vista CRM. Producción observada v23; no se declara recuperación de WhatsApp. Detalles: `laso-memoria-auditoria.md`.
+
+## Laso: contenido de confirmación sin controles de dirección — 27/11/2026
+
+- Parser de memoria en desarrollo rechaza controles bidireccionales invisibles en nombres, ítems y consultas, sin borrar contenido. También invalida sesiones anteriores que los contengan.
+- Cuatro regresiones nuevas; 381 pruebas locales pasadas. Acentos, decimales y emojis compuestos conservados.
+- Sin despliegue ni cambios de interfaz. Receptor verificado v23 ACTIVE; WhatsApp real y memoria integrada siguen sin verificar.

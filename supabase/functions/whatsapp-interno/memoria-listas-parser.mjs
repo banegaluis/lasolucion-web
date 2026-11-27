@@ -1,6 +1,9 @@
 // Prototipo puro para revisión. No ejecuta escrituras ni envía mensajes; no está conectado al receptor.
 export function interpretarLista(texto){
- const s=String(texto??'').trim().replace(/^laso[,:]?\s+/i,'').replace(/[.!?]+$/,'').trim();
+ // Rechazar controles bidireccionales: no quitar caracteres del contenido a confirmar.
+ const entrada=String(texto??'');
+ if(/[\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/u.test(entrada))return {accion:'invalido'};
+ const s=entrada.trim().replace(/^laso[,:]?\s+/i,'').replace(/[.!?]+$/,'').trim();
  const clave=x=>x.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
  const t=clave(s).replace(/^¿/,'');
  if(/^(mis listas|mostrar mis listas|mostrame mis listas|que listas tengo|ver listas)$/.test(t))return {accion:'listar'};
