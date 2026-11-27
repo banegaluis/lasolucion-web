@@ -37,3 +37,13 @@ Dos escenarios nuevos del handler aislado comprueban que sus cinco solicitudes d
 Sin despliegue: versión productiva observada v23 ACTIVE. Siguen pendientes la revisión de entrega en Meta y la aprobación del despliegue por la vía normal; no se reintentó ni se eludió el bloqueo. Se mantienen HMAC, número autorizado y destino fijo.
 
 Validación: **372 pruebas pasadas, cero fallos**, con `node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs`, incluidas regresiones de memoria, agenda y clientes. Sin medición de rendimiento productivo.
+
+## Entradas nulas en lotes — 27/11/2026
+
+`extraerMensajes` accedía directamente a `entry.changes` y `change.field`: un elemento null podía lanzar una excepción antes del manejo de errores de procesamiento. Se agregaron accesos opcionales para ignorar esas entradas, conservando el filtrado de número/phone_id y los mensajes válidos del lote.
+
+Dos pruebas del handler con HMAC local comprueban un lote mixto con entradas/cambios nulos y un lote sin entradas utilizables: el primero procesa el saludo válido una vez; el segundo responde sin consultas ni envíos. No se observó este payload en producción y no se atribuye a él la incidencia de WhatsApp.
+
+Producción sigue v23 ACTIVE. Cambio sin desplegar; no se modifican datos reales ni se envían mensajes. Continúan pendientes verificación de entrega en Meta y aprobación normal del despliegue bloqueado. No se alteran memoria, agenda ni CRM visual.
+
+Validación completa: **374 pruebas pasadas, cero fallos**, comando `node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs`; incluye memoria, agenda y clientes. Sin prueba productiva de entrega ni medición de eficiencia.

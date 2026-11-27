@@ -13,8 +13,8 @@ export function extraerMensajes(payload,phoneId){
  if(payload?.object!=='whatsapp_business_account'||!phoneId)return [];
  const salida=[];
  for(const entry of Array.isArray(payload.entry)?payload.entry:[]){
-  for(const change of Array.isArray(entry.changes)?entry.changes:[]){
-   if(change.field!=='messages')continue;
+  for(const change of Array.isArray(entry?.changes)?entry.changes:[]){
+   if(change?.field!=='messages')continue;
    const valor=change.value;
    if(String(valor?.metadata?.phone_number_id||'')!==String(phoneId))continue;
    for(const m of Array.isArray(valor.messages)?valor.messages:[]){

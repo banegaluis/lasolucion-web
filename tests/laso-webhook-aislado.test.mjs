@@ -29,8 +29,8 @@ test('receptor completo con red sustituida y secretos exclusivamente locales',as
   }
   throw new Error('Ruta no habilitada en la prueba aislada');
  };
- const enviar=async({from='5493512143961',phone='1431267843408523',firma=true}={})=>{
-  const body=JSON.stringify({object:'whatsapp_business_account',entry:[{changes:[{field:'messages',value:{metadata:{phone_number_id:phone},messages:[{from,id:'wamid.local.entrada',timestamp:String(Math.floor(Date.now()/1000)),type:'text',text:{body:'Hola'}}]}}]}]});
+ const enviar=async({from='5493512143961',phone='1431267843408523',firma=true,transformar=x=>x}={})=>{
+  const body=JSON.stringify(transformar({object:'whatsapp_business_account',entry:[{changes:[{field:'messages',value:{metadata:{phone_number_id:phone},messages:[{from,id:'wamid.local.entrada',timestamp:String(Math.floor(Date.now()/1000)),type:'text',text:{body:'Hola'}}]}}]}]}));
   const hash=createHmac('sha256',env.WHATSAPP_APP_SECRET).update(body).digest('hex');
   return handler(new Request('https://webhook.local/',{method:'POST',body,headers:{'x-hub-signature-256':'sha256='+(firma?hash:'0'.repeat(64))}}));
  };
@@ -72,6 +72,14 @@ test('receptor completo con red sustituida y secretos exclusivamente locales',as
   await t.test('redirección rechazada durante autorización corta antes de guardar o enviar',async()=>{
    reset({redireccionAutorizacion:true});const r=await enviar();assert.equal(r.status,503);
    assert.equal(llamadas.length,1);assert.equal(llamadas[0].redirect,'error');assert.equal(eventos.size,0);assert.equal(envios().length,0);
+  });
+  await t.test('entradas y cambios nulos no interrumpen mensajes válidos del lote',async()=>{
+   reset();const r=await enviar({transformar:p=>{p.entry.unshift(null);p.entry[1].changes.unshift(null);return p;}});
+   assert.equal(r.status,200);assert.equal(eventos.size,1);assert.equal(envios().length,1);
+  });
+  await t.test('lote firmado sin entradas utilizables no consulta ni envía',async()=>{
+   reset();const r=await enviar({transformar:p=>({...p,entry:[null,{changes:[null,{},false]}]})});
+   assert.equal(r.status,200);assert.equal(llamadas.length,0);assert.deepEqual(await r.json(),{ok:true,recibidos:0,omitidos:0});
   });
   await t.test('apagado por defecto impide consultas y respuestas',async()=>{
    reset();delete env.WHATSAPP_BOT_MODO;assert.equal((await enviar()).status,503);assert.equal(llamadas.length,0);

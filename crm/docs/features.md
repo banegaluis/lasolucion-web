@@ -301,3 +301,7 @@ Función propuesta confirma texto exacto, compara orden original, verifica horar
 ### Laso: llamadas REST sin redirecciones (27/11/2026)
 - La función REST compartida prohíbe seguir redirecciones en solicitudes a Supabase con credenciales de servicio.
 - Dos regresiones del handler prueban política de red y corte sin guardado/envío ante error de redirección. No desplegado; no implica recuperación de WhatsApp.
+
+### Laso: tolerancia a elementos nulos en webhook (27/11/2026)
+- Entradas/cambios nulos se ignoran sin interrumpir mensajes válidos del lote firmado.
+- Dos pruebas integradas aisladas verifican lote mixto y vacío. Corrección no desplegada; causa de la falta de respuesta aún sin confirmar.
