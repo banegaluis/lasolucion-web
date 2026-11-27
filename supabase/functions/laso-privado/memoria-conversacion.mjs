@@ -1,6 +1,8 @@
 import {interpretarLista} from '../whatsapp-interno/memoria-listas-parser.mjs';
 
 const TTL=15*60*1000;
+// Presupuesto conservador del canal; nunca truncar una propuesta confirmable.
+export const LIMITE_PROPUESTA_MEMORIA=3500;
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const identidad=o=>o&&uuid.test(o.acceso_id)&&uuid.test(o.perfil_id)&&Number.isSafeInteger(o.version_acceso)&&o.version_acceso>0;
 const mismo=(a,b)=>identidad(a)&&identidad(b)&&a.acceso_id===b.acceso_id&&a.perfil_id===b.perfil_id&&a.version_acceso===b.version_acceso;
@@ -29,5 +31,7 @@ export function conversarMemoria({mensaje,operador,sesion=null,ahora=new Date()}
  if(!['crear','agregar'].includes(p.accion))return aclarar('Para cambiar un ítem primero necesito mostrarte su contenido actual. No guardé cambios.');
  const codigo=crypto.randomUUID().replace(/-/g,'');
  const creada=sesion&&mismo(sesion.operador,operador)&&Number.isFinite(sesion.creada)&&tiempo>=sesion.creada&&tiempo-sesion.creada<TTL?sesion.creada:tiempo;
- return {estado:'propuesta',sesion:{codigo,creada,operador:{...operador},texto:pedido,propuesta:structuredClone(p)},mensaje:`${p.accion==='crear'?'Crear':'Agregar a'} lista «${p.nombre}»:\n${p.items.length?p.items.map((x,i)=>`${i+1}. ${x}`).join('\n'):'Lista vacía'}\nTodavía no guardé nada. Para confirmar escribí exactamente: CONFIRMAR LISTA ${codigo}`};
+ const resumen=`${p.accion==='crear'?'Crear':'Agregar a'} lista «${p.nombre}»:\n${p.items.length?p.items.map((x,i)=>`${i+1}. ${x}`).join('\n'):'Lista vacía'}\nTodavía no guardé nada. Para confirmar escribí exactamente: CONFIRMAR LISTA ${codigo}`;
+ if(resumen.length>LIMITE_PROPUESTA_MEMORIA)return aclarar('La lista es demasiado larga para mostrarte todos los ítems antes de confirmar. Mandámela en grupos más chicos; después podés usar «Agregá a lista nombre: ...». No guardé nada y descarté la propuesta anterior.');
+ return {estado:'propuesta',sesion:{codigo,creada,operador:{...operador},texto:pedido,propuesta:structuredClone(p)},mensaje:resumen};
 }

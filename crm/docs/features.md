@@ -289,3 +289,7 @@ Función propuesta confirma texto exacto, compara orden original, verifica horar
 - Request con HMAC real contra el handler de la rama, red completamente sustituida: autorización, destino fijo, duplicados, revocación, fallos de guardado/envío y modo apagado.
 - Documenta que un envío fallido después de guardar evento no se reintenta automáticamente; no es una corrección ni diagnóstico confirmado de producción.
 - Sin cambios de runtime ni despliegue. Ver `laso-diagnostico-respuestas.md`.
+
+### Memoria: límite de resumen confirmable (26/11/2026)
+- Propuestas completas limitadas a un presupuesto interno de 3.500 unidades UTF-16. Las listas mayores solicitan grupos menores; no se recortan ítems ni se devuelve sesión confirmable.
+- Tres regresiones nuevas para listas largas, emojis y tamaño total. Módulo pendiente de integración y publicación; no activo en WhatsApp.

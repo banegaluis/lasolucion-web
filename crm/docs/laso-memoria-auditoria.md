@@ -52,3 +52,11 @@ El módulo es puro y no está importado por el receptor activo. Devuelve intenci
 Ocho pruebas nuevas cubren texto/transcripción, corrección e invalidación de código, vencimiento, cambio de identidad/versión, alteración de propuesta, reordenamiento JSONB, cancelación, consultas, acciones por índice y entradas inválidas. No hay prueba de audio real, WhatsApp ni vista CRM en esta entrega. La versión activa observada continúa v23; no se reintentó el despliegue bloqueado ni se alteraron datos reales.
 
 Suite completa: **351 pruebas pasadas, cero fallos**, con `node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs`, incluidas agenda, clientes y SQL local. No se midió mejora de latencia productiva.
+
+## Tamaño de propuesta antes de confirmar — 26/11/2026
+
+El parser admite hasta 40 ítems de 240 caracteres. Una entrada válida podía producir un resumen de más de 9.600 caracteres. El adaptador ahora impone un presupuesto interno conservador de 3.500 unidades UTF-16 al mensaje completo, incluyendo título, numeración y confirmación. Este valor es una decisión local de diseño, no una validación de la API Meta. Nunca trunca ítems: si el resumen excede el presupuesto devuelve aclaración, sesión nula e indicación de enviar grupos menores y luego agregar a la lista. La futura persistencia deberá guardar esa sesión nula para invalidar efectivamente la propuesta anterior.
+
+Tres regresiones nuevas cubren máximo aceptado por parser, emojis con contenido íntegro y el límite incluyendo encabezado/código. Sigue siendo un módulo no conectado al receptor: no cambia límites productivos ni habilita listas en WhatsApp. Receptor observado v23 ACTIVE; publicación bloqueada pendiente del flujo autorizado. No se envían mensajes ni se modifican datos reales.
+
+Validación: **368 pruebas pasadas, cero fallos**, incluidas agenda, clientes, memoria SQL y webhook aislado. Comando: `node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs`. No se midió entrega ni rendimiento productivo.

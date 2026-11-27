@@ -41,3 +41,23 @@ test('cancelar descarta sin escribir y consultas no generan intención de escrit
 test('entradas inválidas y largas se rechazan antes del parser',()=>{
  assert.equal(pedir('x'.repeat(12001)).estado,'aclarar');assert.equal(pedir('mis listas','audio').estado,'aclarar');assert.equal(pedir('mis listas','texto',null,{operador:null}).estado,'aclarar');assert.equal(pedir('mis listas','texto',null,{ahora:new Date('invalid')}).estado,'aclarar');
 });
+
+test('lista válida extensa se detiene sin ocultar ítems ni dejar confirmación anterior',()=>{
+ const s=crear().sesion;
+ const texto='Creá lista materiales: '+Array.from({length:40},(_,i)=>`${i} `+'x'.repeat(230)).join('; ');
+ const r=pedir(texto,'texto',s);assert.equal(r.estado,'aclarar');assert.equal(r.sesion,null);assert.match(r.mensaje,/grupos más chicos/);assert.equal(r.intencion,undefined);
+});
+test('propuestas dentro del presupuesto muestran todos los ítems incluidos emojis',()=>{
+ const items=Array.from({length:10},(_,i)=>`${i} `+'🔧'.repeat(100));
+ const r=pedir('Agregá a lista materiales: '+items.join('; '),'transcripcion');
+ assert.equal(r.estado,'propuesta');assert.ok(r.mensaje.length<=3500);assert.deepEqual(r.sesion.propuesta.items,items);
+ for(const item of items)assert.ok(r.mensaje.includes(item));assert.equal(confirmar(r.sesion).estado,'intencion_validada');
+});
+test('límite de propuesta incluye encabezado, numeración y código de confirmación',()=>{
+ let ultimo=null,primeroRechazado=null;
+ for(let n=10;n<=20;n++){
+  const r=pedir('Creá lista '+ 'n'.repeat(120)+': '+Array(n).fill('x'.repeat(240)).join('; '));
+  if(r.estado==='propuesta'){assert.ok(r.mensaje.length<=3500);ultimo=r;}else{primeroRechazado=r;break;}
+ }
+ assert.ok(ultimo);assert.equal(primeroRechazado.estado,'aclarar');assert.equal(primeroRechazado.sesion,null);
+});
