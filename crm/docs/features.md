@@ -293,3 +293,7 @@ Función propuesta confirma texto exacto, compara orden original, verifica horar
 ### Memoria: límite de resumen confirmable (26/11/2026)
 - Propuestas completas limitadas a un presupuesto interno de 3.500 unidades UTF-16. Las listas mayores solicitan grupos menores; no se recortan ítems ni se devuelve sesión confirmable.
 - Tres regresiones nuevas para listas largas, emojis y tamaño total. Módulo pendiente de integración y publicación; no activo en WhatsApp.
+
+### Memoria: rechazo seguro de sesiones incompletas (26/11/2026)
+- Valida texto/propuesta recuperados antes de confirmar y vuelve a aplicar el presupuesto de resumen a sesiones antiguas.
+- Reutiliza formato de propuesta; rechaza datos inválidos sin producir intención de escritura. Adaptador no conectado a producción.

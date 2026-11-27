@@ -60,3 +60,11 @@ El parser admite hasta 40 ítems de 240 caracteres. Una entrada válida podía p
 Tres regresiones nuevas cubren máximo aceptado por parser, emojis con contenido íntegro y el límite incluyendo encabezado/código. Sigue siendo un módulo no conectado al receptor: no cambia límites productivos ni habilita listas en WhatsApp. Receptor observado v23 ACTIVE; publicación bloqueada pendiente del flujo autorizado. No se envían mensajes ni se modifican datos reales.
 
 Validación: **368 pruebas pasadas, cero fallos**, incluidas agenda, clientes, memoria SQL y webhook aislado. Comando: `node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs`. No se midió entrega ni rendimiento productivo.
+
+## Validación de sesiones recuperadas — 26/11/2026
+
+La confirmación ahora valida el tipo y longitud del texto de sesión antes de llamar al parser, y exige una propuesta con estructura de objeto. Un JSON con `texto: {toString: 0}` podía provocar una excepción al convertirlo a texto; ahora se rechaza con aclaración y sesión nula. También se vuelve a comprobar el presupuesto de resumen durante la confirmación, de modo que una sesión antigua de más de 3.500 unidades no pueda saltear el límite agregado al preparar propuestas. Se reutiliza el mismo formateador en ambos pasos.
+
+Dos regresiones adicionales prueban sesiones JSON incompletas/tipos inválidos y una sesión antigua extensa. Esto endurece el adaptador aún no conectado: no implica persistencia implementada, integridad criptográfica ni consumo atómico. La futura integración debe persistir la invalidación. Producción verificada v23 ACTIVE; sin despliegue ni datos reales modificados. Sigue pendiente la aprobación normal del despliegue y verificar entregas en Meta.
+
+Validación completa: **370 pruebas pasadas, cero fallos**, con `node --test tests/*.test.cjs tests/*.test.mjs tests/sql-aislado/*.test.mjs`; incluye agenda, clientes, memoria SQL y receptor aislado. No se midió rendimiento ni funcionamiento de WhatsApp productivo.

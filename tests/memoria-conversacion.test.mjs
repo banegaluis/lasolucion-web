@@ -61,3 +61,17 @@ test('límite de propuesta incluye encabezado, numeración y código de confirma
  }
  assert.ok(ultimo);assert.equal(primeroRechazado.estado,'aclarar');assert.equal(primeroRechazado.sesion,null);
 });
+
+test('sesión JSON incompleta o con texto de otro tipo se rechaza sin excepciones',()=>{
+ for(const texto of [null,42,[],{}, {toString:0},'x'.repeat(12001)]){
+  const s=crear().sesion;s.texto=texto;const r=confirmar(s);assert.equal(r.estado,'aclarar');assert.equal(r.sesion,null);assert.equal(r.intencion,undefined);
+ }
+ for(const propuesta of [null,[],false,'lista']){
+  const s=crear().sesion;s.propuesta=propuesta;assert.equal(confirmar(s).estado,'aclarar');
+ }
+});
+test('sesión antigua con lista extensa no evita el presupuesto al confirmar',async()=>{
+ const {interpretarLista}=await import('../supabase/functions/whatsapp-interno/memoria-listas-parser.mjs');
+ const s=crear().sesion;s.texto='Creá lista materiales: '+Array(40).fill('x'.repeat(240)).join('; ');s.propuesta=interpretarLista(s.texto);
+ const r=confirmar(s);assert.equal(r.estado,'aclarar');assert.equal(r.intencion,undefined);assert.equal(r.sesion,null);
+});
