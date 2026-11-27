@@ -1,0 +1,163 @@
+# Laso — secretario interno: contrato de borradores v1
+
+Código fuente: `supabase/functions/whatsapp-interno/secretario-borradores.mjs`.
+Pruebas: `tests/secretario-borradores.test.mjs`.
+
+**Estado:** módulo puro de interpretación en rama del PR #12. **NO está conectado al webhook de Meta, al CRM ni desplegado en Supabase.** No es un modelo conversacional: usa reglas simples y deterministas. Ningún texto ejecuta órdenes o envía mensajes.
+
+## Funcionalidad probada (pruebas locales de desarrollo)
+- Clasifica borradores internos: agenda, recordatorio, presupuesto y nota.
+- Reconoce expresiones frecuentes: «Agendame», «Agendá», «Recordame», «Presupuestame».
+- Acepta fechas DD/MM/AAAA y horarios HH:MM; también «a las 10» o «9 hs».
+- Permite «hoy», «mañana» y «pasado mañana» **solo cuando se proporciona explícitamente una fecha/hora de referencia** (objeto Date válido). Usa America/Argentina/Cordoba para decidir el día correcto y suma días de calendario, incluso a medianoche UTC o en cambios de mes.
+- Rechaza fechas calendarias imposibles. Una fecha explícita inválida tiene prioridad sobre una expresión relativa, para no inventar otro día.
+- Si falta una fecha/hora fiable, lo indica en el arreglo `faltantes`. Mencionar «para Guille» sirve como indicio textual, **no identifica ni valida clientes del CRM**.
+- El módulo emite siempre `requiere_confirmacion: true`, `puede_ejecutar: false`, `puede_enviar: false`. No hace escrituras, consultas externas ni pagos.
+
+### Cómo correr las pruebas
+```bash
+node --test tests/secretario-borradores.test.mjs
+```
+
+Resultado local reportado al 8/11/2026: 12 pruebas del módulo aprobadas con Node 22. Esto **no sustituye** CI, pruebas Deno, integración con la API, test del webhook real ni ensayos desde iPhone.
+
+## Diseño seguro de la siguiente fase
+1. Completar el simulador de solicitudes sin datos personales: pedido → borrador → aclaración → aprobación. La preparación de preguntas y resumen existe desde el 11/11; la aprobación con estado todavía no.
+2. Interpretación ampliada para días de semana y fechas coloquiales con resolución determinista de zona y ambigüedades, sin inventar horarios.
+3. Consulta mínima y autorizada de agenda/clientes, sin exponer datos a remitentes no autenticados.
+4. Voz interna optativa con consentimiento, control de costos, política de retención y eliminación de audios.
+5. Estado auditable de borradores (pendiente, aclarado, aprobado, cancelado), con idempotencia y prevención de duplicados.
+6. Antes de crear órdenes, realizar pruebas transaccionales y requerir aprobación del operador. Mantener `WHATSAPP_BOT_MODO=apagado` por defecto.
+7. Conectar WhatsApp solamente después de verificar coexistencia, recepción del webhook, permisos y controles de despliegue.
+
+## Advertencias técnicas
+- El parser reconoce patrones básicos, no comprende el significado completo ni detecta conflictos de agenda.
+- El ejemplo «Agendame mañana a las 10 para Guille» produce una fecha si hay reloj inyectado, pero **no crea turno real**.
+- No atribuir esta prueba a la implementación desplegada en Supabase ni a WhatsApp.
+- No activar mensajes externos, gastos, escritura de datos ni acceso a Caja por una instrucción recibida en el propio chat.
+
+## Corrección 9/11/2026: horarios inválidos y ambiguos
+- «a las 10:75» ya no se reduce a 10:00. Horarios inválidos, incluso acompañados de otro válido, dejan `hora: null` y solicitan `hora_explicita`.
+- Varios horarios distintos (incluidos formatos mixtos) requieren aclaración. Repetir el mismo horario no genera un faltante.
+- No resuelve aún franjas «tarde/noche», rangos ni correcciones conversacionales. Mantiene confirmación obligatoria y ninguna ejecución/envío.
+- Módulo puro sin conexión al webhook: no implica activación ni mejora desplegada.
+
+Validación local del 9/11/2026 (Node v24.22.1): `node --test tests/*.test.cjs tests/*.test.mjs`, 105 pruebas aprobadas, 0 fallos; 8 pruebas nuevas. `git diff --check` sin errores. No se probaron Safari, flujos reales de Nueva Orden/agenda/PDF, Deno, webhook ni audio. No se midió ahorro de tiempo operativo.
+
+## Corrección 10/11/2026: mañana y tarde junto a una hora
+- «3 de la tarde» y «3:30 de la tarde» producen 15:00 y 15:30; se admite también la hora de 24 h (15 de la tarde). «9 de la mañana» conserva 09:00.
+- «De la mañana» ya no se interpreta como fecha relativa. Sin otro día indicado, pide fecha; «mañana a las 9 de la mañana» conserva el día siguiente.
+- Por criterio conservador, «12 de la mañana/tarde», «de la noche», contradicciones y horarios inválidos piden hora explícita de 24 h. No interpreta todas las variantes del habla, rangos ni correcciones conversacionales.
+- Validación: 120 pruebas locales aprobadas, 0 fallos (15 nuevas), con `node --test tests/*.test.cjs tests/*.test.mjs`; `git diff --check` limpio. Los dos errores reproducidos (03:00 en vez de 15:00 y fecha siguiente inventada) quedan cubiertos. No se midió ahorro de tiempo de uso real.
+- Se mantienen confirmación obligatoria, ejecución/envío deshabilitados y módulo sin conectar al webhook. No se probaron audio, Deno, Safari ni flujos reales de Nueva Orden, agenda y PDF. Sin cambios de interfaz ni producción.
+
+## Revisión interna 11/11/2026
+- Nuevo módulo puro `supabase/functions/whatsapp-interno/secretario-revision.mjs`, función `prepararRevisionInterna(texto, { ahora })`. Reutiliza el intérprete; no confía en flags externos de un borrador.
+- Para agenda/recordatorios devuelve preguntas en español por los faltantes detectados y un resumen estructurado con pedido original, fecha, hora y zona. Agrupa todos los faltantes en una revisión. No vuelve a preguntar por campos ya interpretados.
+- Estados: `entrada_invalida`, `revision_manual` (otros tipos o confirmaciones sueltas), `necesita_aclaracion` y `pendiente_revision`. Este último no equivale a aprobación ni valida la tarea o el cliente: el indicio textual del intérprete sigue requiriendo revisión humana.
+- Para aclarar, se reenvía el pedido completo; no mantiene conversación, no combina respuestas parciales ni recibe aprobaciones. Tampoco persiste, autentica, envía o conecta al webhook. Siempre requiere confirmación, con ejecución/envío deshabilitados.
+- Pruebas: `node --test tests/*.test.cjs tests/*.test.mjs`, 128/128 aprobadas en Node v24.22.1; 8 pruebas nuevas. Caso medido: 3 faltantes agrupados en una revisión; con fecha y cliente indicados pregunta solo por la hora. No hay medición de ahorro operativo real.
+- No se ejecutaron pruebas de audio, Deno, Safari ni flujos CRM reales (Nueva Orden, agenda, PDF). Dashboard sin cambios; `WHATSAPP_BOT_MODO=apagado` sigue por defecto. Próximo paso: estado versionado para correcciones y aprobación vinculada al borrador, con rechazo de confirmaciones antiguas.
+
+## Sesión versionada 12/11/2026
+- Nuevo `secretario-sesion.mjs`: `crearSesionRevision({ id, texto, ahora })` devuelve `consultar()`, `corregir(textoCompleto, { id, version })` y `confirmar({ id, version })`. Reutiliza la revisión existente.
+- Estado encapsulado en memoria y copias independientes al consultar. Cada corrección aceptada incrementa la versión y borra la confirmación simulada, incluso si se reenvía el mismo texto. Se rechazan referencias antiguas, de otro borrador o sin versión; una segunda corrección basada en la versión vieja no pisa la primera.
+- Solo permite confirmación simulada de `pendiente_revision`; faltantes y otros tipos quedan bloqueados. Repetir la misma confirmación no cambia el estado. El reloj inicial se copia para conservar el significado de fechas relativas durante la sesión.
+- **No es autorización ni aprobación de producción.** El identificador lo asigna el integrador; conocerlo no autentica al remitente. No persiste, no resuelve concurrencia entre procesos, no acepta respuestas parciales, no valida clientes ni tareas. El integrador futuro debe autenticar, autorizar y persistir con control transaccional de versión. No usar `confirmacion_simulada` para habilitar escrituras.
+- Todas las salidas conservan ejecución/envío deshabilitados y confirmación real pendiente. Sigue separado del webhook y del CRM; `WHATSAPP_BOT_MODO=apagado`. Sin cambios visuales, de producción o datos reales.
+- Validación local: `node --test tests/*.test.cjs tests/*.test.mjs`, 137/137 aprobadas (9 nuevas); `git diff --check` limpio. Casos comprobados: invalidación tras corregir, rechazo de confirmación vieja, conflicto de dos correcciones, confirmación repetida idempotente y aislamiento de copias. No se midió ahorro operativo.
+- No se probaron Deno, audio, Safari, Nueva Orden/agenda/PDF reales ni persistencia. Próximo paso: cancelación y vencimiento de sesiones antes de diseñar su integración autenticada.
+
+## Cancelación de sesión 13/11/2026
+- `cancelar({ id, version })` descarta la sesión vigente en memoria, revoca su confirmación simulada y bloquea `confirmar` y `corregir`. Se expone `estado_sesion: activa | cancelada` separado del estado de interpretación. No hay reapertura; para otro pedido se crea una nueva sesión con identificador único.
+- La cancelación no incrementa la versión del contenido: el estado terminal bloquea cualquier acción posterior. Repetirla con la misma referencia devuelve `ya_cancelada` sin cambios. Referencias antiguas, ausentes o de otro borrador se rechazan; pueden cancelarse pedidos incompletos.
+- Pruebas locales: `node --test tests/*.test.cjs tests/*.test.mjs`, 142/142 aprobadas (5 nuevas), `git diff --check` limpio. Verificado: revocación, bloqueo posterior, reintento idempotente, rechazo de referencias viejas e independencia entre sesiones/copias. Sin medición de ahorro de tiempo operativo.
+- Sigue siendo simulación interna sin autenticación, persistencia, webhook, envíos ni guardado CRM. No se modifican producción, datos reales o dashboard; bot apagado por defecto. No se probaron audio, Deno, Safari ni Nueva Orden/agenda/PDF reales. Vencimiento automático pendiente como siguiente paso.
+
+## Vencimiento de sesión 14/11/2026
+- `crearSesionRevision` admite `reloj` (función que devuelve milisegundos, por defecto `Date.now`) y `vigenciaMs` (entero positivo, por defecto 15 minutos). Ese plazo es una decisión provisional de simulación, pendiente de validar para uso real. `ahora` sigue siendo la referencia independiente para interpretar fechas relativas.
+- Cada consulta o acción verifica el reloj. Al alcanzar el límite pasa a `vencida`, revoca confirmación simulada y rechaza confirmar, corregir o cancelar. Corregir no renueva el plazo. No usa temporizador ni proceso en segundo plano: detecta el vencimiento en el siguiente acceso.
+- Un reloj inválido, que falla o retrocede cierra la sesión como vencida; no se reabre aunque el reloj se recupere. Cancelación previa conserva su estado terminal. Se expone `vence_en_ms` en la copia de consulta.
+- Validación: `node --test tests/*.test.cjs tests/*.test.mjs`, 148/148 aprobadas, 6 nuevas; `git diff --check` limpio. Casos medidos con reloj simulado: aceptación 1 ms antes, rechazo en el límite, plazo no renovable, fallo/regresión del reloj y cancelación previa. No hay medición de ahorro operativo.
+- Continúa en memoria, sin autenticación, persistencia, integración CRM/WhatsApp ni efectos externos. Sin cambios de dashboard o producción; bot apagado. No se probaron audio, Deno, Safari ni Nueva Orden/agenda/PDF reales. Siguiente paso: probar la autorización del operador junto con este ciclo de borrador en un adaptador aislado, antes de conectar servicios reales.
+
+## Adaptador de acceso aislado 15/11/2026
+- Nuevo `secretario-acceso.mjs`: `crearRevisionConAcceso({ numero, autorizar, ...opcionesSesion })` devuelve un controlador con `operar({ numero, accion, referencia, texto })`. Mantiene privada la sesión subyacente.
+- Verifica `agenda.registrar` al crear y en cada consulta, corrección, confirmación simulada o cancelación. Vincula la sesión al número, acceso_id, perfil_id y versión iniciales. Un cambio de identidad/versión, revocación o error deniega sin devolver el contenido del borrador. Otro remitente no puede acceder aunque conozca id y versión.
+- **Frontera de confianza:** el número debe venir de un transporte autenticado (por ejemplo, webhook con firma validada); la dependencia `autorizar` debe ser del servidor. Pasar un número o callback inventado no autentica a nadie. No está conectado al webhook, Supabase ni WhatsApp. Las pruebas usan dobles locales sin llamadas externas.
+- No reemplaza autorización transaccional al guardar ni cubre revocación posterior a la comprobación. No persiste ni ejecuta acciones reales. `agenda.registrar` se reutiliza para esta simulación; permisos de revisión específicos quedan por definir antes de integrar.
+- Validación: `node --test tests/*.test.cjs tests/*.test.mjs`, 154/154 aprobadas (6 nuevas); `git diff --check` limpio. Se cubren las 4 operaciones frente a otro remitente y a revocación/reasignación/cambio de versión, errores del autorizador, versiones viejas y vencimiento. Sin medición de ahorro operativo.
+- Sin cambios en producción, datos reales, dashboard o modo apagado. No se probaron audio, Deno, Safari ni flujos CRM reales de Nueva Orden, agenda y PDF. Próximo paso: probar el recorrido conjunto desde un evento autenticado simulado hasta el borrador, incluyendo duplicados, sin conectar Meta.
+
+## Recorrido de entrada 16/11/2026
+- Se reprodujo una incompatibilidad: el intérprete clasificaba «Agendame» y «Programame» como agenda, pero `esComandoAgenda` los rechazaba. Ahora el filtro reutiliza `esSolicitudAgenda`, exportada por el intérprete, evitando dos reglas divergentes.
+- Nuevo arnés local `tests/secretario-recorrido.test.mjs`: cuerpo ficticio firmado → validación HMAC → extracción/destino → autorización simulada → consulta del borrador. Cubre Agendame/Agendáme/Programame/Programáme, firma alterada, destino incorrecto, permiso denegado, comandos anteriores y entradas ajenas.
+- Validación: `node --test tests/*.test.cjs tests/*.test.mjs`, 161/161 aprobadas (7 nuevas); `git diff --check` limpio. Las 4 variantes llegan a borrador en el arnés. Firma inválida y destino incorrecto provocan 0 consultas al autorizador. No se midió ahorro operativo.
+- El arnés solo une módulos en pruebas: no se conectó el receptor real al ciclo de revisión. No demuestra recepción Meta ni deduplicación persistente. La prueba conjunta de duplicados sigue pendiente como siguiente paso.
+- Sin despliegue, activación, secretos, mensajes ni cambios de datos reales/dashboard. `WHATSAPP_BOT_MODO=apagado` permanece por defecto. No se probaron Deno, audio, Safari ni Nueva Orden/agenda/PDF reales.
+
+## Duplicados dentro del lote 17/11/2026
+- `procesarMensajes` recuerda evento_id después de una inserción resuelta y omite repeticiones posteriores del mismo lote. No agrupa por texto: eventos con identificadores distintos se conservan. Requiere eventos ya validados por `extraerMensajes`.
+- Duplicados del lote se contabilizan como `omitidos`; `registrados` cuenta llamadas de inserción resueltas de eventos distintos en ese lote, no necesariamente filas nuevas en la base. No autorizados no ocupan el identificador; errores de inserción se propagan y permiten reintentar la solicitud.
+- Mejora medida en prueba sintética con 50 copias: 1 consulta de autorización y 1 inserción frente a 50 de cada una (98 % menos llamadas). No es una medición de latencia o ahorro en producción.
+- Reintentos entre solicitudes o procesos siguen dependiendo de la restricción única persistente y del manejo existente de duplicados; no se verificó Supabase real. El doble de almacenamiento usado en pruebas no demuestra concurrencia ni persistencia real.
+- Validación: `node --test tests/*.test.cjs tests/*.test.mjs`, 166/166 aprobadas (5 nuevas), `git diff --check` limpio. Sin despliegue, mensajes, secretos, datos reales ni cambios de dashboard; `WHATSAPP_BOT_MODO=apagado`. No se probaron Deno, audio, Safari ni flujos reales Nueva Orden/agenda/PDF. Próximo paso: validar reintentos concurrentes contra una base de pruebas aislada, cuando esté disponible.
+
+## Regresión del manejador HTTP 18/11/2026
+- Nuevo `tests/bot-webhook-http.test.mjs`: ejecuta el `index.js` existente, captura `Deno.serve` y reemplaza `fetch` por un doble local. No abre servidor, no usa secretos reales y no realiza tráfico de red.
+- Se prueban modo apagado por defecto, firma incorrecta, operador denegado, 20 solicitudes simultáneas del mismo evento, error temporal seguido de reintento y revocación entre solicitudes. Las respuestas no exponen texto, números ni detalles internos del error.
+- Resultado: `node --test tests/*.test.cjs tests/*.test.mjs`, 173/173 aprobadas (6 escenarios nuevos y su grupo); `git diff --check` limpio. Las 20 solicitudes completan con HTTP 200; el doble retiene una fila y registra 40 llamadas (20 autorizaciones y 20 inserciones). No hay mejora de rendimiento implementada hoy: se amplía cobertura del manejador HTTP.
+- La unicidad está simulada con Map y conflictos 23505: **no prueba concurrencia ni persistencia de PostgreSQL/Supabase**. No se encontraron ejecutables psql, postgres, docker o deno en el entorno local; la prueba contra una base aislada continúa pendiente. Node ejecuta el manejador con una interfaz Deno simulada, no el runtime Deno.
+- Sin cambios al código funcional, producción, modo apagado, dashboard, secretos ni datos reales. No se probaron Meta, audio, Safari ni Nueva Orden/agenda/PDF reales. Siguiente paso: preparar un ensayo reproducible de unicidad con una base PostgreSQL local aislada cuando esté disponible.
+
+## Fechas múltiples 19/11/2026
+- Corregido el intérprete: ya no elige la primera fecha cuando hay varias menciones reconocidas (DD/MM/AAAA, DD-MM-AAAA, hoy, mañana o pasado mañana). Devuelve fecha nula/origen `ambigua` y la revisión solicita una única fecha. Cualquier fecha explícita imposible conserva prioridad `explicita_invalida`.
+- Regla conservadora: también pide aclaración si las menciones parecen equivalentes; no deduce rangos ni correcciones como «mejor el 21». «De la mañana» sigue siendo franja horaria y no cuenta como otra fecha. Conserva texto original y horario válido. No cubre fechas escritas con nombres de meses o días de la semana.
+- Validación: 7 pruebas nuevas (6 pedidos con varias fechas y 1 control de franjas con 3 variantes). Antes de la corrección fallaban los 6 escenarios nuevos de fechas múltiples; después, suite completa `node --test tests/*.test.cjs tests/*.test.mjs`: 180/180 aprobadas. `git diff --check` limpio. Mejora de confiabilidad medida en estos casos; sin medición de ahorro de tiempo real.
+- Sin integración nueva al webhook ni escritura de agenda, mensajes, producción o interfaz. Modo apagado por defecto. No se probaron audio, Deno, Safari, Nueva Orden/agenda/PDF reales ni PostgreSQL concurrente; este último ensayo continúa pendiente.
+- Decisión operativa registrada: el 3515439183 continúa siendo el número comercial de La Solución. Número separado para Laso es una propuesta, todavía sin confirmación ni conexión. Verificar Developers no equivale a activar el bot.
+- Próximo paso: comprobar el rechazo de fechas ambiguas durante la confirmación/corrección de una sesión completa antes de integrar guardado real.
+
+## Recorrido de aclaración con permisos 20/11/2026
+- Nuevo `tests/secretario-aclaracion-integrada.test.mjs`: usa juntos el adaptador de acceso, la sesión, la revisión y el intérprete existentes. Cuatro escenarios: ambigüedad → aclaración completa → rechazo de versión antigua → confirmación simulada idempotente; corrección ambigua de un pedido ya confirmado; revocación después de aclarar; vencimiento después de aclarar sin renovar plazo.
+- Validación: `node --test tests/*.test.cjs tests/*.test.mjs`, 184/184 aprobadas (4 nuevas); `git diff --check` limpio. Cobertura de integración ampliada, sin modificar código funcional ni medir ahorro operativo o latencia. Se usan identidad y reloj ficticios; no hay llamadas de red ni persistencia.
+- El recorrido exige reenviar el pedido completo para corregirlo. La confirmación es simulada y mantiene ejecución/envío deshabilitados. No prueba autenticación de transporte, recepción Meta, audio, Deno, PostgreSQL concurrente, Safari ni Nueva Orden/agenda/PDF reales. Sin cambios de producción, secretos, datos reales, dashboard o modo apagado por defecto.
+- Actualización operativa según conversación y captura del 19/11: Luis confirmó que el número nuevo es personal y quiere conservar el comercial 3515439183 para clientes y futura conexión de Laso. El tercer número no es una decisión aceptada. La captura muestra Verify account y Contact info completados, pero todavía About you y Completar registro: no acredita alta final, número WhatsApp habilitado ni bot conectado. Coexistencia con WhatsApp Business y separación efectiva entre operador/clientes siguen pendientes de verificar antes de conectar.
+- Próximo paso: permitir aclarar un campo faltante sin reenviar todo el pedido, con versión vigente y confirmación explícita; diseñar y probar primero en memoria. Continúa pendiente el ensayo de unicidad con PostgreSQL aislado.
+
+## Aclaración breve de hora 21/11/2026
+- Nueva operación `completarHora(hora, referenciaVersion)` en sesión; el adaptador la expone con `accion: completarHora` y `texto: HH:MM`. Solo admite hora pendiente y formato estricto 00:00–23:59. Reinterpreta el texto completo con la hora añadida; no sobrescribe conflictos numéricos o fechas. Ante conflicto o exceso de longitud exige corrección completa sin mutar la sesión.
+- Conserva el texto previo como prefijo del pedido ampliado; no crea historial persistente. Incrementa versión, invalida confirmación y conserva vencimiento. Reutiliza autorización por operación, identidad, cancelación y vencimiento; no elimina otros faltantes. Para cambiar una hora existente sigue siendo necesaria la corrección completa.
+- Pruebas: `node --test tests/*.test.cjs tests/*.test.mjs`, 191/191 aprobadas (7 nuevas); `git diff --check` limpio. Incluyen recorrido hasta confirmación simulada, datos inválidos, conflictos previos, versiones antiguas, permisos/remitente, cancelación/vencimiento, otros faltantes y límite de texto.
+- Eficiencia sintética: «Agendame para Guille 22/11/2026 revisar calefón 10:30» tiene 53 caracteres; la respuesta breve tiene 5: 48 menos, aproximadamente 91 %. No mide tiempo, latencia ni ahorro real. No acepta lenguaje libre como «a las diez» ni aclara fecha/cliente.
+- Cambios solo en módulos aislados, pruebas y documentación. Sin dashboard, producción, secretos, mensajes, datos reales ni activación; modo apagado por defecto. No se probaron Meta, audio, Deno, Safari, PostgreSQL concurrente ni Nueva Orden/agenda/PDF reales. Próximo paso: diseñar aclaración breve de fecha con la misma protección de versiones antes de integrar el transporte.
+
+## Aclaración breve de fecha 22/11/2026
+- Nueva `completarFecha(fecha, referenciaVersion)` y acción homónima en el adaptador, con `texto: DD/MM/AAAA`. Valida formato estricto y calendario reutilizando el intérprete; incluye años bisiestos. Fecha y hora comparten la lógica de completar un campo, sin cambiar las respuestas públicas de completarHora.
+- Solo completa fecha pendiente. Añade el valor al pedido y reinterpreta; fechas previas inválidas, múltiples o relativas sin referencia requieren corrección completa. No sustituye una fecha existente. El pedido previo queda como prefijo del ampliado, sin historial persistente. Incrementa versión, mantiene plazo, deja otros faltantes y exige confirmación simulada posterior.
+- Validación: `node --test tests/*.test.cjs tests/*.test.mjs`, 199/199 aprobadas (8 nuevas); `git diff --check` limpio. Cobertura: fecha y hora conservadas, calendario inválido, versiones viejas, permisos/remitente, cancelación/vencimiento, otros faltantes, límite de texto y secuencia fecha bisiesta → hora → confirmación.
+- Eficiencia sintética: «Agendame para Guille 10:30 revisar calefón 23/11/2026» requiere 53 caracteres al reenviar; la respuesta breve necesita 10 (43 menos, aproximadamente 81 %). No mide tiempo real o latencia. No admite «mañana», nombres de meses ni fechas sin año en esta operación.
+- Sin cambios de producción, secretos, datos reales, dashboard, mensajes o modo apagado. No se probaron Meta, audio, Deno, PostgreSQL concurrente, Safari ni Nueva Orden/agenda/PDF reales. No hay integración nueva de persistencia o transporte. Próximo paso: definir cómo vincular cada respuesta breve al borrador/pregunta vigente en el transporte antes de conectar WhatsApp; evitar aplicar respuestas a otro pedido.
+
+## Aislamiento de clientes 23/11/2026
+- Se prioriza la instrucción de Luis del 22/11: Laso no debe comunicarse con clientes. Cualquier futura salida debe limitarse al operador autorizado y fallar sin enviar ante identidad no comprobada. No se habilita atención automática, catálogo, recordatorios o presupuestos salientes a clientes. Esta condición requiere pruebas antes de activar.
+- Ampliado el arnés HTTP existente: autorización simulada por número y solicitudes firmadas con lotes variables. Tres escenarios nuevos: cliente con comando válido, texto «soy Luis» y audio; lote de dos clientes y un operador; saludo/consulta comercial. El doble rechaza cualquier ruta distinta de autorización e inserción de borradores en Supabase, por lo que una llamada fetch de envío o descarga hace fallar estos casos.
+- Resultado local: 202/202 aprobadas con `node --test tests/*.test.cjs tests/*.test.mjs`; `git diff --check` limpio. Primer escenario: 3 autorizaciones, 0 filas; lote mixto: 3 autorizaciones, 1 inserción del operador; consultas comerciales: 0 llamadas. Ningún escenario genera llamadas a Meta o descarga de audio. No se implementa mejora de rendimiento ni se mide ahorro operativo; se amplía cobertura de seguridad.
+- Solo pruebas/documentación; receptor funcional sin cambios. La respuesta HTTP técnica al webhook no es un mensaje de WhatsApp al remitente. Actualmente no existe envío saliente, tampoco al operador. El arnés usa Node, Deno simulado e identidades ficticias; no acredita configuración real de permisos, convivencia con WhatsApp Business ni recepción real.
+- Bot apagado por defecto; sin despliegue, secretos, datos reales, cambios CRM/dashboard o envíos. No se probaron Meta, transcripción, Deno real, PostgreSQL concurrente, Safari ni Nueva Orden/agenda/PDF reales. Próximo paso: vincular respuestas breves al borrador vigente en un adaptador aislado, manteniendo esta frontera de acceso; no conectar WhatsApp hasta validar separación y permisos reales.
+
+## Reintentos sin ocultar errores de guardado — 24/11/2026
+- Corregido `whatsapp-interno/index.js`: antes cualquier error PostgreSQL `23505` se aceptaba como duplicado, incluso si correspondía a otra restricción. Ahora la inserción usa `on_conflict=evento_id` y `Prefer: return=representation,resolution=ignore-duplicates`; los errores restantes se propagan al HTTP 503 saneado para permitir reintento. No depende del texto o idioma del error.
+- Se reutiliza la restricción UNIQUE de evento_id ya declarada en `docs/sql/bot_entrada_interna_pruebas.sql`. No hay migración ni instalación. La operación ignora el duplicado, no actualiza el pedido previo. La autorización se sigue consultando antes de cada intento; no agrega lectura ni llamada adicional. `recibidos` mantiene su significado existente: eventos procesados, incluidos reintentos aceptados, no filas nuevas.
+- Contrato utilizado: [PostgREST, Upsert y On Conflict](https://docs.postgrest.org/en/v12/references/api/tables_views.html#upsert). Es necesario verificar su funcionamiento contra la versión y esquema de una base aislada antes del despliegue.
+- Dos regresiones nuevas: otro conflicto de unicidad devuelve 503 sin datos privados y permite guardar al reintentar; repetir evento con texto distinto conserva el borrador original. Ambas fallaban antes del cambio (la segunda por el contrato de ruta). Suite completa: `node --test tests/*.test.cjs tests/*.test.mjs`, 204/204 aprobadas; `git diff --check` limpio. El arnés exige la ruta y preferencia exactas, bloqueando otros destinos.
+- Medición sintética: ante el conflicto ajeno, pasa de HTTP 200 falso con 0 filas a HTTP 503 con 0 filas, seguido de 200 y 1 fila al resolver el fallo. Reintento normal mantiene 2 llamadas por solicitud (autorización e inserción); no se atribuye ahorro de tiempo o latencia.
+- Pruebas con Node y dobles de Deno/fetch/almacenamiento; no demuestran PostgreSQL concurrente ni PostgREST real. Sin Meta, audio, Deno real, Safari o flujos reales Nueva Orden/agenda/PDF. No hubo cambios de CRM/dashboard, producción, secretos, datos reales ni mensajes; modo apagado por defecto y prohibición de contactar clientes conservados.
+- Próximo paso: validar este contrato de conflicto y reintentos contra PostgreSQL/PostgREST aislados. La vinculación de respuestas breves a preguntas/borradores vigentes sigue pendiente; no se implementó hoy.
+
+## Identidad de acceso coherente — 25/11/2026
+- Receptor y revisión interna reutilizan `validarIdentidadAcceso` en `secretario-identidad.mjs`. Exige identificadores de acceso/perfil de tipo texto no vacío y versión entera entre 1 y 2147483647, compatible con el integer positivo del borrador SQL. Antes el receptor aceptaba versiones negativas/cero e identificadores de otros tipos; el adaptador admitía versión cero y textos solo con espacios.
+- Una respuesta inválida del autorizador se omite sin intentar insertar, y no permite crear o consultar una sesión. No convierte identificadores ni valida su existencia/UUID: la autorización sigue dependiendo del servidor y la base de datos. No sustituye autenticación del transporte ni resuelve revocación atómica al guardar.
+- Cuatro regresiones nuevas cubren 17 identidades inválidas en recepción y alta, revalidación posterior sin revelar sesión y los dos extremos válidos del rango. Dos de las cuatro pruebas fallaban antes de corregir. Suite completa: `node --test tests/*.test.cjs tests/*.test.mjs`, 208/208 aprobadas; `git diff --check` limpio. En la matriz inválida: 0 intentos de inserción después del cambio. No se midió latencia ni ahorro operativo.
+- No se encontraron psql, docker o deno instalados; sigue pendiente validar el contrato PostgREST de deduplicación con una base aislada. Las pruebas usan dependencias simuladas, sin Meta, transcripción, Deno real, Safari o flujos reales Nueva Orden/agenda/PDF. No hubo cambios visuales ni escrituras reales, envíos, despliegue o activación. Se conserva apagado como valor predeterminado del código; no se verificó la configuración desplegada ni el resultado del alta realizada por Luis en otra conversación.
+- Próximo paso: validar guardado y reintentos en PostgreSQL/PostgREST aislados, incluyendo respuestas de autorización inválidas. Laso debe seguir sin comunicarse con clientes.
